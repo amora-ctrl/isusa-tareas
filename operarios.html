@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Operarios — Mantenimiento</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;min-height:100vh}
+.screen{display:none;padding:1rem;max-width:620px;margin:0 auto;padding-bottom:2rem}
+.screen.show{display:block}
+.hdr{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem}
+.logo{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-e{background:#0C447C}.logo-m{background:#92400E}.logo-g{background:#1a1a1a}
+h1{font-size:16px;font-weight:600;color:#1a1a1a;line-height:1.2}
+.sub{font-size:12px;color:#888;margin-top:1px}
+.card{background:#fff;border:1px solid #e8e8e5;border-radius:12px;padding:18px;margin-bottom:10px}
+.sec{font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid #f0f0ee}
+.field{margin-bottom:14px}.field:last-child{margin-bottom:0}
+label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:5px}
+input,select,textarea{width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a;outline:none;font-family:inherit}
+input:focus,select:focus,textarea:focus{border-color:#1a1a1a}
+textarea{resize:vertical;line-height:1.5}
+.btn{width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity 0.15s;margin-top:6px}
+.btn:hover{opacity:0.85}
+.btn-dark{background:#1a1a1a;color:#fff}
+.btn-outline{background:#fff;color:#1a1a1a;border:1.5px solid #ddd}
+.btn-green{background:#059669;color:#fff}
+.taller-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.taller-btn{padding:20px 8px;border:1.5px solid #ddd;border-radius:12px;background:#fff;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:8px;transition:all 0.12s}
+.taller-btn:hover{background:#f5f5f3}
+.taller-btn.se{background:#E6F1FB;border-color:#185FA5;color:#0C447C}
+.taller-btn.sm{background:#FEF3E2;border-color:#D97706;color:#92400E}
+.taller-btn.ss{background:#F0FDF4;border-color:#16A34A;color:#15803D}
+.logo-s{background:#15803D}
+.d-card{background:#fff;border:1px solid #e8e8e5;border-radius:10px;padding:14px;margin-bottom:8px;cursor:pointer;transition:all 0.12s}
+.d-card:hover{border-color:#aaa}
+.d-card.activa{border:2px solid #1E40AF;background:#f8fbff}
+.d-card.tomada{opacity:0.45;cursor:not-allowed}
+.d-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.d-eq{font-size:14px;font-weight:600;color:#1a1a1a}
+.d-pl{font-size:11px;font-family:monospace;color:#888;margin-bottom:2px}
+.d-desc{font-size:12px;color:#666;line-height:1.4;margin-top:5px}
+.d-meta{font-size:11px;color:#aaa;margin-top:5px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.b-mp{background:#FEF2F2;color:#991B1B}
+.b-baja{background:#ECFDF5;color:#065F46}
+.b-elec{background:#E6F1FB;color:#0C447C}
+.b-mec{background:#FEF3E2;color:#92400E}
+.b-indef{background:#F3F4F6;color:#374151}
+.b-pend{background:#FEF9EE;color:#92400E}
+.b-proc{background:#DBEAFE;color:#1E40AF}
+.b-fin{background:#ECFDF5;color:#065F46}
+.timer-wrap{border-radius:12px;padding:20px;text-align:center;margin-bottom:10px;background:#1a1a1a}
+.timer-label{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+.timer-val{font-size:44px;font-weight:700;font-family:monospace;letter-spacing:3px;color:#fff}
+.timer-running .timer-val{color:#4ADE80}
+.timer-sub{font-size:12px;color:#555;margin-top:6px}
+.info-row{display:flex;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:1px solid #f0f0ee}
+.info-row:last-child{border-bottom:none}
+.info-lbl{color:#888;flex-shrink:0}
+.info-val{font-weight:600;color:#1a1a1a;text-align:right;margin-left:12px}
+.empty{text-align:center;padding:2.5rem;color:#aaa;font-size:14px}
+.ok-circle{width:52px;height:52px;background:#ECFDF5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.back-btn{font-size:13px;color:#888;background:none;border:none;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:12px;display:flex;align-items:center;gap:4px}
+.back-btn:hover{color:#1a1a1a}
+.logout-btn{font-size:11px;color:#aaa;background:none;border:none;cursor:pointer;font-family:inherit}
+.cargando{text-align:center;padding:2rem;color:#aaa;font-size:13px}
+.sync-badge{font-size:10px;color:#059669;background:#ECFDF5;padding:2px 8px;border-radius:20px;margin-left:8px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="screen show" id="s-login">
+  <div class="hdr">
+    <div class="logo logo-g">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="6" r="3" stroke="white" stroke-width="1.5" fill="none"/><path d="M3 15c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+    </div>
+    <div>
+      <h1>Panel de operarios</h1>
+      <div class="sub">Gestión de denuncias — Mantenimiento</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="sec">Identificación</div>
+    <div class="field">
+      <label>Taller</label>
+      <div class="taller-grid" style="grid-template-columns:1fr 1fr 1fr">
+        <button class="taller-btn" id="tb-e" type="button" onclick="selTaller('Eléctrico')">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M13 2L5 13h8l-2 8 10-11h-8l2-8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none"/></svg>
+          Taller Eléctrico
+        </button>
+        <button class="taller-btn" id="tb-m" type="button" onclick="selTaller('Mecánico')">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M11 2v3M11 17v3M2 11h3M17 11h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Taller Mecánico
+        </button>
+        <button class="taller-btn" id="tb-s" type="button" onclick="selTaller('Soldadura')">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 18L18 4M8 4h10v10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          Taller Soldadura
+        </button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Operario</label>
+      <select id="sel-op"><option value="">— Seleccionar —</option></select>
+    </div>
+    <button class="btn btn-dark" type="button" onclick="login()">Ingresar</button>
+  </div>
+</div>
+
+<!-- LISTA DENUNCIAS -->
+<div class="screen" id="s-lista">
+  <div class="hdr">
+    <div class="logo" id="logo-lista">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1.5" y="3" width="15" height="12" rx="2" stroke="white" stroke-width="1.5" fill="none"/><path d="M5 8h8M5 11h5" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
+    </div>
+    <div style="flex:1">
+      <h1 id="lista-title">Denuncias</h1>
+      <div class="sub" id="lista-sub"></div>
+    </div>
+    <button class="logout-btn" type="button" onclick="logout()">Salir</button>
+  </div>
+  <div id="lista-items"></div>
+</div>
+
+<!-- TRABAJO EN CURSO -->
+<div class="screen" id="s-trabajo">
+  <div style="max-width:620px;margin:0 auto;padding:1rem;padding-bottom:2rem">
+    <button class="back-btn" type="button" onclick="volverLista()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Volver
+    </button>
+    <div class="timer-wrap" id="timer-wrap">
+      <div class="timer-label">Tiempo transcurrido</div>
+      <div class="timer-val" id="timer-val">00:00:00</div>
+      <div class="timer-sub" id="timer-sub">Cronómetro iniciado al tomar la denuncia</div>
+    </div>
+    <div class="card">
+      <div class="sec">Denuncia en curso</div>
+      <div class="info-row"><span class="info-lbl">Equipo</span><span class="info-val" id="t-eq">—</span></div>
+      <div class="info-row"><span class="info-lbl">Planta</span><span class="info-val" id="t-pl">—</span></div>
+      <div class="info-row"><span class="info-lbl">Disciplina</span><span class="info-val" id="t-ti">—</span></div>
+      <div class="info-row"><span class="info-lbl">Prioridad</span><span class="info-val" id="t-pr">—</span></div>
+      <div class="info-row"><span class="info-lbl">Descripción</span><span class="info-val" id="t-de" style="max-width:65%;text-align:right">—</span></div>
+      <div class="info-row"><span class="info-lbl">Reportó</span><span class="info-val" id="t-re">—</span></div>
+      <div class="info-row"><span class="info-lbl">Hora inicio</span><span class="info-val" id="t-hi">—</span></div>
+    </div>
+    <div class="card">
+      <div class="sec">Registrar trabajo</div>
+      <div class="field">
+        <label>Observaciones <span style="color:#c0392b">*</span></label>
+        <textarea id="obs" rows="4" placeholder="Describí lo que hiciste, materiales usados, solución aplicada..."></textarea>
+      </div>
+    </div>
+    <button class="btn btn-green" type="button" onclick="finalizar()">Finalizar y registrar parte diario</button>
+    <button class="btn btn-outline" type="button" onclick="guardarParcial()">Guardar avance (seguir después)</button>
+  </div>
+</div>
+
+<!-- ÉXITO -->
+<div class="screen" id="s-ok">
+  <div style="max-width:620px;margin:2rem auto;padding:1rem;text-align:center">
+    <div class="ok-circle">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 11l5 5 9-9" stroke="#059669" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div style="font-size:16px;font-weight:700;color:#1a1a1a;margin-bottom:8px">Trabajo finalizado</div>
+    <div id="ok-txt" style="font-size:13px;color:#666;line-height:1.8;margin-bottom:16px"></div>
+    <div style="background:#f8f8f6;border-radius:10px;padding:14px;margin-bottom:20px;font-size:13px;color:#555">
+      Parte diario registrado en Google Sheets y supervisor notificado.
+    </div>
+    <button class="btn btn-dark" type="button" onclick="mostrarLista()">Tomar otra denuncia</button>
+    <button class="btn btn-outline" type="button" onclick="logout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<script>
+const SCRIPT_DENUNCIAS = 'https://script.google.com/macros/s/AKfycbzYcmmkMeFQjrWGDYl_PCMTdFypBK1KZ0ZGPlR1Nyluo4nbJTWOtU6Ae7kLhr92GT0u/exec';
+const SCRIPT_PARTES    = 'https://script.google.com/a/macros/isusa.com.uy/s/AKfycbz4XjIpsdw1wO2LNZQFG7GXLf4_ZzjYMD0sXzjVkTR8OgSLNEra6YFAo3i7ay2XwtY7/exec';
+
+const OPERARIOS = {
+  'Eléctrico': ['Luis Brun','Carlos Palermo','Lautaro Bigolin','Jhon Cooper'],
+  'Mecánico':  ['Gaston Matto','Jhonatan Cortabitarte','Raul Medina','Leandro Vilar'],
+  'Soldadura': ['Leonardo Matto','Luis Telis']
+};
+
+let DENUNCIAS = [];
+let sesion = {taller:'', operario:''};
+let trabajo = null;
+let timerIv = null;
+let timerSec = 0;
+let timerStart = null;
+
+// ── CARGA REAL DESDE SHEET ──────────────────────────────────────
+function cargarDenuncias(callback) {
+  const el = document.getElementById('lista-items');
+  if (el) el.innerHTML = '<div class="cargando">Cargando denuncias...</div>';
+
+  fetch(SCRIPT_DENUNCIAS)
+    .then(r => r.json())
+    .then(data => {
+      const nuevas = (data.denuncias || []).map(d => ({
+        id:          d.id,
+        planta:      d.planta      || '',
+        equipo:      d.equipo      || '',
+        tipo:        d.tipo        || 'Indefinida',
+        prioridad:   d.prioridad   || 'Baja',
+        descripcion: d.descripcion || '',
+        persona:     d.persona     || '',
+        fecha:       d.fecha       || '',
+        hora:        d.hora        || '',
+        estado:      d.estado      || 'Pendiente',
+        operario:    d.operario    || '',
+        hora_inicio: d.hora_inicio || ''
+      }));
+
+      // Preservar estados locales (En proceso tomados en esta sesión)
+      DENUNCIAS.forEach(local => {
+        if (local.estado === 'En proceso') {
+          const idx = nuevas.findIndex(n => String(n.id) === String(local.id));
+          if (idx >= 0) {
+            nuevas[idx].estado  = local.estado;
+            nuevas[idx].operario = local.operario;
+          }
+        }
+      });
+
+      DENUNCIAS = nuevas;
+      if (callback) callback();
+    })
+    .catch(() => {
+      if (el) el.innerHTML = '<div class="empty">Error de conexión. Reintentando...</div>';
+      setTimeout(() => cargarDenuncias(callback), 5000);
+    });
+}
+
+function selTaller(t) {
+  sesion.taller = t;
+  document.getElementById('tb-e').className = 'taller-btn' + (t==='Eléctrico'?' se':'');
+  document.getElementById('tb-m').className = 'taller-btn' + (t==='Mecánico'?' sm':'');
+  document.getElementById('tb-s').className = 'taller-btn' + (t==='Soldadura'?' ss':'');
+  const sel = document.getElementById('sel-op');
+  sel.innerHTML = '<option value="">— Seleccionar —</option>';
+  OPERARIOS[t].forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = o; opt.textContent = o; sel.appendChild(opt);
+  });
+}
+
+function login() {
+  if (!sesion.taller) { alert('Seleccioná un taller'); return; }
+  const op = document.getElementById('sel-op').value;
+  if (!op) { alert('Seleccioná tu nombre'); return; }
+  sesion.operario = op;
+  mostrarLista();
+}
+
+function mostrarLista() {
+  const esE = sesion.taller === 'Eléctrico';
+  document.getElementById('logo-lista').className = 'logo ' + (sesion.taller==='Eléctrico' ? 'logo-e' : sesion.taller==='Mecánico' ? 'logo-m' : 'logo-s');
+  document.getElementById('lista-title').textContent = 'Taller ' + sesion.taller;
+  document.getElementById('lista-sub').textContent = sesion.operario + ' — ' + hoy();
+  showScreen('s-lista');
+  cargarDenuncias(renderLista);
+}
+
+function renderLista() {
+  const esE = sesion.taller === 'Eléctrico';
+  const vis = DENUNCIAS.filter(d => {
+    if (d.estado === 'Finalizado') return false;
+    if (sesion.taller === 'Soldadura') return true;
+    if (esE) return d.tipo === 'Eléctrica' || d.tipo === 'Indefinida';
+    return d.tipo === 'Mecánica' || d.tipo === 'Indefinida';
+  });
+
+  const el = document.getElementById('lista-items');
+  if (!vis.length) {
+    el.innerHTML = '<div class="empty">No hay denuncias pendientes para este taller.</div>';
+    return;
+  }
+
+  const eo = {'En proceso':0,'Pendiente':1};
+  const po = {'Máquina parada':0,'Baja':1};
+  vis.sort((a,b) => (eo[a.estado]||1)-(eo[b.estado]||1) || (po[a.prioridad]||1)-(po[b.prioridad]||1));
+
+  el.innerHTML = vis.map(d => {
+    const mia   = d.estado === 'En proceso' && d.operario === sesion.operario;
+    const ajena = d.estado === 'En proceso' && d.operario && d.operario !== sesion.operario;
+    const bP    = d.prioridad === 'Máquina parada' ? 'b-mp' : 'b-baja';
+    const bT    = d.tipo === 'Eléctrica' ? 'b-elec' : d.tipo === 'Mecánica' ? 'b-mec' : 'b-indef';
+    const estLbl = mia ? 'En proceso (yo)' : ajena ? 'Tomada — ' + d.operario : 'Pendiente';
+    const estCls = mia ? 'b-proc' : ajena ? 'b-fin' : 'b-pend';
+    const cls   = mia ? 'activa' : ajena ? 'tomada' : '';
+    const click = ajena ? '' : `onclick="tomarDenuncia('${d.id}')"`;
+    return `<div class="d-card ${cls}" ${click}>
+      <div class="d-top">
+        <div><div class="d-pl">${d.planta}</div><div class="d-eq">${d.equipo}</div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          <span class="badge ${bP}">${d.prioridad}</span>
+          <span class="badge ${estCls}">${estLbl}</span>
+        </div>
+      </div>
+      <div class="d-desc">${d.descripcion}</div>
+      <div class="d-meta">
+        <span class="badge ${bT}">${d.tipo}</span>
+        <span>${d.fecha} ${d.hora}</span>
+        <span>Reportó: ${d.persona}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function tomarDenuncia(id) {
+  const d = DENUNCIAS.find(x => String(x.id) === String(id));
+  if (!d || (d.estado === 'En proceso' && d.operario && d.operario !== sesion.operario)) return;
+
+  // Usar hora del Sheet si ya está en proceso, sino registrar ahora
+  const horaInicio = (d.hora_inicio && d.estado === 'En proceso')
+    ? new Date(Number(d.hora_inicio))
+    : new Date();
+
+  trabajo = {...d, operario: sesion.operario, taller: sesion.taller, horaInicio: horaInicio};
+
+  const idx = DENUNCIAS.findIndex(x => String(x.id) === String(id));
+  DENUNCIAS[idx].estado    = 'En proceso';
+  DENUNCIAS[idx].operario  = sesion.operario;
+  DENUNCIAS[idx].hora_inicio = horaInicio.getTime();
+
+  fetch(SCRIPT_DENUNCIAS, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: JSON.stringify({
+      accion: 'actualizar_estado',
+      id_denuncia: d.id,
+      estado: 'En proceso',
+      operario: sesion.operario,
+      hora_inicio: horaInicio.getTime()
+    })
+  }).catch(() => {});
+
+  document.getElementById('t-eq').textContent = trabajo.equipo;
+  document.getElementById('t-pl').textContent = trabajo.planta;
+  document.getElementById('t-ti').textContent = trabajo.tipo;
+  document.getElementById('t-pr').textContent = trabajo.prioridad;
+  document.getElementById('t-de').textContent = trabajo.descripcion;
+  document.getElementById('t-re').textContent = trabajo.persona;
+  document.getElementById('t-hi').textContent = fmtH(trabajo.horaInicio);
+  document.getElementById('obs').value = '';
+
+  timerStart = trabajo.horaInicio;
+  timerSec = Math.floor((Date.now() - timerStart.getTime()) / 1000);
+  document.getElementById('timer-val').textContent = fmtTimer(timerSec);
+  document.getElementById('timer-wrap').className = 'timer-wrap timer-running';
+  document.getElementById('timer-sub').textContent = 'Iniciado: ' + fmtH(timerStart);
+  clearInterval(timerIv);
+  timerIv = setInterval(() => {
+    timerSec = Math.floor((Date.now() - timerStart.getTime()) / 1000);
+    document.getElementById('timer-val').textContent = fmtTimer(timerSec);
+  }, 1000);
+
+  showScreen('s-trabajo');
+}
+
+function finalizar() {
+  const obs = document.getElementById('obs').value.trim();
+  if (!obs) { alert('Agregá una observación antes de finalizar.'); return; }
+
+  clearInterval(timerIv);
+  const fin = new Date();
+  const min = Math.round(timerSec / 60);
+
+  const idx = DENUNCIAS.findIndex(x => String(x.id) === String(trabajo.id));
+  if (idx >= 0) DENUNCIAS[idx].estado = 'Finalizado';
+
+  // Actualizar estado Finalizado en Sheet
+  fetch(SCRIPT_DENUNCIAS, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: JSON.stringify({
+      accion: 'actualizar_estado',
+      id_denuncia: trabajo.id,
+      estado: 'Finalizado',
+      operario: sesion.operario
+    })
+  }).catch(() => {});
+
+  const parte = {
+    accion:       'parte',
+    id_denuncia:  trabajo.id,
+    fecha:        trabajo.fecha,
+    planta:       trabajo.planta,
+    equipo:       trabajo.equipo,
+    tipo:         trabajo.tipo,
+    prioridad:    trabajo.prioridad,
+    descripcion:  trabajo.descripcion,
+    operario:     sesion.operario,
+    taller:       sesion.taller,
+    hora_inicio:  fmtH(trabajo.horaInicio),
+    hora_fin:     fmtH(fin),
+    duracion_min: min,
+    duracion_hs:  (timerSec/3600).toFixed(2),
+    observaciones: obs
+  };
+
+  const url = SCRIPT_PARTES + '?payload=' + encodeURIComponent(JSON.stringify(parte));
+  const img = new Image();
+  img.src = url;
+
+  document.getElementById('ok-txt').innerHTML =
+    `<strong>${trabajo.equipo}</strong> — ${trabajo.planta}<br>` +
+    `Operario: ${sesion.operario} (${sesion.taller})<br>` +
+    `Inicio: ${fmtH(trabajo.horaInicio)} &nbsp;→&nbsp; Fin: ${fmtH(fin)}<br>` +
+    `<strong>Duración: ${fmtTimer(timerSec)}</strong>`;
+
+  showScreen('s-ok');
+}
+
+function guardarParcial() {
+  clearInterval(timerIv);
+  alert('Avance guardado. Podés retomar desde la lista.');
+  mostrarLista();
+}
+
+function volverLista() { clearInterval(timerIv); mostrarLista(); }
+
+function logout() {
+  clearInterval(timerIv);
+  sesion = {taller:'', operario:''};
+  document.getElementById('tb-e').className = 'taller-btn';
+  document.getElementById('tb-m').className = 'taller-btn';
+  document.getElementById('tb-s').className = 'taller-btn';
+  document.getElementById('sel-op').innerHTML = '<option value="">— Seleccionar —</option>';
+  showScreen('s-login');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('show'));
+  document.getElementById(id).classList.add('show');
+  window.scrollTo(0,0);
+}
+
+function pad(n){return String(n).padStart(2,'0');}
+function fmtTimer(s){return `${pad(Math.floor(s/3600))}:${pad(Math.floor((s%3600)/60))}:${pad(s%60)}`;}
+function fmtH(d){return `${pad(d.getHours())}:${pad(d.getMinutes())}`;}
+function hoy(){const d=new Date();return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;}
+</script>
+</body>
+</html>
