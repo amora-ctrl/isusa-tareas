@@ -62,10 +62,16 @@ textarea{resize:vertical;line-height:1.5}
 .info-val{font-weight:600;color:#1a1a1a;text-align:right;margin-left:12px}
 .empty{text-align:center;padding:2.5rem;color:#aaa;font-size:14px}
 .ok-circle{width:52px;height:52px;background:#ECFDF5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
-.back-btn{font-size:13px;color:#888;background:none;border:none;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:12px;display:flex;align-items:center;gap:4px}
-.back-btn:hover{color:#1a1a1a}
-.logout-btn{font-size:11px;color:#aaa;background:none;border:none;cursor:pointer;font-family:inherit}
+.back-btn{font-size:15px;color:#555;background:#f5f5f3;border:1.5px solid #ddd;border-radius:8px;cursor:pointer;font-family:inherit;padding:8px 16px;margin-bottom:14px;display:flex;align-items:center;gap:6px;font-weight:600}
+.back-btn:hover{background:#eee;color:#1a1a1a}
+.logout-btn{font-size:13px;color:#555;background:#f5f5f3;border:1.5px solid #ddd;border-radius:8px;cursor:pointer;font-family:inherit;padding:7px 14px;font-weight:600}
+.logout-btn:hover{background:#eee;color:#1a1a1a}
 .cargando{text-align:center;padding:2rem;color:#aaa;font-size:13px}
+.h-card{background:#fff;border:1px solid #e8e8e5;border-radius:10px;padding:14px;margin-bottom:8px}
+.h-eq{font-size:14px;font-weight:600;color:#1a1a1a}
+.h-pl{font-size:11px;font-family:monospace;color:#888;margin-bottom:2px}
+.h-obs{font-size:12px;color:#555;line-height:1.5;margin-top:8px;padding:8px;background:#f8f8f6;border-radius:6px}
+.h-meta{font-size:11px;color:#aaa;margin-top:6px;display:flex;gap:8px;flex-wrap:wrap}
 .sync-badge{font-size:10px;color:#059669;background:#ECFDF5;padding:2px 8px;border-radius:20px;margin-left:8px}
 </style>
 </head>
@@ -119,9 +125,25 @@ textarea{resize:vertical;line-height:1.5}
       <h1 id="lista-title">Denuncias</h1>
       <div class="sub" id="lista-sub"></div>
     </div>
-    <button class="logout-btn" type="button" onclick="logout()">Salir</button>
+    <button class="logout-btn" type="button" onclick="verHistorial()">📋 Historial</button>
+    <button class="logout-btn" type="button" onclick="logout()" style="margin-left:6px">↩ Salir</button>
   </div>
   <div id="lista-items"></div>
+</div>
+
+<!-- HISTORIAL -->
+<div class="screen" id="s-historial">
+  <div class="hdr">
+    <div class="logo logo-g">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1.5" y="3" width="15" height="12" rx="2" stroke="white" stroke-width="1.5" fill="none"/><path d="M5 8h8M5 11h5" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
+    </div>
+    <div style="flex:1">
+      <h1>Historial</h1>
+      <div class="sub" id="historial-sub">Trabajos finalizados</div>
+    </div>
+    <button class="logout-btn" type="button" onclick="showScreen('s-lista')">← Volver</button>
+  </div>
+  <div id="historial-items"><div class="cargando">Cargando...</div></div>
 </div>
 
 <!-- TRABAJO EN CURSO -->
@@ -153,8 +175,8 @@ textarea{resize:vertical;line-height:1.5}
         <textarea id="obs" rows="4" placeholder="Describí lo que hiciste, materiales usados, solución aplicada..."></textarea>
       </div>
     </div>
-    <button class="btn btn-green" type="button" onclick="finalizar()">Finalizar y registrar parte diario</button>
-    <button class="btn btn-outline" type="button" onclick="guardarParcial()">Guardar avance (seguir después)</button>
+    <button class="btn btn-green" type="button" onclick="finalizar()">✅ Finalizar — registrar parte y cerrar denuncia</button>
+    <button class="btn btn-outline" type="button" onclick="guardarParcial()">⏸ Guardar avance — registrar parte y dejar abierta</button>
   </div>
 </div>
 
@@ -179,7 +201,7 @@ const SCRIPT_DENUNCIAS = 'https://script.google.com/macros/s/AKfycbzYcmmkMeFQjrW
 const SCRIPT_PARTES    = 'https://script.google.com/a/macros/isusa.com.uy/s/AKfycbz4XjIpsdw1wO2LNZQFG7GXLf4_ZzjYMD0sXzjVkTR8OgSLNEra6YFAo3i7ay2XwtY7/exec';
 
 const OPERARIOS = {
-  'Eléctrico': ['Luis Brun','Carlos Palermo','Lautaro Bigolin','Jhon Cooper'],
+  'Eléctrico': ['Luis Brun','Carlos Palermo','Lautaro Bigolin','Jhon Cooper','Alan Mora','Mauricio Ponce de Leon'],
   'Mecánico':  ['Gaston Matto','Jhonatan Cortabitarte','Raul Medina','Leandro Vilar'],
   'Soldadura': ['Leonardo Matto','Luis Telis']
 };
@@ -190,29 +212,46 @@ let trabajo = null;
 let timerIv = null;
 let timerSec = 0;
 let timerStart = null;
+// Registro local de operarios trabajando (se actualiza via Sheet)
+let operariosActivos = {}; // {id_denuncia: [operario1, operario2]}
+let estadosOperarios = {}; // {id_denuncia: {operario: 'En proceso'|'Avance guardado'}}
 
 // ── CARGA REAL DESDE SHEET ──────────────────────────────────────
 function cargarDenuncias(callback) {
-  const el = document.getElementById('lista-items');
-  if (el) el.innerHTML = '<div class="cargando">Cargando denuncias...</div>';
-
   fetch(SCRIPT_DENUNCIAS)
     .then(r => r.json())
     .then(data => {
       const nuevas = (data.denuncias || []).map(d => ({
-        id:          d.id,
-        planta:      d.planta      || '',
-        equipo:      d.equipo      || '',
-        tipo:        d.tipo        || 'Indefinida',
-        prioridad:   d.prioridad   || 'Baja',
-        descripcion: d.descripcion || '',
-        persona:     d.persona     || '',
-        fecha:       d.fecha       || '',
-        hora:        d.hora        || '',
-        estado:      d.estado      || 'Pendiente',
-        operario:    d.operario    || '',
-        hora_inicio: d.hora_inicio || ''
+        id:            d.id,
+        planta:        d.planta        || '',
+        equipo:        d.equipo        || '',
+        tipo:          d.tipo          || 'Indefinida',
+        prioridad:     d.prioridad     || 'Baja',
+        descripcion:   d.descripcion   || '',
+        persona:       d.persona       || '',
+        fecha:         d.fecha         || '',
+        hora:          d.hora          || '',
+        estado:        d.estado        || 'Pendiente',
+        operario:      d.operario      || '',
+        hora_inicio:   d.hora_inicio   || '',
+        pausado_en:    Number(d.pausado_en) || 0,
+        observaciones: d.observaciones || '',
+        operarios_activos: d.operarios_activos || []
       }));
+      // Actualizar registro local de operarios activos desde Sheet
+      nuevas.forEach(d => {
+        if (d.estado === 'En proceso' && d.operario) {
+          if (!operariosActivos[String(d.id)]) operariosActivos[String(d.id)] = [];
+          if (!operariosActivos[String(d.id)].includes(d.operario)) {
+            operariosActivos[String(d.id)].push(d.operario);
+          }
+        } else if (d.estado === 'Pendiente') {
+          // Limpiar operarios si volvió a Pendiente
+          if (!sesion.operario || !trabajo || String(trabajo.id) !== String(d.id)) {
+            // Solo limpiar si yo no estoy trabajando en ella
+          }
+        }
+      });
 
       // Preservar estados locales (En proceso tomados en esta sesión)
       DENUNCIAS.forEach(local => {
@@ -256,12 +295,17 @@ function login() {
 }
 
 function mostrarLista() {
-  const esE = sesion.taller === 'Eléctrico';
   document.getElementById('logo-lista').className = 'logo ' + (sesion.taller==='Eléctrico' ? 'logo-e' : sesion.taller==='Mecánico' ? 'logo-m' : 'logo-s');
   document.getElementById('lista-title').textContent = 'Taller ' + sesion.taller;
   document.getElementById('lista-sub').textContent = sesion.operario + ' — ' + hoy();
   showScreen('s-lista');
-  cargarDenuncias(renderLista);
+  if (DENUNCIAS.length === 0) {
+    cargarDenuncias(renderLista);
+  } else {
+    renderLista();
+    // Actualizar en background sin bloquear UI
+    cargarDenuncias(renderLista);
+  }
 }
 
 function renderLista() {
@@ -284,14 +328,35 @@ function renderLista() {
   vis.sort((a,b) => (eo[a.estado]||1)-(eo[b.estado]||1) || (po[a.prioridad]||1)-(po[b.prioridad]||1));
 
   el.innerHTML = vis.map(d => {
-    const mia   = d.estado === 'En proceso' && d.operario === sesion.operario;
-    const ajena = d.estado === 'En proceso' && d.operario && d.operario !== sesion.operario;
+    const key        = String(d.id);
+    const activos    = operariosActivos[key] || [];
+    const yoActivo   = activos.includes(sesion.operario);
+    const tieneAvance = d.observaciones && !yoActivo;
+    const otrosOps   = activos.filter(o => o !== sesion.operario);
     const bP    = d.prioridad === 'Máquina parada' ? 'b-mp' : 'b-baja';
     const bT    = d.tipo === 'Eléctrica' ? 'b-elec' : d.tipo === 'Mecánica' ? 'b-mec' : 'b-indef';
-    const estLbl = mia ? 'En proceso (yo)' : ajena ? 'Tomada — ' + d.operario : 'Pendiente';
-    const estCls = mia ? 'b-proc' : ajena ? 'b-fin' : 'b-pend';
-    const cls   = mia ? 'activa' : ajena ? 'tomada' : '';
-    const click = ajena ? '' : `onclick="tomarDenuncia('${d.id}')"`;
+    const estLbl = yoActivo ? 'En proceso (yo)' : tieneAvance ? 'Con avance guardado' : activos.length > 0 ? 'En proceso' : 'Pendiente';
+    const estCls = yoActivo ? 'b-proc' : tieneAvance ? 'b-indef' : activos.length > 0 ? 'b-proc' : 'b-pend';
+    const cls    = yoActivo ? 'activa' : '';
+    const click  = `onclick="tomarDenuncia('${d.id}')"`;
+    // Construir lista con estado individual
+    const todosConEstado = [];
+    // Operarios activos (En proceso)
+    activos.forEach(o => todosConEstado.push({nombre: o, est: 'En proceso'}));
+    // Operarios con avance guardado
+    const estMap = estadosOperarios[key] || {};
+    Object.entries(estMap).forEach(([o, est]) => {
+      if (est === 'Avance guardado' && !activos.includes(o)) {
+        todosConEstado.push({nombre: o, est: 'Avance guardado'});
+      }
+    });
+    const otrosLabel = todosConEstado.length > 0
+      ? `<div style="font-size:11px;margin-top:4px;display:flex;flex-wrap:wrap;gap:4px">` +
+        todosConEstado.map(x =>
+          `<span style="color:${x.est==='En proceso'?'#1E40AF':'#92400E'}">👷 ${x.nombre} <em style="font-weight:400">(${x.est})</em></span>`
+        ).join('') +
+        `</div>`
+      : '';
     return `<div class="d-card ${cls}" ${click}>
       <div class="d-top">
         <div><div class="d-pl">${d.planta}</div><div class="d-eq">${d.equipo}</div></div>
@@ -301,6 +366,7 @@ function renderLista() {
         </div>
       </div>
       <div class="d-desc">${d.descripcion}</div>
+      ${otrosLabel}
       <div class="d-meta">
         <span class="badge ${bT}">${d.tipo}</span>
         <span>${d.fecha} ${d.hora}</span>
@@ -312,19 +378,23 @@ function renderLista() {
 
 function tomarDenuncia(id) {
   const d = DENUNCIAS.find(x => String(x.id) === String(id));
-  if (!d || (d.estado === 'En proceso' && d.operario && d.operario !== sesion.operario)) return;
+  if (!d || d.estado === 'Finalizado') return;
 
-  // Usar hora del Sheet si ya está en proceso, sino registrar ahora
-  const horaInicio = (d.hora_inicio && d.estado === 'En proceso')
-    ? new Date(Number(d.hora_inicio))
-    : new Date();
-
+  // Siempre arranca desde cero — el tiempo anterior ya se guardó en el parte
+  const horaInicio = new Date();
   trabajo = {...d, operario: sesion.operario, taller: sesion.taller, horaInicio: horaInicio};
 
   const idx = DENUNCIAS.findIndex(x => String(x.id) === String(id));
   DENUNCIAS[idx].estado    = 'En proceso';
   DENUNCIAS[idx].operario  = sesion.operario;
-  DENUNCIAS[idx].hora_inicio = horaInicio.getTime();
+  DENUNCIAS[idx].pausado_en = 0;
+  // Agregar a registro local con estado
+  if (!operariosActivos[String(id)]) operariosActivos[String(id)] = [];
+  if (!operariosActivos[String(id)].includes(sesion.operario)) {
+    operariosActivos[String(id)].push(sesion.operario);
+  }
+  if (!estadosOperarios[String(id)]) estadosOperarios[String(id)] = {};
+  estadosOperarios[String(id)][sesion.operario] = 'En proceso';
 
   fetch(SCRIPT_DENUNCIAS, {
     method: 'POST',
@@ -334,7 +404,8 @@ function tomarDenuncia(id) {
       id_denuncia: d.id,
       estado: 'En proceso',
       operario: sesion.operario,
-      hora_inicio: horaInicio.getTime()
+      hora_inicio: horaInicio.getTime(),
+      pausado_en: 0  // siempre cero — tiempo nuevo
     })
   }).catch(() => {});
 
@@ -370,9 +441,17 @@ function finalizar() {
   const min = Math.round(timerSec / 60);
 
   const idx = DENUNCIAS.findIndex(x => String(x.id) === String(trabajo.id));
-  if (idx >= 0) DENUNCIAS[idx].estado = 'Finalizado';
+  // Solo actualizar si yo era el último trabajando
+  if (idx >= 0) {
+    const key = String(trabajo.id);
+    operariosActivos[key] = (operariosActivos[key] || []).filter(o => o !== sesion.operario);
+    // Finalizar en Sheet solo si no hay otros trabajando
+    if (operariosActivos[key].length === 0) {
+      DENUNCIAS[idx].estado = 'Finalizado';
+    }
+  }
 
-  // Actualizar estado Finalizado en Sheet
+  // Actualizar estado Finalizado en Sheet con observaciones
   fetch(SCRIPT_DENUNCIAS, {
     method: 'POST',
     mode: 'no-cors',
@@ -380,7 +459,8 @@ function finalizar() {
       accion: 'actualizar_estado',
       id_denuncia: trabajo.id,
       estado: 'Finalizado',
-      operario: sesion.operario
+      operario: sesion.operario,
+      observaciones: obs
     })
   }).catch(() => {});
 
@@ -416,12 +496,144 @@ function finalizar() {
 }
 
 function guardarParcial() {
+  const obsParc = document.getElementById('obs').value.trim();
+  if (!obsParc) { alert('Agregá una observación antes de guardar el avance.'); return; }
+
   clearInterval(timerIv);
-  alert('Avance guardado. Podés retomar desde la lista.');
+  const fin = new Date();
+  const min = Math.round(timerSec / 60);
+
+  // 1. Registrar parte parcial con el tiempo trabajado
+  const parte = {
+    accion:       'parte',
+    id_denuncia:  trabajo.id,
+    fecha:        trabajo.fecha,
+    planta:       trabajo.planta,
+    equipo:       trabajo.equipo,
+    tipo:         trabajo.tipo,
+    prioridad:    trabajo.prioridad,
+    descripcion:  trabajo.descripcion,
+    operario:     sesion.operario,
+    taller:       sesion.taller,
+    hora_inicio:  fmtH(trabajo.horaInicio),
+    hora_fin:     fmtH(fin),
+    duracion_min: min,
+    duracion_hs:  (timerSec/3600).toFixed(2),
+    observaciones: obsParc + ' [AVANCE PARCIAL]'
+  };
+  const url = SCRIPT_PARTES + '?payload=' + encodeURIComponent(JSON.stringify(parte));
+  const img = new Image();
+  img.src = url;
+
+  // 2. Resetear denuncia a Pendiente con tiempo en cero
+  // Guardamos el operario en observaciones para el historial
+  const obsConOperario = '[' + sesion.operario + '] ' + obsParc;
+  fetch(SCRIPT_DENUNCIAS, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: JSON.stringify({
+      accion: 'actualizar_estado',
+      id_denuncia: trabajo.id,
+      estado: 'Pendiente',
+      operario: '',
+      hora_inicio: '',
+      pausado_en: 0,
+      observaciones: obsConOperario
+    })
+  }).catch(() => {});
+
+  // 3. Actualizar lista local
+  const idx = DENUNCIAS.findIndex(x => String(x.id) === String(trabajo.id));
+  if (idx >= 0) {
+    const key = String(trabajo.id);
+    // Marcar mi estado como Avance guardado (pero sigo en la lista para mostrar)
+    if (!estadosOperarios[key]) estadosOperarios[key] = {};
+    estadosOperarios[key][sesion.operario] = 'Avance guardado';
+    DENUNCIAS[idx].observaciones = obsConOperario;
+    // Remover de activos (ya no está trabajando activamente)
+    operariosActivos[key] = (operariosActivos[key] || []).filter(o => o !== sesion.operario);
+    // Si no hay otros activos, pasar a Pendiente
+    if (operariosActivos[key].length === 0) {
+      DENUNCIAS[idx].estado   = 'Pendiente';
+      DENUNCIAS[idx].operario = '';
+    }
+  }
+  volverLista();
+}
+
+function volverLista() {
+  clearInterval(timerIv);
+  // Volver sin recargar Sheet — usar datos ya cargados
+  document.getElementById('logo-lista').className = 'logo ' + (sesion.taller==='Eléctrico' ? 'logo-e' : sesion.taller==='Mecánico' ? 'logo-m' : 'logo-s');
+  document.getElementById('lista-title').textContent = 'Taller ' + sesion.taller;
+  document.getElementById('lista-sub').textContent = sesion.operario + ' — ' + hoy();
+  showScreen('s-lista');
+  renderLista();
+}
+
+function abandonar() {
+  // Vuelve a la lista sin guardar ni liberar la denuncia
+  clearInterval(timerIv);
   mostrarLista();
 }
 
-function volverLista() { clearInterval(timerIv); mostrarLista(); }
+function renderHistorial() {
+  const el = document.getElementById('historial-items');
+  const pad = n => String(n).padStart(2,'0');
+  const hoyDate = new Date();
+  const ayerDate = new Date(); ayerDate.setDate(ayerDate.getDate()-1);
+  const hoyStr = pad(hoyDate.getDate())+'/'+pad(hoyDate.getMonth()+1)+'/'+hoyDate.getFullYear();
+  const ayerStr = pad(ayerDate.getDate())+'/'+pad(ayerDate.getMonth()+1)+'/'+ayerDate.getFullYear();
+  const esE = sesion.taller === 'Eléctrico';
+  const fin = DENUNCIAS.filter(d => {
+    // Mostrar Finalizados Y cualquier denuncia con observaciones (avance guardado)
+    const tieneHistorial = d.estado === 'Finalizado' || d.observaciones;
+    if (!tieneHistorial) return false;
+    if (d.fecha !== hoyStr && d.fecha !== ayerStr) return false;
+    if (sesion.taller === 'Soldadura') return true;
+    if (esE) return d.tipo === 'Eléctrica' || d.tipo === 'Indefinida';
+    return d.tipo === 'Mecánica' || d.tipo === 'Indefinida';
+  });
+  document.getElementById('historial-sub').textContent = 'Ayer '+ayerStr+' y hoy '+hoyStr;
+  if (!fin.length) {
+    el.innerHTML = '<div class="empty">No hay trabajos finalizados para mostrar.</div>';
+    return;
+  }
+  fin.sort((a,b) => (b.fecha+b.hora).localeCompare(a.fecha+a.hora));
+  el.innerHTML = fin.map(d => {
+    const bT = d.tipo==='Eléctrica'?'b-elec':d.tipo==='Mecánica'?'b-mec':'b-indef';
+    const bP = d.prioridad==='Máquina parada'?'b-mp':'b-baja';
+    return `<div class="h-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div><div class="h-pl">${d.planta}</div><div class="h-eq">${d.equipo}</div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          <span class="badge ${bP}">${d.prioridad}</span>
+          <span class="badge ${d.estado==='Finalizado'?'b-fin':'b-pend'}">${d.estado==='Finalizado'?'Finalizado':'Avance guardado'}</span>
+        </div>
+      </div>
+      <div class="h-meta">
+        <span class="badge ${bT}">${d.tipo}</span>
+        <span>${d.fecha} ${d.hora}</span>
+        <span>Operario: ${d.operario||'—'}</span>
+      </div>
+      ${d.descripcion?`<div class="h-obs">📋 <strong>Falla:</strong> ${d.descripcion}</div>`:''}
+      ${d.observaciones ? (() => {
+        const lineas = d.observaciones.split('\n').filter(l => l.trim());
+        return lineas.map(l =>
+          `<div class="h-obs" style="margin-top:4px;background:#f0fdf4;border-left:3px solid #059669">🔧 ${l}</div>`
+        ).join('');
+      })() : ''}
+    </div>`;
+  }).join('');
+}
+
+function verHistorial() {
+  showScreen('s-historial');
+  const el = document.getElementById('historial-items');
+  el.innerHTML = '<div class="cargando">Cargando historial...</div>';
+  // Recargar del Sheet para tener las finalizadas actualizadas
+  cargarDenuncias(renderHistorial);
+}
 
 function logout() {
   clearInterval(timerIv);

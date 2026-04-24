@@ -258,7 +258,7 @@
           <option>MARIO MANQUIS</option>
           <option>JIMENA BENTANCOUR</option>
           <option>IGNACIO MARTINO</option>
-          <option>MARCELO ESPINDOLA</option>
+          <option>MARCELO ESPINOLA</option>
           <option>MARCEL PARIS</option>
           <option>PABLO VILCHES</option>
           <option>JAVIER LENCAUSCA</option>
@@ -399,7 +399,7 @@
         <select id="p-persona">
           <option value="">— Seleccionar —</option>
           <option>EDUARDO GAMBOA</option><option>WILSON PIÑEIRO</option><option>MARIO MANQUIS</option>
-          <option>JIMENA BENTANCOUR</option><option>IGNACIO MARTINO</option><option>MARCELO ESPINDOLA</option>
+          <option>JIMENA BENTANCOUR</option><option>IGNACIO MARTINO</option><option>MARCELO ESPINOLA</option>
           <option>MARCEL PARIS</option><option>PABLO VILCHES</option><option>JAVIER LENCAUSCA</option>
           <option>DIEGO QUINTANA</option><option>CARLOS MARTINEZ</option><option>ALAN MORA</option>
           <option>MAURICIO PONCE DE LEON</option><option>LUIS BARREIRO</option><option>VICTOR IGLESIAS</option>
@@ -483,17 +483,32 @@ updateClock(); setInterval(updateClock, 15000);
 function previewFoto(input) {
   const file = input.files[0];
   if (!file) return;
-  if (file.size > 5 * 1024 * 1024) { alert('La foto supera 5 MB. Elegí una imagen más pequeña.'); input.value = ''; return; }
-  fotoName = file.name; fotoMime = file.type;
+  fotoName = file.name; fotoMime = 'image/jpeg';
+
   const reader = new FileReader();
   reader.onload = e => {
-    fotoB64 = e.target.result;
-    const zone = document.getElementById('foto-zone');
-    const img = document.getElementById('foto-prev');
-    document.getElementById('foto-ph').style.display = 'none';
-    img.src = fotoB64; img.style.display = 'block';
-    document.getElementById('btn-rm').style.display = 'block';
-    zone.classList.add('has');
+    const img2 = new Image();
+    img2.onload = () => {
+      // Comprimir a max 1200px y calidad 0.7
+      const canvas = document.createElement('canvas');
+      let w = img2.width, h = img2.height;
+      const max = 1200;
+      if (w > max || h > max) {
+        if (w > h) { h = Math.round(h * max / w); w = max; }
+        else { w = Math.round(w * max / h); h = max; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img2, 0, 0, w, h);
+      fotoB64 = canvas.toDataURL('image/jpeg', 0.7);
+
+      const zone = document.getElementById('foto-zone');
+      const prev = document.getElementById('foto-prev');
+      document.getElementById('foto-ph').style.display = 'none';
+      prev.src = fotoB64; prev.style.display = 'block';
+      document.getElementById('btn-rm').style.display = 'block';
+      zone.classList.add('has');
+    };
+    img2.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }

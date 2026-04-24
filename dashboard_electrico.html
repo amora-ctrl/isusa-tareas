@@ -69,6 +69,15 @@ tr:hover td{background:#111d33}
 </head>
 <body>
 
+<!-- Overlay para desbloquear audio -->
+<div id="audio-unlock" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:999;cursor:pointer" onclick="unlockAudio()">
+  <div style="text-align:center;color:#fff">
+    <div style="font-size:48px;margin-bottom:16px">🔊</div>
+    <div style="font-size:20px;font-weight:700;margin-bottom:8px">Tocar para activar</div>
+    <div style="font-size:14px;color:#9ca3af">Click para iniciar el dashboard con sonido</div>
+  </div>
+</div>
+
 <div class="alerta" id="alerta">
   <div class="alerta-titulo">Nueva denuncia — Taller Eléctrico</div>
   <div class="alerta-eq" id="alerta-eq">—</div>
@@ -151,6 +160,7 @@ let ultimosIds = new Set();
 let primeraVez = true;
 let audioCtx = null;
 let tiemposInicio = {};
+let alarmaIv = null;  // intervalo para sonido continuo MP
 
 function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
 
@@ -201,9 +211,9 @@ function cargarDatos(){
       const vis=todas.filter(d=>{
         if(d.estado==='Finalizado'||d.estado==='Reprogramada') return false;
         if(!(d.tipo==='Eléctrica'||d.tipo==='Indefinida')) return false;
-        // Máquina parada: siempre visible / Baja: solo si supervisor la envió al taller
-        if(d.prioridad==='Máquina parada') return true;
-        return d.visible_taller==='si';
+        // Todas las prioridades van al taller por defecto, excepto si fue reprogramada
+        if(d.estado==='Reprogramada') return false;
+        return true;
       });
       if(!primeraVez){
         vis.forEach(d=>{
@@ -277,12 +287,14 @@ function fmtNow(){const d=new Date();return pad(d.getHours())+':'+pad(d.getMinut
 setInterval(()=>{const d=new Date();document.getElementById('clock').textContent=pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());},1000);
 setInterval(()=>{Object.keys(tiemposInicio).forEach(id=>{const el=document.getElementById('tel'+id);if(el)el.textContent=fmtElapsed(tiemposInicio[id]);});},1000);
 cargarDatos();
-setInterval(cargarDatos,30000);
-// Desbloquear audio al primer click o toque
-document.addEventListener('click',()=>{try{if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();}catch(e){}});
-document.addEventListener('touchstart',()=>{try{if(!audioCtx){audioCtx=new(window.AudioContext||window.webkitAudioContext)();}if(audioCtx.state==='suspended')audioCtx.resume();}catch(e){}},{once:true});
-// Intentar desbloquear automáticamente
-setTimeout(()=>{try{if(!audioCtx){audioCtx=new(window.AudioContext||window.webkitAudioContext)();}}catch(e){}},100);
+setInterval(cargarDatos,5000);
+function unlockAudio(){
+  try{
+    audioCtx = new(window.AudioContext||window.webkitAudioContext)();
+    audioCtx.resume();
+  }catch(e){}
+  document.getElementById('audio-unlock').style.display='none';
+}
 </script>
 </body>
 </html>
