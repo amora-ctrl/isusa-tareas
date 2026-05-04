@@ -782,137 +782,61 @@ function resetForm() {
         </div>
       </div>
 
+      <div id="admin-status" style="display:none;font-size:13px;font-weight:600;padding:10px 14px;background:#f8f8f6;border-radius:8px;margin-bottom:12px;text-align:center"></div>
+
       <button onclick="cerrarAdmin()" style="width:100%;padding:12px;background:#f5f5f3;border:1px solid #e8e8e5;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:#555">Cerrar</button>
     </div>
   </div>
 </div>
 
 <script>
-// ── DATOS EDITABLES EN localStorage ──────────────────────────
-const LS_PERSONAS = 'isusa_personas';
-const LS_EQ_EXTRA = 'isusa_eq_extra'; // plantas/equipos agregados
+// ── PANEL DE ADMINISTRACIÓN — llama al Apps Script que edita GitHub ──
+const ADMIN_SCRIPT = 'https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycby1NaSe5vqwJxS65GtkEBX4o_8yWOO3mOlN5mO3yCykGGxf9VvRZXkTG33rIza3HZ9f/exec/exec';
 
-// Personas base (hardcoded como fallback)
-const PERSONAS_BASE = [
-  'EDUARDO GAMBOA','WILSON PIÑEIRO','MARIO MANQUIS','DAMIAN HERNANDEZ',
-  'JIMENA BENTANCOUR','IGNACIO MARTINO','MARCELO ESPINOLA','MARCEL PARIS',
-  'PABLO VILCHES','JAVIER LENCAUSCA','DIEGO QUINTANA','CARLOS MARTINEZ',
-  'ALAN MORA','MAURICIO PONCE DE LEON','LUIS BARREIRO','VICTOR IGLESIAS'
-];
-
-function getPersonas() {
-  try {
-    const saved = localStorage.getItem(LS_PERSONAS);
-    return saved ? JSON.parse(saved) : [...PERSONAS_BASE];
-  } catch(e) { return [...PERSONAS_BASE]; }
-}
-
-function savePersonas(arr) {
-  localStorage.setItem(LS_PERSONAS, JSON.stringify(arr));
-}
-
-function getEqExtra() {
-  try {
-    const saved = localStorage.getItem(LS_EQ_EXTRA);
-    return saved ? JSON.parse(saved) : {};
-  } catch(e) { return {}; }
-}
-
-function saveEqExtra(obj) {
-  localStorage.setItem(LS_EQ_EXTRA, JSON.stringify(obj));
-}
-
-// ── POBLAR SELECTS CON DATOS EDITABLES ───────────────────────
-function poblarPersonas() {
-  const personas = getPersonas();
-  const selects  = ['f-persona', 'p-persona'];
-  selects.forEach(id => {
-    const sel = document.getElementById(id);
-    if (!sel) return;
-    // Guardar valor actual
-    const current = sel.value;
-    sel.innerHTML = '<option value="">— Seleccionar —</option>';
-    const og = document.createElement('optgroup');
-    og.label = 'Operarios';
-    personas.sort().forEach(p => {
-      const o = document.createElement('option');
-      o.value = p; o.textContent = p;
-      og.appendChild(o);
-    });
-    sel.appendChild(og);
-    sel.value = current;
-  });
-}
-
-function poblarPlantas() {
-  const extra = getEqExtra();
-  const merged = Object.assign({}, EQ, extra);
-  const selects = ['f-planta','p-planta','admin-sel-planta'];
-  selects.forEach(id => {
-    const sel = document.getElementById(id);
-    if (!sel) return;
-    const current = sel.value;
-    // Preservar la opción vacía
-    const firstOpt = sel.options[0];
-    sel.innerHTML = '';
-    if (firstOpt) sel.appendChild(firstOpt);
-    Object.keys(merged).sort().forEach(p => {
-      const o = document.createElement('option');
-      o.value = p; o.textContent = p;
-      sel.appendChild(o);
-    });
-    sel.value = current;
-  });
-}
-
-// Llamar al cargar (reemplaza el populate original)
+let tapCount = 0, tapTimer = null;
 document.addEventListener('DOMContentLoaded', () => {
-  poblarPersonas();
-  poblarPlantas();
+  document.querySelectorAll('.logo-icon,.logo,.top-logo,h1').forEach(el => {
+    el.addEventListener('click', () => {
+      tapCount++;
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(() => tapCount = 0, 2000);
+      if (tapCount >= 5) { tapCount = 0; abrirAdmin(); }
+    });
+  });
 });
 
-// ── PANEL ADMIN ───────────────────────────────────────────────
-let tapCount = 0;
-let tapTimer  = null;
-
-// Activar tocando el título 5 veces
-document.querySelector('h1,#app-title,.app-title,.titulo,.header,.hdr')
-  ?.addEventListener('click', activarAdmin);
-
-// Fallback: toque largo en el logo
-document.querySelector('.logo-icon,.logo,.top-logo')
-  ?.addEventListener('click', () => {
-    tapCount++;
-    clearTimeout(tapTimer);
-    tapTimer = setTimeout(() => tapCount = 0, 2000);
-    if (tapCount >= 5) { tapCount = 0; abrirAdmin(); }
-  });
-
-function activarAdmin() {
-  tapCount++;
-  clearTimeout(tapTimer);
-  tapTimer = setTimeout(() => tapCount = 0, 2000);
-  if (tapCount >= 5) { tapCount = 0; abrirAdmin(); }
-}
-
 function abrirAdmin() {
-  const overlay = document.getElementById('admin-overlay');
-  overlay.style.display = 'flex';
+  document.getElementById('admin-overlay').style.display = 'flex';
   renderAdminPlantas();
   renderAdminPersonas();
 }
 
 function cerrarAdmin() {
   document.getElementById('admin-overlay').style.display = 'none';
-  poblarPersonas();
-  poblarPlantas();
 }
 
-// ── RENDER TAGS ───────────────────────────────────────────────
+async function llamarAdmin(payload) {
+  const encoded = encodeURIComponent(JSON.stringify(payload));
+  await new Promise(r => {
+    const img = new Image();
+    img.onload = r; img.onerror = r;
+    setTimeout(r, 6000);
+    img.src = ADMIN_SCRIPT + '?payload=' + encoded;
+  });
+}
+
+function setAdminStatus(msg, ok) {
+  const el = document.getElementById('admin-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = ok ? '#059669' : '#f59e0b';
+  el.style.display = 'block';
+}
+
 function tag(texto, onRemove) {
   const div = document.createElement('div');
   div.style.cssText = 'display:inline-flex;align-items:center;gap:5px;background:#f0f0ee;border:1px solid #ddd;border-radius:20px;padding:3px 10px;font-size:12px;font-family:inherit';
-  div.textContent = texto;
+  div.appendChild(document.createTextNode(texto));
   const btn = document.createElement('button');
   btn.textContent = '×';
   btn.style.cssText = 'background:none;border:none;color:#999;cursor:pointer;font-size:14px;line-height:1;padding:0;margin-left:2px';
@@ -922,96 +846,117 @@ function tag(texto, onRemove) {
 }
 
 function renderAdminPlantas() {
-  const extra   = getEqExtra();
-  const merged  = Object.assign({}, EQ, extra);
-  const cont    = document.getElementById('admin-plantas');
+  const cont = document.getElementById('admin-plantas');
   cont.innerHTML = '';
-  Object.keys(merged).sort().forEach(p => {
-    const esExtra = !!extra[p];
-    const t = tag(p, () => {
-      if (!esExtra) { alert('Esta planta es del sistema y no se puede eliminar.'); return; }
-      delete extra[p];
-      saveEqExtra(extra);
+  Object.keys(EQ).sort().forEach(p => {
+    cont.appendChild(tag(p, async () => {
+      if (!confirm('¿Eliminar la planta "' + p + '" y todos sus equipos?')) return;
+      setAdminStatus('Eliminando...', false);
+      await llamarAdmin({ accion: 'eliminar_planta', planta: p });
+      delete EQ[p];
       renderAdminPlantas();
-    });
-    if (!esExtra) t.style.opacity = '0.6';
-    cont.appendChild(t);
+      poblarPlantas();
+      setAdminStatus('✓ Eliminada. GitHub se actualiza en ~1 min.', true);
+    }));
   });
 }
 
 function renderAdminEquipos() {
   const planta = document.getElementById('admin-sel-planta').value;
-  const extra  = getEqExtra();
-  const merged = Object.assign({}, EQ, extra);
-  const cont   = document.getElementById('admin-equipos');
+  const cont = document.getElementById('admin-equipos');
   cont.innerHTML = '';
-  if (!planta) return;
-  (merged[planta] || []).forEach(eq => {
-    const esExtra = extra[planta] && extra[planta].includes(eq);
-    const t = tag(eq, () => {
-      if (!esExtra) { alert('Este equipo es del sistema y no se puede eliminar.'); return; }
-      extra[planta] = extra[planta].filter(e => e !== eq);
-      saveEqExtra(extra);
+  if (!planta || !EQ[planta]) return;
+  EQ[planta].forEach(eq => {
+    cont.appendChild(tag(eq, async () => {
+      if (!confirm('¿Eliminar "' + eq + '" de ' + planta + '?')) return;
+      setAdminStatus('Eliminando...', false);
+      await llamarAdmin({ accion: 'eliminar_equipo', planta, equipo: eq });
+      EQ[planta] = EQ[planta].filter(e => e !== eq);
       renderAdminEquipos();
-    });
-    if (!esExtra) t.style.opacity = '0.6';
-    cont.appendChild(t);
+      setAdminStatus('✓ Eliminado. GitHub se actualiza en ~1 min.', true);
+    }));
   });
 }
 
-document.getElementById('admin-sel-planta').addEventListener('change', renderAdminEquipos);
+document.addEventListener('DOMContentLoaded', () => {
+  const selAdmin = document.getElementById('admin-sel-planta');
+  if (selAdmin) selAdmin.addEventListener('change', renderAdminEquipos);
+});
 
 function renderAdminPersonas() {
-  const personas = getPersonas();
-  const cont     = document.getElementById('admin-personas');
-  cont.innerHTML  = '';
-  personas.sort().forEach(p => {
-    const esBase = PERSONAS_BASE.includes(p);
-    const t = tag(p, () => {
-      if (esBase) { alert('Esta persona es del sistema y no se puede eliminar.'); return; }
-      savePersonas(personas.filter(x => x !== p));
+  const cont = document.getElementById('admin-personas');
+  cont.innerHTML = '';
+  const sel = document.getElementById('f-persona');
+  if (!sel) return;
+  [...sel.querySelectorAll('option')].map(o => o.value).filter(v => v).sort().forEach(p => {
+    cont.appendChild(tag(p, async () => {
+      if (!confirm('¿Eliminar "' + p + '"?')) return;
+      setAdminStatus('Eliminando...', false);
+      await llamarAdmin({ accion: 'eliminar_persona', persona: p });
+      document.querySelectorAll('#f-persona option, #p-persona option')
+        .forEach(o => { if (o.value === p) o.remove(); });
       renderAdminPersonas();
-    });
-    if (esBase) t.style.opacity = '0.6';
-    cont.appendChild(t);
+      setAdminStatus('✓ Eliminado. GitHub se actualiza en ~1 min.', true);
+    }));
   });
 }
 
-// ── AGREGAR ───────────────────────────────────────────────────
-function agregarPlanta() {
-  const val = document.getElementById('nueva-planta').value.trim();
-  if (!val) return;
-  const extra = getEqExtra();
-  if (!extra[val]) extra[val] = [];
-  saveEqExtra(extra);
-  document.getElementById('nueva-planta').value = '';
-  renderAdminPlantas();
-  // Actualizar select de planta en admin
-  poblarPlantas();
+function poblarPlantas() {
+  ['f-planta','p-planta','admin-sel-planta'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const current = sel.value;
+    const first = sel.options[0];
+    sel.innerHTML = '';
+    if (first) sel.appendChild(first.cloneNode(true));
+    Object.keys(EQ).sort().forEach(p => {
+      const o = document.createElement('option');
+      o.value = p; o.textContent = p; sel.appendChild(o);
+    });
+    sel.value = current;
+  });
 }
 
-function agregarEquipoAdmin() {
+async function agregarPlanta() {
+  const val = document.getElementById('nueva-planta').value.trim();
+  if (!val) return;
+  setAdminStatus('Guardando en GitHub...', false);
+  await llamarAdmin({ accion: 'agregar_planta', planta: val, equipos: [] });
+  EQ[val] = [];
+  document.getElementById('nueva-planta').value = '';
+  renderAdminPlantas();
+  poblarPlantas();
+  setAdminStatus('✓ Planta "' + val + '" agregada. GitHub se actualiza en ~1 min.', true);
+}
+
+async function agregarEquipoAdmin() {
   const planta = document.getElementById('admin-sel-planta').value;
   const val    = document.getElementById('nuevo-equipo').value.trim();
   if (!planta || !val) return;
-  const extra = getEqExtra();
-  if (!extra[planta]) extra[planta] = [];
-  if (!extra[planta].includes(val)) extra[planta].push(val);
-  saveEqExtra(extra);
+  setAdminStatus('Guardando en GitHub...', false);
+  await llamarAdmin({ accion: 'agregar_equipo', planta, equipo: val });
+  if (!EQ[planta]) EQ[planta] = [];
+  if (!EQ[planta].includes(val)) { EQ[planta].push(val); EQ[planta].sort(); }
   document.getElementById('nuevo-equipo').value = '';
   renderAdminEquipos();
+  setAdminStatus('✓ Equipo "' + val + '" agregado. GitHub se actualiza en ~1 min.', true);
 }
 
-function agregarPersona() {
+async function agregarPersona() {
   const val = document.getElementById('nueva-persona').value.trim().toUpperCase();
   if (!val) return;
-  const personas = getPersonas();
-  if (!personas.includes(val)) {
-    personas.push(val);
-    savePersonas(personas);
-  }
+  setAdminStatus('Guardando en GitHub...', false);
+  await llamarAdmin({ accion: 'agregar_persona', persona: val });
+  ['f-persona','p-persona'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const og = sel.querySelector('optgroup') || sel;
+    const o = document.createElement('option');
+    o.value = val; o.textContent = val; og.appendChild(o);
+  });
   document.getElementById('nueva-persona').value = '';
   renderAdminPersonas();
+  setAdminStatus('✓ "' + val + '" agregado. GitHub se actualiza en ~1 min.', true);
 }
 </script>
 </body>
