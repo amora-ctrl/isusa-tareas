@@ -3,16 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ISUSA — Denuncias</title>
-
-<!-- PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a1a1a">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Denuncias ISUSA">
-<link rel="apple-touch-icon" href="icon-192.png">
+<title>Denuncia de equipos</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;min-height:100vh;padding:1rem}
@@ -40,7 +31,7 @@
   .dt-box{background:#f8f8f6;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px}
   .dt-val{font-size:14px;font-weight:600;color:#1a1a1a}
   .dt-lbl{font-size:11px;color:#999}
-  .tipo-group,.prio-group{display:flex;gap:8px}
+  .tipo-group,.prio-group{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .tipo-btn,.prio-btn{
     flex:1;padding:10px 8px;
     border:1px solid #ddd;border-radius:8px;
@@ -277,16 +268,12 @@
         <label class="req">Persona que denuncia</label>
         <select id="f-persona">
           <option value="">— Seleccionar —</option>
-          <optgroup label="Mecánicos Mototransporte">
-            <option>MARTIN ZUCCOLINI</option>
-            <option>DAMIAN HERNANDEZ</option>
-            <option>ERNESTO DAVILA</option>
-          </optgroup>
           <optgroup label="Operarios">
             <option>EDUARDO GAMBOA</option>
             <option>WILSON PIÑEIRO</option>
             <option>MARIO MANQUIS</option>
             <option>JIMENA BENTANCOUR</option>
+            <option>DAMIAN HERNANDEZ</option>
             <option>IGNACIO MARTINO</option>
             <option>MARCELO ESPINOLA</option>
             <option>MARCEL PARIS</option>
@@ -429,14 +416,9 @@
         <label class="req">Creado por</label>
         <select id="p-persona">
           <option value="">— Seleccionar —</option>
-          <optgroup label="Mecánicos Mototransporte">
-            <option>MARTIN ZUCCOLINI</option>
-            <option>DAMIAN HERNANDEZ</option>
-            <option>ERNESTO DAVILA</option>
-          </optgroup>
           <optgroup label="Operarios">
             <option>EDUARDO GAMBOA</option><option>WILSON PIÑEIRO</option><option>MARIO MANQUIS</option>
-            <option>JIMENA BENTANCOUR</option><option>IGNACIO MARTINO</option><option>MARCELO ESPINOLA</option>
+            <option>DAMIAN HERNANDEZ</option><option>JIMENA BENTANCOUR</option><option>IGNACIO MARTINO</option><option>MARCELO ESPINOLA</option>
             <option>MARCEL PARIS</option><option>PABLO VILCHES</option><option>JAVIER LENCAUSCA</option>
             <option>DIEGO QUINTANA</option><option>CARLOS MARTINEZ</option><option>ALAN MORA</option>
             <option>MAURICIO PONCE DE LEON</option><option>LUIS BARREIRO</option><option>VICTOR IGLESIAS</option>
@@ -474,12 +456,7 @@ const EQ = {"Almacen":["B. carga de acido t1,2 y 9 rep..","Bba recirc. Ácido PA
 let tipo='', prio='', fotoB64='', fotoMime='', fotoName='';
 
 // Poblar plantas
-const selP = document.getElementById('f-planta');
-Object.keys(EQ).sort().forEach(p => {
-  const o = document.createElement('option');
-  o.value = p; o.textContent = p;
-  selP.appendChild(o);
-});
+// Las plantas se pueblan via poblarPlantas() al DOMContentLoaded
 
 function updateEq() {
   const p  = document.getElementById('f-planta').value;
@@ -664,14 +641,8 @@ function volverAlForm() { setState('form-wrap'); }
 let tipoProg = '', prioProg = '', repProg = 'una_vez';
 
 function abrirProgramadas() {
-  // Poblar plantas si no están
-  const sel = document.getElementById('p-planta');
-  if (sel.options.length <= 1) {
-    Object.keys(EQ).sort().forEach(p => {
-      const o = document.createElement('option');
-      o.value = p; o.textContent = p; sel.appendChild(o);
-    });
-  }
+  // Poblar plantas (incluyendo las extras del admin)
+  poblarPlantas();
   // Fecha default = mañana a las 08:00
   const manana = new Date(); manana.setDate(manana.getDate()+1);
   manana.setHours(8,0,0,0);
@@ -760,14 +731,237 @@ function resetForm() {
   setState('form-wrap');
 }
 </script>
+<!-- ═══════════════════════════════════════════════════════════
+     PANEL DE ADMINISTRACIÓN — activar tocando el título 5 veces
+     ═══════════════════════════════════════════════════════════ -->
+<div id="admin-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:14px;width:92%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.3)">
+
+    <!-- Header -->
+    <div style="background:#1a1a1a;padding:16px 20px;border-radius:14px 14px 0 0;display:flex;align-items:center;justify-content:space-between">
+      <div style="color:#fff;font-weight:700;font-size:15px;letter-spacing:0.03em">⚙ Administración</div>
+      <button onclick="cerrarAdmin()" style="background:none;border:none;color:#999;font-size:20px;cursor:pointer;line-height:1">×</button>
+    </div>
+
+    <div style="padding:20px">
+
+      <!-- PLANTAS -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0ee">Plantas</div>
+        <div id="admin-plantas" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+        <div style="display:flex;gap:8px">
+          <input id="nueva-planta" type="text" placeholder="Nombre de nueva planta"
+            style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none">
+          <button onclick="agregarPlanta()" style="padding:8px 16px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">+ Agregar</button>
+        </div>
+      </div>
+
+      <!-- EQUIPOS -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0ee">Equipos por planta</div>
+        <select id="admin-sel-planta"
+          style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;margin-bottom:8px;outline:none">
+          <option value="">— Seleccionar planta —</option>
+        </select>
+        <div id="admin-equipos" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+        <div style="display:flex;gap:8px">
+          <input id="nuevo-equipo" type="text" placeholder="Nombre de nuevo equipo"
+            style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none">
+          <button onclick="agregarEquipoAdmin()" style="padding:8px 16px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">+ Agregar</button>
+        </div>
+      </div>
+
+      <!-- PERSONAS -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0ee">Personas que denuncian</div>
+        <div id="admin-personas" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+        <div style="display:flex;gap:8px">
+          <input id="nueva-persona" type="text" placeholder="Nombre en MAYÚSCULAS"
+            style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none">
+          <button onclick="agregarPersona()" style="padding:8px 16px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">+ Agregar</button>
+        </div>
+      </div>
+
+      <div id="admin-status" style="display:none;font-size:13px;font-weight:600;padding:10px 14px;background:#f8f8f6;border-radius:8px;margin-bottom:12px;text-align:center"></div>
+
+      <button onclick="cerrarAdmin()" style="width:100%;padding:12px;background:#f5f5f3;border:1px solid #e8e8e5;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:#555">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// Registrar Service Worker para PWA
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(() => console.log('SW registrado'))
-      .catch(e => console.log('SW error:', e));
+// ── PANEL DE ADMINISTRACIÓN — llama al Apps Script que edita GitHub ──
+const ADMIN_SCRIPT = 'https://script.google.com/macros/s/AKfycby1NaSe5vqwJxS65GtkEBX4o_8yWOO3mOlN5mO3yCykGGxf9VvRZXkTG33rIza3HZ9f/exec';
+
+let tapCount = 0, tapTimer = null;
+
+// Un solo DOMContentLoaded para todo
+document.addEventListener('DOMContentLoaded', () => {
+  // Poblar plantas al cargar
+  poblarPlantas();
+
+  // Activar panel admin tocando logo/título 5 veces
+  document.querySelectorAll('.logo-icon,.logo,.top-logo,h1').forEach(el => {
+    el.addEventListener('click', () => {
+      tapCount++;
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(() => tapCount = 0, 2000);
+      if (tapCount >= 5) { tapCount = 0; abrirAdmin(); }
+    });
   });
+
+  // Listener del select de planta en el admin
+  const selAdmin = document.getElementById('admin-sel-planta');
+  if (selAdmin) selAdmin.addEventListener('change', renderAdminEquipos);
+});
+
+function abrirAdmin() {
+  document.getElementById('admin-overlay').style.display = 'flex';
+  renderAdminPlantas();
+  renderAdminPersonas();
+}
+
+function cerrarAdmin() {
+  document.getElementById('admin-overlay').style.display = 'none';
+}
+
+async function llamarAdmin(payload) {
+  const encoded = encodeURIComponent(JSON.stringify(payload));
+  await new Promise(r => {
+    const img = new Image();
+    img.onload = r; img.onerror = r;
+    setTimeout(r, 6000);
+    img.src = ADMIN_SCRIPT + '?payload=' + encoded;
+  });
+}
+
+function setAdminStatus(msg, ok) {
+  const el = document.getElementById('admin-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = ok ? '#059669' : '#f59e0b';
+  el.style.display = 'block';
+}
+
+function tag(texto, onRemove) {
+  const div = document.createElement('div');
+  div.style.cssText = 'display:inline-flex;align-items:center;gap:5px;background:#f0f0ee;border:1px solid #ddd;border-radius:20px;padding:3px 10px;font-size:12px;font-family:inherit';
+  div.appendChild(document.createTextNode(texto));
+  const btn = document.createElement('button');
+  btn.textContent = '×';
+  btn.style.cssText = 'background:none;border:none;color:#999;cursor:pointer;font-size:14px;line-height:1;padding:0;margin-left:2px';
+  btn.onclick = onRemove;
+  div.appendChild(btn);
+  return div;
+}
+
+function renderAdminPlantas() {
+  const cont = document.getElementById('admin-plantas');
+  cont.innerHTML = '';
+  Object.keys(EQ).sort().forEach(p => {
+    cont.appendChild(tag(p, async () => {
+      if (!confirm('¿Eliminar la planta "' + p + '" y todos sus equipos?')) return;
+      setAdminStatus('Eliminando...', false);
+      await llamarAdmin({ accion: 'eliminar_planta', planta: p });
+      delete EQ[p];
+      renderAdminPlantas();
+      poblarPlantas();
+      setAdminStatus('✓ Eliminada. GitHub se actualiza en ~1 min.', true);
+    }));
+  });
+}
+
+function renderAdminEquipos() {
+  const planta = document.getElementById('admin-sel-planta').value;
+  const cont = document.getElementById('admin-equipos');
+  cont.innerHTML = '';
+  if (!planta || !EQ[planta]) return;
+  EQ[planta].forEach(eq => {
+    cont.appendChild(tag(eq, async () => {
+      if (!confirm('¿Eliminar "' + eq + '" de ' + planta + '?')) return;
+      setAdminStatus('Eliminando...', false);
+      await llamarAdmin({ accion: 'eliminar_equipo', planta, equipo: eq });
+      EQ[planta] = EQ[planta].filter(e => e !== eq);
+      renderAdminEquipos();
+      setAdminStatus('✓ Eliminado. GitHub se actualiza en ~1 min.', true);
+    }));
+  });
+}
+
+function renderAdminPersonas() {
+  const cont = document.getElementById('admin-personas');
+  cont.innerHTML = '';
+  const sel = document.getElementById('f-persona');
+  if (!sel) return;
+  [...sel.querySelectorAll('option')].map(o => o.value).filter(v => v).sort().forEach(p => {
+    cont.appendChild(tag(p, async () => {
+      if (!confirm('¿Eliminar "' + p + '"?')) return;
+      setAdminStatus('Eliminando...', false);
+      await llamarAdmin({ accion: 'eliminar_persona', persona: p });
+      document.querySelectorAll('#f-persona option, #p-persona option')
+        .forEach(o => { if (o.value === p) o.remove(); });
+      renderAdminPersonas();
+      setAdminStatus('✓ Eliminado. GitHub se actualiza en ~1 min.', true);
+    }));
+  });
+}
+
+function poblarPlantas() {
+  ['f-planta','p-planta','admin-sel-planta'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const current = sel.value;
+    const first = sel.options[0];
+    sel.innerHTML = '';
+    if (first) sel.appendChild(first.cloneNode(true));
+    Object.keys(EQ).sort().forEach(p => {
+      const o = document.createElement('option');
+      o.value = p; o.textContent = p; sel.appendChild(o);
+    });
+    sel.value = current;
+  });
+}
+
+async function agregarPlanta() {
+  const val = document.getElementById('nueva-planta').value.trim();
+  if (!val) return;
+  setAdminStatus('Guardando en GitHub...', false);
+  await llamarAdmin({ accion: 'agregar_planta', planta: val, equipos: [] });
+  EQ[val] = [];
+  document.getElementById('nueva-planta').value = '';
+  renderAdminPlantas();
+  poblarPlantas();
+  setAdminStatus('✓ Planta "' + val + '" agregada. GitHub se actualiza en ~1 min.', true);
+}
+
+async function agregarEquipoAdmin() {
+  const planta = document.getElementById('admin-sel-planta').value;
+  const val    = document.getElementById('nuevo-equipo').value.trim();
+  if (!planta || !val) return;
+  setAdminStatus('Guardando en GitHub...', false);
+  await llamarAdmin({ accion: 'agregar_equipo', planta, equipo: val });
+  if (!EQ[planta]) EQ[planta] = [];
+  if (!EQ[planta].includes(val)) { EQ[planta].push(val); EQ[planta].sort(); }
+  document.getElementById('nuevo-equipo').value = '';
+  renderAdminEquipos();
+  setAdminStatus('✓ Equipo "' + val + '" agregado. GitHub se actualiza en ~1 min.', true);
+}
+
+async function agregarPersona() {
+  const val = document.getElementById('nueva-persona').value.trim().toUpperCase();
+  if (!val) return;
+  setAdminStatus('Guardando en GitHub...', false);
+  await llamarAdmin({ accion: 'agregar_persona', persona: val });
+  ['f-persona','p-persona'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const og = sel.querySelector('optgroup') || sel;
+    const o = document.createElement('option');
+    o.value = val; o.textContent = val; og.appendChild(o);
+  });
+  document.getElementById('nueva-persona').value = '';
+  renderAdminPersonas();
+  setAdminStatus('✓ "' + val + '" agregado. GitHub se actualiza en ~1 min.', true);
 }
 </script>
 </body>
