@@ -456,12 +456,7 @@ const EQ = {"Almacen":["B. carga de acido t1,2 y 9 rep..","Bba recirc. Ácido PA
 let tipo='', prio='', fotoB64='', fotoMime='', fotoName='';
 
 // Poblar plantas
-const selP = document.getElementById('f-planta');
-Object.keys(EQ).sort().forEach(p => {
-  const o = document.createElement('option');
-  o.value = p; o.textContent = p;
-  selP.appendChild(o);
-});
+// Las plantas se pueblan via poblarPlantas() al DOMContentLoaded
 
 function updateEq() {
   const p  = document.getElementById('f-planta').value;
@@ -646,14 +641,8 @@ function volverAlForm() { setState('form-wrap'); }
 let tipoProg = '', prioProg = '', repProg = 'una_vez';
 
 function abrirProgramadas() {
-  // Poblar plantas si no están
-  const sel = document.getElementById('p-planta');
-  if (sel.options.length <= 1) {
-    Object.keys(EQ).sort().forEach(p => {
-      const o = document.createElement('option');
-      o.value = p; o.textContent = p; sel.appendChild(o);
-    });
-  }
+  // Poblar plantas (incluyendo las extras del admin)
+  poblarPlantas();
   // Fecha default = mañana a las 08:00
   const manana = new Date(); manana.setDate(manana.getDate()+1);
   manana.setHours(8,0,0,0);
@@ -742,5 +731,289 @@ function resetForm() {
   setState('form-wrap');
 }
 </script>
+<!-- ═══════════════════════════════════════════════════════════
+     PANEL DE ADMINISTRACIÓN — activar tocando el título 5 veces
+     ═══════════════════════════════════════════════════════════ -->
+<div id="admin-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:14px;width:92%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.3)">
+
+    <!-- Header -->
+    <div style="background:#1a1a1a;padding:16px 20px;border-radius:14px 14px 0 0;display:flex;align-items:center;justify-content:space-between">
+      <div style="color:#fff;font-weight:700;font-size:15px;letter-spacing:0.03em">⚙ Administración</div>
+      <button onclick="cerrarAdmin()" style="background:none;border:none;color:#999;font-size:20px;cursor:pointer;line-height:1">×</button>
+    </div>
+
+    <div style="padding:20px">
+
+      <!-- PLANTAS -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0ee">Plantas</div>
+        <div id="admin-plantas" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+        <div style="display:flex;gap:8px">
+          <input id="nueva-planta" type="text" placeholder="Nombre de nueva planta"
+            style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none">
+          <button onclick="agregarPlanta()" style="padding:8px 16px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">+ Agregar</button>
+        </div>
+      </div>
+
+      <!-- EQUIPOS -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0ee">Equipos por planta</div>
+        <select id="admin-sel-planta"
+          style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;margin-bottom:8px;outline:none">
+          <option value="">— Seleccionar planta —</option>
+        </select>
+        <div id="admin-equipos" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+        <div style="display:flex;gap:8px">
+          <input id="nuevo-equipo" type="text" placeholder="Nombre de nuevo equipo"
+            style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none">
+          <button onclick="agregarEquipoAdmin()" style="padding:8px 16px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">+ Agregar</button>
+        </div>
+      </div>
+
+      <!-- PERSONAS -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0ee">Personas que denuncian</div>
+        <div id="admin-personas" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+        <div style="display:flex;gap:8px">
+          <input id="nueva-persona" type="text" placeholder="Nombre en MAYÚSCULAS"
+            style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none">
+          <button onclick="agregarPersona()" style="padding:8px 16px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">+ Agregar</button>
+        </div>
+      </div>
+
+      <button onclick="cerrarAdmin()" style="width:100%;padding:12px;background:#f5f5f3;border:1px solid #e8e8e5;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:#555">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATOS EDITABLES EN localStorage ──────────────────────────
+const LS_PERSONAS = 'isusa_personas';
+const LS_EQ_EXTRA = 'isusa_eq_extra'; // plantas/equipos agregados
+
+// Personas base (hardcoded como fallback)
+const PERSONAS_BASE = [
+  'EDUARDO GAMBOA','WILSON PIÑEIRO','MARIO MANQUIS','DAMIAN HERNANDEZ',
+  'JIMENA BENTANCOUR','IGNACIO MARTINO','MARCELO ESPINOLA','MARCEL PARIS',
+  'PABLO VILCHES','JAVIER LENCAUSCA','DIEGO QUINTANA','CARLOS MARTINEZ',
+  'ALAN MORA','MAURICIO PONCE DE LEON','LUIS BARREIRO','VICTOR IGLESIAS'
+];
+
+function getPersonas() {
+  try {
+    const saved = localStorage.getItem(LS_PERSONAS);
+    return saved ? JSON.parse(saved) : [...PERSONAS_BASE];
+  } catch(e) { return [...PERSONAS_BASE]; }
+}
+
+function savePersonas(arr) {
+  localStorage.setItem(LS_PERSONAS, JSON.stringify(arr));
+}
+
+function getEqExtra() {
+  try {
+    const saved = localStorage.getItem(LS_EQ_EXTRA);
+    return saved ? JSON.parse(saved) : {};
+  } catch(e) { return {}; }
+}
+
+function saveEqExtra(obj) {
+  localStorage.setItem(LS_EQ_EXTRA, JSON.stringify(obj));
+}
+
+// ── POBLAR SELECTS CON DATOS EDITABLES ───────────────────────
+function poblarPersonas() {
+  const personas = getPersonas();
+  const selects  = ['f-persona', 'p-persona'];
+  selects.forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    // Guardar valor actual
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— Seleccionar —</option>';
+    const og = document.createElement('optgroup');
+    og.label = 'Operarios';
+    personas.sort().forEach(p => {
+      const o = document.createElement('option');
+      o.value = p; o.textContent = p;
+      og.appendChild(o);
+    });
+    sel.appendChild(og);
+    sel.value = current;
+  });
+}
+
+function poblarPlantas() {
+  const extra = getEqExtra();
+  const merged = Object.assign({}, EQ, extra);
+  const selects = ['f-planta','p-planta','admin-sel-planta'];
+  selects.forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const current = sel.value;
+    // Preservar la opción vacía
+    const firstOpt = sel.options[0];
+    sel.innerHTML = '';
+    if (firstOpt) sel.appendChild(firstOpt);
+    Object.keys(merged).sort().forEach(p => {
+      const o = document.createElement('option');
+      o.value = p; o.textContent = p;
+      sel.appendChild(o);
+    });
+    sel.value = current;
+  });
+}
+
+// Llamar al cargar (reemplaza el populate original)
+document.addEventListener('DOMContentLoaded', () => {
+  poblarPersonas();
+  poblarPlantas();
+});
+
+// ── PANEL ADMIN ───────────────────────────────────────────────
+let tapCount = 0;
+let tapTimer  = null;
+
+// Activar tocando el título 5 veces
+document.querySelector('h1,#app-title,.app-title,.titulo,.header,.hdr')
+  ?.addEventListener('click', activarAdmin);
+
+// Fallback: toque largo en el logo
+document.querySelector('.logo-icon,.logo,.top-logo')
+  ?.addEventListener('click', () => {
+    tapCount++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(() => tapCount = 0, 2000);
+    if (tapCount >= 5) { tapCount = 0; abrirAdmin(); }
+  });
+
+function activarAdmin() {
+  tapCount++;
+  clearTimeout(tapTimer);
+  tapTimer = setTimeout(() => tapCount = 0, 2000);
+  if (tapCount >= 5) { tapCount = 0; abrirAdmin(); }
+}
+
+function abrirAdmin() {
+  const overlay = document.getElementById('admin-overlay');
+  overlay.style.display = 'flex';
+  renderAdminPlantas();
+  renderAdminPersonas();
+}
+
+function cerrarAdmin() {
+  document.getElementById('admin-overlay').style.display = 'none';
+  poblarPersonas();
+  poblarPlantas();
+}
+
+// ── RENDER TAGS ───────────────────────────────────────────────
+function tag(texto, onRemove) {
+  const div = document.createElement('div');
+  div.style.cssText = 'display:inline-flex;align-items:center;gap:5px;background:#f0f0ee;border:1px solid #ddd;border-radius:20px;padding:3px 10px;font-size:12px;font-family:inherit';
+  div.textContent = texto;
+  const btn = document.createElement('button');
+  btn.textContent = '×';
+  btn.style.cssText = 'background:none;border:none;color:#999;cursor:pointer;font-size:14px;line-height:1;padding:0;margin-left:2px';
+  btn.onclick = onRemove;
+  div.appendChild(btn);
+  return div;
+}
+
+function renderAdminPlantas() {
+  const extra   = getEqExtra();
+  const merged  = Object.assign({}, EQ, extra);
+  const cont    = document.getElementById('admin-plantas');
+  cont.innerHTML = '';
+  Object.keys(merged).sort().forEach(p => {
+    const esExtra = !!extra[p];
+    const t = tag(p, () => {
+      if (!esExtra) { alert('Esta planta es del sistema y no se puede eliminar.'); return; }
+      delete extra[p];
+      saveEqExtra(extra);
+      renderAdminPlantas();
+    });
+    if (!esExtra) t.style.opacity = '0.6';
+    cont.appendChild(t);
+  });
+}
+
+function renderAdminEquipos() {
+  const planta = document.getElementById('admin-sel-planta').value;
+  const extra  = getEqExtra();
+  const merged = Object.assign({}, EQ, extra);
+  const cont   = document.getElementById('admin-equipos');
+  cont.innerHTML = '';
+  if (!planta) return;
+  (merged[planta] || []).forEach(eq => {
+    const esExtra = extra[planta] && extra[planta].includes(eq);
+    const t = tag(eq, () => {
+      if (!esExtra) { alert('Este equipo es del sistema y no se puede eliminar.'); return; }
+      extra[planta] = extra[planta].filter(e => e !== eq);
+      saveEqExtra(extra);
+      renderAdminEquipos();
+    });
+    if (!esExtra) t.style.opacity = '0.6';
+    cont.appendChild(t);
+  });
+}
+
+document.getElementById('admin-sel-planta').addEventListener('change', renderAdminEquipos);
+
+function renderAdminPersonas() {
+  const personas = getPersonas();
+  const cont     = document.getElementById('admin-personas');
+  cont.innerHTML  = '';
+  personas.sort().forEach(p => {
+    const esBase = PERSONAS_BASE.includes(p);
+    const t = tag(p, () => {
+      if (esBase) { alert('Esta persona es del sistema y no se puede eliminar.'); return; }
+      savePersonas(personas.filter(x => x !== p));
+      renderAdminPersonas();
+    });
+    if (esBase) t.style.opacity = '0.6';
+    cont.appendChild(t);
+  });
+}
+
+// ── AGREGAR ───────────────────────────────────────────────────
+function agregarPlanta() {
+  const val = document.getElementById('nueva-planta').value.trim();
+  if (!val) return;
+  const extra = getEqExtra();
+  if (!extra[val]) extra[val] = [];
+  saveEqExtra(extra);
+  document.getElementById('nueva-planta').value = '';
+  renderAdminPlantas();
+  // Actualizar select de planta en admin
+  poblarPlantas();
+}
+
+function agregarEquipoAdmin() {
+  const planta = document.getElementById('admin-sel-planta').value;
+  const val    = document.getElementById('nuevo-equipo').value.trim();
+  if (!planta || !val) return;
+  const extra = getEqExtra();
+  if (!extra[planta]) extra[planta] = [];
+  if (!extra[planta].includes(val)) extra[planta].push(val);
+  saveEqExtra(extra);
+  document.getElementById('nuevo-equipo').value = '';
+  renderAdminEquipos();
+}
+
+function agregarPersona() {
+  const val = document.getElementById('nueva-persona').value.trim().toUpperCase();
+  if (!val) return;
+  const personas = getPersonas();
+  if (!personas.includes(val)) {
+    personas.push(val);
+    savePersonas(personas);
+  }
+  document.getElementById('nueva-persona').value = '';
+  renderAdminPersonas();
+}
+</script>
 </body>
 </html>
+
