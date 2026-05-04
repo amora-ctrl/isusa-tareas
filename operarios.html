@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel Operarios — Mantenimiento</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest_operarios.json">
+<meta name="theme-color" content="#0d1117">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Operarios">
+<link rel="apple-touch-icon" href="icon-operarios-192.png">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;min-height:100vh}
@@ -278,6 +287,28 @@ function cargarDenuncias(callback) {
       });
 
       DENUNCIAS = nuevas;
+
+      // Restaurar trabajo en curso desde localStorage si existe
+      try {
+        const saved = localStorage.getItem('isusa_trabajo');
+        const savedSesion = localStorage.getItem('isusa_sesion');
+        if (saved && !trabajo) {
+          const t = JSON.parse(saved);
+          // Verificar que la denuncia sigue activa
+          const aun = DENUNCIAS.find(x => String(x.id) === String(t.id));
+          if (aun && aun.estado !== 'Finalizado') {
+            if (savedSesion) sesion = JSON.parse(savedSesion);
+            t.horaInicio = new Date(t.horaInicio);
+            trabajo = t;
+            // Restaurar pantalla de trabajo
+            mostrarTrabajo();
+            showScreen('s-trabajo');
+          } else {
+            localStorage.removeItem('isusa_trabajo');
+          }
+        }
+      } catch(e) {}
+
       if (callback) callback();
     })
     .catch(() => {
@@ -399,6 +430,13 @@ function tomarDenuncia(id) {
   const horaInicio = new Date();
   trabajo = {...d, operario: sesion.operario, taller: sesion.taller, horaInicio: horaInicio};
 
+  // Guardar en localStorage para sobrevivir recargas
+  localStorage.setItem('isusa_trabajo', JSON.stringify({
+    ...trabajo,
+    horaInicio: horaInicio.getTime()
+  }));
+  localStorage.setItem('isusa_sesion', JSON.stringify(sesion));
+
   const idx = DENUNCIAS.findIndex(x => String(x.id) === String(id));
   DENUNCIAS[idx].estado    = 'En proceso';
   DENUNCIAS[idx].operario  = sesion.operario;
@@ -465,11 +503,51 @@ function tomarDenuncia(id) {
   showScreen('s-trabajo');
 }
 
+// Restaurar pantalla de trabajo desde localStorage (sin resetear timer)
+function mostrarTrabajo() {
+  document.getElementById('t-eq').textContent = trabajo.equipo;
+  document.getElementById('t-pl').textContent = trabajo.planta;
+  document.getElementById('t-ti').textContent = trabajo.tipo;
+  document.getElementById('t-pr').textContent = trabajo.prioridad;
+  document.getElementById('t-de').textContent = trabajo.descripcion;
+  document.getElementById('t-re').textContent = trabajo.persona;
+  document.getElementById('t-hi').textContent = fmtH(trabajo.horaInicio);
+  document.getElementById('obs').value = '';
+
+  // Foto
+  const fotoRaw = trabajo.foto || '';
+  const fotoWrap = document.getElementById('foto-wrap');
+  if (fotoRaw && fotoRaw.startsWith('http')) {
+    fotoWrap.style.display = 'block';
+    fotoWrap.innerHTML =
+      `<div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">📷 Foto adjunta</div>
+       <a href="${fotoRaw}" target="_blank"
+          style="display:inline-flex;align-items:center;gap:10px;padding:12px 20px;background:#1d4ed8;color:#fff;border-radius:10px;font-weight:700;font-size:15px;text-decoration:none;box-shadow:0 2px 8px rgba(29,78,216,0.3)">
+         Ver foto en Drive
+       </a>`;
+  } else {
+    fotoWrap.style.display = 'none';
+  }
+
+  // Restaurar timer desde hora de inicio
+  timerStart = trabajo.horaInicio;
+  timerSec   = Math.floor((Date.now() - timerStart.getTime()) / 1000);
+  document.getElementById('timer-val').textContent = fmtTimer(timerSec);
+  document.getElementById('timer-wrap').className  = 'timer-wrap timer-running';
+  document.getElementById('timer-sub').textContent = 'Iniciado: ' + fmtH(timerStart);
+  clearInterval(timerIv);
+  timerIv = setInterval(() => {
+    timerSec = Math.floor((Date.now() - timerStart.getTime()) / 1000);
+    document.getElementById('timer-val').textContent = fmtTimer(timerSec);
+  }, 1000);
+}
+
 function finalizar() {
   const obs = document.getElementById('obs').value.trim();
   if (!obs) { alert('Agregá una observación antes de finalizar.'); return; }
 
   clearInterval(timerIv);
+  localStorage.removeItem('isusa_trabajo');
   const fin = new Date();
   const min = Math.round(timerSec / 60);
 
@@ -596,7 +674,8 @@ function guardarParcial() {
 
 function volverLista() {
   clearInterval(timerIv);
-  // Volver sin recargar Sheet — usar datos ya cargados
+  timerIv = null;
+  // No limpiar localStorage — el trabajo sigue en curso
   document.getElementById('logo-lista').className = 'logo ' + (sesion.taller==='Eléctrico' ? 'logo-e' : sesion.taller==='Mecánico' ? 'logo-m' : 'logo-s');
   document.getElementById('lista-title').textContent = 'Taller ' + sesion.taller;
   document.getElementById('lista-sub').textContent = sesion.operario + ' — ' + hoy();
@@ -688,6 +767,15 @@ function pad(n){return String(n).padStart(2,'0');}
 function fmtTimer(s){return `${pad(Math.floor(s/3600))}:${pad(Math.floor((s%3600)/60))}:${pad(s%60)}`;}
 function fmtH(d){return `${pad(d.getHours())}:${pad(d.getMinutes())}`;}
 function hoy(){const d=new Date();return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw_operarios.js')
+      .then(() => console.log('SW operarios ok'))
+      .catch(e => console.log('SW error:', e));
+  });
+}
 </script>
 </body>
 </html>
