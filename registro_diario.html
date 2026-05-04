@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro Diario — Mototransporte</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;min-height:100vh;padding:1rem}
+  .wrap{max-width:520px;margin:0 auto;padding-bottom:2rem}
+
+  .hdr{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;padding:0 2px}
+  .logo{width:36px;height:36px;background:#1a1a1a;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  h1{font-size:16px;font-weight:600;color:#1a1a1a;line-height:1.2}
+  .sub{font-size:12px;color:#888;margin-top:1px}
+
+  .card{background:#fff;border:1px solid #e8e8e5;border-radius:12px;padding:18px;margin-bottom:10px}
+  .sec{font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid #f0f0ee}
+
+  .field{margin-bottom:14px}
+  .field:last-child{margin-bottom:0}
+  label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:5px}
+  .req::after{content:" *";color:#c0392b}
+
+  input[type=number],select{
+    width:100%;font-size:15px;padding:10px 12px;
+    border:1px solid #ddd;border-radius:8px;
+    background:#fff;color:#1a1a1a;outline:none;
+    transition:border-color 0.15s;font-family:inherit;
+    -webkit-appearance:none;appearance:none
+  }
+  input[type=number]{-moz-appearance:textfield}
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+  input:focus,select:focus{border-color:#1a1a1a}
+  select{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 12px center;
+    padding-right:32px;cursor:pointer
+  }
+
+  .dt-row{display:flex;gap:10px}
+  .dt-box{flex:1;background:#f8f8f6;border-radius:8px;padding:9px 12px}
+  .dt-val{font-size:14px;font-weight:600;color:#1a1a1a}
+  .dt-lbl{font-size:10px;color:#aaa;margin-top:1px}
+
+  /* Lavado toggle */
+  .lavado-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0}
+  .lavado-label{font-size:14px;font-weight:600;color:#1a1a1a;display:flex;align-items:center;gap:8px}
+  .toggle{position:relative;width:46px;height:26px;flex-shrink:0}
+  .toggle input{opacity:0;width:0;height:0;position:absolute}
+  .toggle-track{position:absolute;inset:0;background:#ddd;border-radius:13px;cursor:pointer;transition:background 0.2s}
+  .toggle-track::after{content:'';position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+  .toggle input:checked + .toggle-track{background:#1a1a1a}
+  .toggle input:checked + .toggle-track::after{transform:translateX(20px)}
+  .lavado-estado{font-size:12px;font-weight:700;color:#aaa;min-width:20px;text-align:right}
+  .lavado-estado.si{color:#059669}
+
+  .err{font-size:11px;color:#c0392b;margin-top:5px;display:none}
+
+  /* Botón denuncia */
+  .btn-denuncia{
+    width:100%;padding:13px;
+    background:#fff;color:#c0392b;
+    border:1.5px solid #c0392b;border-radius:10px;
+    font-size:14px;font-weight:700;
+    cursor:pointer;font-family:inherit;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    transition:all 0.15s;margin-bottom:10px;text-decoration:none
+  }
+  .btn-denuncia:hover{background:#fef2f2}
+
+  .btn-submit{width:100%;padding:13px;background:#1a1a1a;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity 0.15s}
+  .btn-submit:hover{opacity:0.85}
+  .btn-submit:disabled{opacity:0.4;cursor:not-allowed}
+
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .state{display:none}
+  .state.show{display:block}
+  .ok-wrap{text-align:center;padding:2.5rem 1rem}
+  .ok-circle{width:64px;height:64px;background:#ECFDF5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+  .ok-title{font-size:18px;font-weight:700;color:#1a1a1a;margin-bottom:8px}
+  .ok-txt{font-size:14px;color:#666;line-height:1.7;margin-bottom:1.5rem}
+  .btn-nuevo{padding:10px 28px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- FORMULARIO -->
+  <div class="state show" id="s-form">
+
+    <div class="hdr">
+      <div class="logo">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <rect x="2" y="11" width="14" height="5" rx="1.5" stroke="white" stroke-width="1.4" fill="none"/>
+          <path d="M4 11V8a4 4 0 0 1 10 0v3" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="5" cy="13.5" r="1" fill="white"/>
+          <circle cx="13" cy="13.5" r="1" fill="white"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Registro Diario</h1>
+        <div class="sub" id="sub-fecha">Mototransporte</div>
+      </div>
+    </div>
+
+    <!-- FECHA HORA -->
+    <div class="card">
+      <div class="sec">Fecha y hora</div>
+      <div class="dt-row">
+        <div class="dt-box">
+          <div class="dt-val" id="dt-fecha">—</div>
+          <div class="dt-lbl">Fecha</div>
+        </div>
+        <div class="dt-box">
+          <div class="dt-val" id="dt-hora">—</div>
+          <div class="dt-lbl">Hora</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EQUIPO -->
+    <div class="card">
+      <div class="sec">Equipo</div>
+      <div class="field" style="margin-bottom:0">
+        <label class="req">Seleccionar equipo</label>
+        <select id="f-equipo" onchange="hideErr('err-equipo')">
+          <option value="">— Seleccionar —</option>
+          <optgroup label="Palas">
+            <option>Michigan 16</option>
+            <option>SDLG 51</option>
+            <option>SDLG 52</option>
+            <option>SDLG 54</option>
+            <option>SDLG 56</option>
+            <option>LGCE 60</option>
+            <option>SDLG 61</option>
+            <option>SDLG 62</option>
+            <option>SDLG 64</option>
+            <option>SDLG 65</option>
+            <option>SDLG 66</option>
+            <option>SDLG 67</option>
+            <option>SDLG 68</option>
+            <option>SDLG 73</option>
+            <option>LiuGong 70</option>
+            <option>LiuGong 71</option>
+            <option>LiuGong 72</option>
+          </optgroup>
+          <optgroup label="Elevadores">
+            <option>Hangcha 26</option>
+            <option>Hangcha 63</option>
+            <option>Hangcha 69</option>
+          </optgroup>
+          <optgroup label="Generadores">
+            <option>Generador Principal</option>
+            <option>Generador Oficinas</option>
+          </optgroup>
+        </select>
+        <div class="err" id="err-equipo">Seleccioná un equipo</div>
+      </div>
+    </div>
+
+    <!-- DATOS -->
+    <div class="card">
+      <div class="sec">Datos del turno</div>
+
+      <div class="field">
+        <label class="req">Horómetro actual (hs)</label>
+        <input type="number" id="f-horometro" min="0" step="1" placeholder="Ej: 3720" oninput="hideErr('err-horometro')">
+        <div class="err" id="err-horometro">Ingresá el horómetro</div>
+      </div>
+
+      <div class="field">
+        <label class="req">Gasoil cargado (litros)</label>
+        <input type="number" id="f-gasoil" min="0" step="1" placeholder="Ej: 120" oninput="hideErr('err-gasoil')">
+        <div class="err" id="err-gasoil">Ingresá los litros de gasoil</div>
+      </div>
+
+      <div class="field" style="margin-bottom:0">
+        <label>Lavado</label>
+        <div class="lavado-row">
+          <div class="lavado-label">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <path d="M7.5 1.5C7.5 1.5 3 5.5 3 9a4.5 4.5 0 0 0 9 0c0-3.5-4.5-7.5-4.5-7.5z" stroke="#555" stroke-width="1.3" fill="none"/>
+            </svg>
+            ¿Se lavó el equipo?
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="lavado-estado" id="lavado-txt">No</span>
+            <label class="toggle">
+              <input type="checkbox" id="f-lavado" onchange="toggleLavado()">
+              <div class="toggle-track"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DENUNCIA -->
+    <a href="https://amora-ctrl.github.io/isusa-tareas/formulario_denuncias.html" class="btn-denuncia">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <circle cx="7.5" cy="7.5" r="6.5" stroke="currentColor" stroke-width="1.3" fill="none"/>
+        <path d="M7.5 4.5v4M7.5 10.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      Reportar falla en este equipo
+    </a>
+
+    <!-- GUARDAR -->
+    <button class="btn-submit" id="btn-submit" type="button" onclick="enviar()">
+      Guardar registro
+    </button>
+
+  </div><!-- fin s-form -->
+
+  <!-- ÉXITO -->
+  <div class="state" id="s-ok">
+    <div class="card ok-wrap">
+      <div class="ok-circle">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M6 14l6 6 10-10" stroke="#059669" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="ok-title">¡Registro guardado!</div>
+      <div class="ok-txt" id="ok-txt">—</div>
+      <button class="btn-nuevo" onclick="nuevoRegistro()">Registrar otro equipo</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby-fVA7q5QeKQRTLXm9opAN9L2cb-sPCe4-7VjAe5qIzOe5zwr9zWooGINUqa54i-TG/exec';
+
+// ── RELOJ ─────────────────────────────────────────────────────
+const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const DIAS  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+function pad(n){ return String(n).padStart(2,'0'); }
+
+function actualizarReloj(){
+  const now   = new Date();
+  const fecha = `${DIAS[now.getDay()]} ${pad(now.getDate())} ${MESES[now.getMonth()]} ${now.getFullYear()}`;
+  const hora  = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  document.getElementById('dt-fecha').textContent  = fecha;
+  document.getElementById('dt-hora').textContent   = hora;
+  document.getElementById('sub-fecha').textContent = `Mototransporte — ${fecha}`;
+}
+actualizarReloj();
+setInterval(actualizarReloj, 30000);
+
+// ── LAVADO ────────────────────────────────────────────────────
+function toggleLavado(){
+  const checked = document.getElementById('f-lavado').checked;
+  const txt = document.getElementById('lavado-txt');
+  txt.textContent = checked ? 'Sí' : 'No';
+  txt.className   = checked ? 'lavado-estado si' : 'lavado-estado';
+}
+
+// ── VALIDACIÓN ────────────────────────────────────────────────
+function showErr(id){ document.getElementById(id).style.display = 'block'; }
+function hideErr(id){ document.getElementById(id).style.display = 'none'; }
+
+// ── ENVÍO ─────────────────────────────────────────────────────
+async function enviar(){
+  const equipo    = document.getElementById('f-equipo').value;
+  const horometro = document.getElementById('f-horometro').value.trim();
+  const gasoil    = document.getElementById('f-gasoil').value.trim();
+  const lavado    = document.getElementById('f-lavado').checked;
+
+  let ok = true;
+  if (!equipo)    { showErr('err-equipo');    ok = false; } else hideErr('err-equipo');
+  if (!horometro) { showErr('err-horometro'); ok = false; } else hideErr('err-horometro');
+  if (!gasoil)    { showErr('err-gasoil');    ok = false; } else hideErr('err-gasoil');
+  if (!ok) return;
+
+  const now   = new Date();
+  const fecha = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+  const hora  = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+  const payload = {
+    tipo: 'registro_diario',
+    fecha, hora, equipo,
+    horometro, gasoil,
+    lavado: lavado ? 'Sí' : 'No'
+  };
+
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Guardando...';
+
+  try {
+    const encoded = encodeURIComponent(JSON.stringify(payload));
+    await new Promise((resolve) => {
+      const img = new Image();
+      img.onload  = resolve;
+      img.onerror = resolve; // igual resolvemos, el script ya grabó
+      img.src = `${SCRIPT_URL}?payload=${encoded}`;
+    });
+  } catch(e){ console.warn(e); }
+
+  document.getElementById('ok-txt').innerHTML =
+    `<strong>${equipo}</strong><br>` +
+    `Horómetro: <strong>${horometro} hs</strong><br>` +
+    `Gasoil: <strong>${gasoil} L</strong><br>` +
+    `Lavado: <strong>${lavado ? '✓ Sí' : 'No'}</strong>`;
+
+  btn.disabled = false;
+  btn.innerHTML = 'Guardar registro';
+  document.getElementById('s-form').classList.remove('show');
+  document.getElementById('s-ok').classList.add('show');
+}
+
+// ── NUEVO ─────────────────────────────────────────────────────
+function nuevoRegistro(){
+  document.getElementById('f-equipo').value    = '';
+  document.getElementById('f-horometro').value = '';
+  document.getElementById('f-gasoil').value    = '';
+  document.getElementById('f-lavado').checked  = false;
+  toggleLavado();
+  document.getElementById('s-ok').classList.remove('show');
+  document.getElementById('s-form').classList.add('show');
+}
+</script>
+</body>
+</html>
