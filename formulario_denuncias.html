@@ -183,8 +183,8 @@
     <div class="card">
       <div class="sec">Tipo y prioridad</div>
       <div class="field">
-        <label class="req">Disciplina</label>
-        <div class="tipo-group">
+        <label class="req" id="lbl-disciplina">Disciplina</label>
+        <div class="tipo-group" id="tipo-buttons">
           <button class="tipo-btn" id="btn-e" type="button" onclick="setT('Eléctrica')">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M8 1L3 8h5l-2 5 6-7H7l1-5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" fill="none"/>
@@ -206,6 +206,21 @@
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 12L12 2M5 2h7v7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>Soldadura
           </button>
         </div>
+        <!-- SELECTOR MOTOTRANSPORTE (oculto por defecto) -->
+        <select id="tipo-moto" style="display:none;width:100%;padding:10px 12px;background:#1a1a2e;border:1px solid #2d3561;border-radius:8px;color:#e2e8f0;font-size:14px;margin-top:4px;cursor:pointer;" onchange="setT(this.value)">
+          <option value="">— Seleccionar tipo de tarea —</option>
+          <option>Correctivo</option>
+          <option>Service Motor</option>
+          <option>Service Caja</option>
+          <option>Service Diferencial</option>
+          <option>Sist. frenos</option>
+          <option>Carrocería</option>
+          <option>Sist. Eléctrico</option>
+          <option>Aire acondicionado</option>
+          <option>Ejes</option>
+          <option>Chasis/Equipo de trabajo</option>
+          <option>Transmisión</option>
+        </select>
         <div class="err" id="err-tipo">Seleccioná el tipo de falla</div>
       </div>
       <div class="field">
@@ -253,21 +268,24 @@
         <label class="req">Persona que denuncia</label>
         <select id="f-persona">
           <option value="">— Seleccionar —</option>
-          <option>EDUARDO GAMBOA</option>
-          <option>WILSON PIÑEIRO</option>
-          <option>MARIO MANQUIS</option>
-          <option>JIMENA BENTANCOUR</option>
-          <option>IGNACIO MARTINO</option>
-          <option>MARCELO ESPINOLA</option>
-          <option>MARCEL PARIS</option>
-          <option>PABLO VILCHES</option>
-          <option>JAVIER LENCAUSCA</option>
-          <option>DIEGO QUINTANA</option>
-          <option>CARLOS MARTINEZ</option>
-          <option>ALAN MORA</option>
-          <option>MAURICIO PONCE DE LEON</option>
-          <option>LUIS BARREIRO</option>
-          <option>VICTOR IGLESIAS</option>
+          <optgroup label="Operarios">
+            <option>EDUARDO GAMBOA</option>
+            <option>WILSON PIÑEIRO</option>
+            <option>MARIO MANQUIS</option>
+            <option>JIMENA BENTANCOUR</option>
+            <option>DAMIAN HERNANDEZ</option>
+            <option>IGNACIO MARTINO</option>
+            <option>MARCELO ESPINOLA</option>
+            <option>MARCEL PARIS</option>
+            <option>PABLO VILCHES</option>
+            <option>JAVIER LENCAUSCA</option>
+            <option>DIEGO QUINTANA</option>
+            <option>CARLOS MARTINEZ</option>
+            <option>ALAN MORA</option>
+            <option>MAURICIO PONCE DE LEON</option>
+            <option>LUIS BARREIRO</option>
+            <option>VICTOR IGLESIAS</option>
+          </optgroup>
         </select>
         <div class="err" id="err-persona">Seleccioná tu nombre</div>
       </div>
@@ -398,11 +416,13 @@
         <label class="req">Creado por</label>
         <select id="p-persona">
           <option value="">— Seleccionar —</option>
-          <option>EDUARDO GAMBOA</option><option>WILSON PIÑEIRO</option><option>MARIO MANQUIS</option>
-          <option>JIMENA BENTANCOUR</option><option>IGNACIO MARTINO</option><option>MARCELO ESPINOLA</option>
-          <option>MARCEL PARIS</option><option>PABLO VILCHES</option><option>JAVIER LENCAUSCA</option>
-          <option>DIEGO QUINTANA</option><option>CARLOS MARTINEZ</option><option>ALAN MORA</option>
-          <option>MAURICIO PONCE DE LEON</option><option>LUIS BARREIRO</option><option>VICTOR IGLESIAS</option>
+          <optgroup label="Operarios">
+            <option>EDUARDO GAMBOA</option><option>WILSON PIÑEIRO</option><option>MARIO MANQUIS</option>
+            <option>DAMIAN HERNANDEZ</option><option>JIMENA BENTANCOUR</option><option>IGNACIO MARTINO</option><option>MARCELO ESPINOLA</option>
+            <option>MARCEL PARIS</option><option>PABLO VILCHES</option><option>JAVIER LENCAUSCA</option>
+            <option>DIEGO QUINTANA</option><option>CARLOS MARTINEZ</option><option>ALAN MORA</option>
+            <option>MAURICIO PONCE DE LEON</option><option>LUIS BARREIRO</option><option>VICTOR IGLESIAS</option>
+          </optgroup>
         </select>
       </div>
     </div>
@@ -431,7 +451,7 @@
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYcmmkMeFQjrWGDYl_PCMTdFypBK1KZ0ZGPlR1Nyluo4nbJTWOtU6Ae7kLhr92GT0u/exec';
 // ══════════════════════════════════════════════════════════════════
 
-const EQ = {"Almacen":["B. carga de acido t1,2 y 9 rep..","Bba recirc. Ácido PA2","Bomba pileta de recuperacion P.G","Bomba recirculación de ácido","Cinta transp. movil - repuesto","Dilución del super Nº2","Elevador Super 1 - motor viejo","Mezclador superfosfato","Motobomba IVET Lag. Dulce","Quemador de caldera- P.G1","Repuesto elevador 2 granulado","Soplador Super 1 - repuesto","Ventilador portátil ex PG1","Vibrador"],"Alúmina":["Autoclave 1 - Pfaudler","Autoclave 2 - Pfaudler (1989)","Autoclave Nº3","Bba elevador ácido alúmina","Bba recirculación alúmina líquida","Bomba Argal","Bomba de acido","Bomba de elevar agua","Bomba de recirc. Ácido dilución","Bomba elevadora de agua","Cinta transportadora de bolsas","Elevador de sulfato","Sin fin grueso","Soplador","Ventilador"],"C.Granel":["Bomba Agrotain","Cinta chica Bolsones","Cinta de Descarga","Cinta de alimentación","Cinta transportadora","Elevador","Mezclador","Rompeterrones","Vibrador-Zaranda","Zaranda"],"EMB 1":["Banda Cinta Movil","Cinta de alimentación","Cinta de bolsa chica","Cinta de carro - motor de banda","Cinta inclinada oblicua (nueva)","Cinta transportadora de bolsas","Compresor","Elevador","Elevador grande","Extractor de polvo","Vibrador de zaranda","sin fin"],"EMB 2":["Cinta alimentación - motoreductor","Cinta de carro - motor de banda","Cinta movil","Compresor","Elevador de cangilones","Transportador de bolsones corto","Transportador de bolsones largo","Zaranda"],"EMB 3":["Cinta Movil","Cinta de carga del mezclador","Cinta de descarga mezclador","Elevador","Mezclador","Rompeterrones cinta aliment.","Rompeterrones mezclador","Vibrador inferior de zaranda","Vibrador superior de zaranda"],"Equipo Descarga":["Cinta de descarga a granel Nº1","Cinta de descarga a granel Nº3","Cinta de descarga portátil Nº2","Cinta fija","Cinta transp. Móvil","Elevador de cangilones"],"Laguna dulce":["Bomba Nº2","Bomba de Agua.","Bomba de agua"],"Molino Nº3":["Aliment molino 4,6 ráp y 5,1 lento","Elevador de fosforita","Inyector de aire","Molino Raymond","Separador (Whizzer)","Sin fin hacia el brete","Ventilador Molino"],"N30":["Agitador Nº2","Agitador del tacho microelemento","Agitador reactor UAN 30","Bba de agua de OSE","Bomba de condensado","Motobba de traspase de liquidos"],"N30 Nuevo":["Bba de filtrado Nº1","Bba. Stock Nº2","Bba. Tiosulfato","Bomba de condensado","Cinta de Descarga Tolva","Elevador","Extractor de aire pared sur","Extractor pared norte","Filtro de prensa","Reactor Nº1","Reactor Nº2","Rompeterrones"],"PA1":["Agitador azufre","Agitador pil. flocul D9","Bba FMC 1 aliment. Caldera (Emegencia)","Bba. Desgasificador","Bomba KSB Nº1","Bomba agua KSB refriger. ácido","Bomba alimentación caldera Nº1","Bomba alimentación caldera Nº2","Bomba carga de acido tks 1,2","Bomba cisterna","Bomba condensador Nº1","Bomba condensador Nº2","Bomba de agua 1","Bomba de azufre","Bomba de condensado","Bomba de ácido","Bomba de óleum","Cinta alimentación","Compresor","Desgasificador","Laguna Efluentes.","Motobba ECP 1 piletas flocul.","Motobba ECP 2 piletas floculaci.","Soplador fuller","Soplador roots","Ventilador Oleum","Ventilador de foza de azufre","Ventilador lavado de azufre","Ventilador torre alpina","Ósmosis inv. Bba Triplex Cat","Ósmosis inversa-motobba ECP1","Ósmosis inversa-motobba ECP2"],"PA1 y PA2":["Bomba desgasificador","Carga de acido","Molino de escoria de azufre","Piletas de floculación"],"PA2":["Agua lavado canal refriger.","Bba FMC 1 aliment. Caldera","Bomba FCM 2 alim. caldera","Bomba de azufre","Bomba de enfriamiento Nº3 KSB","Bomba de oleum","Bomba recirculación de ácido","Soplador del Fuller eléctrico","Ventilador de gases (óleum)","Ventilador de gases del óleum"],"PG1":["Alimentador de zaranda 1","Alimentador de zaranda 2","Bomba 2 del venturi","Bomba Scruber","Bomba condensado(motobomba ivet)","Bomba de agua scrubber","Bomba de fuel oil","Bomba de ácido","Bomba del scrubber","Cinta de alimentación","Compresor Atlas Copco","Elevador 1 (alimentación)","Elevador 2","Elevador Nº1(aliment.granulador)","Elevador Nº2(aliment. enfriador)","Elevador Nº3(aliment. zaranda)","Enfriador","Filtro prensa","Molino con rotor de cadenas","Molino con rotor de jaula","Molino de gruesos","Puente de grua","Rompeterrones tolva alimentacion","Secador","Ventil.centrífugo filtros de manga","Ventilador 1","Ventilador 2 scrubber","Ventilador centrífugo chimenea","Ventilador centrífugo enfriador","Ventilador de sala de control","Ventilador horno","Vibrador de tolva de alimentación","Válvula rotativa - filtros manga","Zaranda 1","Zaranda 2","Zaranda 3"],"PG1,PG2":["L. de Efluentes (Balza)"],"PG2":["Agitador reactor Nº2","Bomba de acido","Bomba de condensado","Bomba del venturi","Cinta de alimentación","Elevador 1 (alimentación)","Elevador premolienda","Enfriador","Granulador","Molino de martillos","Rompeterrones tolva 1","Rompeterrones tolva 2","Secador","Ventilador 1 (horno)","Ventilador 2","Ventilador 3","Ventilador del granulador.","Ventilador sala de control","Vibrador zaranda (inferior)","Vibrador zaranda (del medio)"],"PS1":["Agitador derecho mezclador","Agitador izquierdo mezclador","Alimentador del molino","Bba agua lavado de gases","Bomba Argal de ácido","Bomba Scruber","Bomba agua torre alpina","Bomba de desc  ácido sucio","Bomba torre enfriamiento alpina","Cinta movil","Cinta transportadora fija","Cortador","Dilución Nº2","Elevador de super","Mezclador","Molino Raymond","Sin fin fosforita molida Nº2","Ventilador","Ventilador 1 pared sur (abajo)","Ventilador 2 pared sur (abajo)","Ventilador 3 pared sur( arriba)","Ventilador de  gases de lavado","Ventilador molino Raymond","Ventilador torre alpina"],"PS2":["Agitador pileta 4","Alpina","Balanza de polvo","Bba lavado Nº4 (aliment. Venturi)","Bba lavado Nº6 (aliment. Venturi)","Bba. Lavado Nº7","Bomba 2 torre 3","Bomba Nº8","Bomba agua torre enfriami","Bomba de acido","Bomba de condensado","Bomba de sellos","Bomba de ácido 1","Bomba de ácido 2","Bomba lavado Nº5","C.Movil","Cinta inclinada","Cinta solidificadora","Compresor","Cortador","Elevador de fosforita molida","Extractor de aire pared norte","Extractor de aire pared sur","Extractor de polvo","Filtro de prensa","Molino Nº3","Reactor","Ventilador Bernauer","Ventilador este","Ventilador filtro de mangas","Ventilador molino 3","Ventilador sala de control"],"Suministro agua":["Bomba de incendio","Bomba de laguna dulce","Bomba laguna de efluentes","Lag. Dulce, motobba IVET 3"],"Taller":["Banco de prueba de bombas","Compresor Compair","Extractor de aire taller soldadura","Piedra esmeril taller electricid.","Piedra esmeril taller mecánico"],"U.T.A":["Agitador","Bomba salida de agua."],"UTA":["Agitador Grande"],"Varios":["Barredora","Bomba  agua vacia balanza","Bomba OSE","Bomba de descarga de fuel oil","Cinta Nº2","Limpieza de taller","Motobomba Electroconforto","Ventilador almacen","Ventilador alta tensión 1"],"UCB1":["Zaranda","Elevador","Cinta alimentación","Rompeterrones","Vibrador tolva","Cinta carga","Cinta descarga","Mezclador","Acondicionador","Bomba Agrotain","Cinta pesadora","Cinta acumuladora","Sensores de nivel","Balanza tolva","Balanza cinta","Sensores cintas","Luces"],"UCB2":["Zaranda","Elevador","Cinta alimentación","Rompeterrones","Vibrador tolva","Cinta carga","Cinta descarga","Mezclador","Acondicionador","Bomba Agrotain","Cinta pesadora","Cinta acumuladora","Sensores de nivel","Balanza tolva","Balanza cinta","Sensores cintas","Luces"],"UCB3":["Zaranda","Elevador","Cinta alimentación","Rompeterrones","Vibrador tolva","Cinta carga","Cinta descarga","Mezclador","Acondicionador","Bomba Agrotain","Cinta pesadora","Cinta acumuladora","Sensores de nivel","Balanza tolva","Balanza cinta","Sensores cintas","Luces"]};
+const EQ = {"Almacen":["B. carga de acido t1,2 y 9 rep..","Bba recirc. Ácido PA2","Bomba pileta de recuperacion P.G","Bomba recirculación de ácido","Cinta transp. movil - repuesto","Dilución del super Nº2","Elevador Super 1 - motor viejo","Mezclador superfosfato","Motobomba IVET Lag. Dulce","Quemador de caldera- P.G1","Repuesto elevador 2 granulado","Soplador Super 1 - repuesto","Ventilador portátil ex PG1","Vibrador"],"Alúmina":["Autoclave 1 - Pfaudler","Autoclave 2 - Pfaudler (1989)","Autoclave Nº3","Bba elevador ácido alúmina","Bba recirculación alúmina líquida","Bomba Argal","Bomba de acido","Bomba de elevar agua","Bomba de recirc. Ácido dilución","Bomba elevadora de agua","Cinta transportadora de bolsas","Elevador de sulfato","Sin fin grueso","Soplador","Ventilador"],"C.Granel":["Bomba Agrotain","Cinta chica Bolsones","Cinta de Descarga","Cinta de alimentación","Cinta transportadora","Elevador","Mezclador","Rompeterrones","Vibrador-Zaranda","Zaranda"],"EMB 1":["Banda Cinta Movil","Cinta de alimentación","Cinta de bolsa chica","Cinta de carro - motor de banda","Cinta inclinada oblicua (nueva)","Cinta transportadora de bolsas","Compresor","Elevador","Elevador grande","Extractor de polvo","Vibrador de zaranda","sin fin"],"EMB 2":["Cinta alimentación - motoreductor","Cinta de carro - motor de banda","Cinta movil","Compresor","Elevador de cangilones","Transportador de bolsones corto","Transportador de bolsones largo","Zaranda"],"EMB 3":["Cinta Movil","Cinta de carga del mezclador","Cinta de descarga mezclador","Elevador","Mezclador","Rompeterrones cinta aliment.","Rompeterrones mezclador","Vibrador inferior de zaranda","Vibrador superior de zaranda"],"Equipo Descarga":["Cinta de descarga a granel Nº1","Cinta de descarga a granel Nº3","Cinta de descarga portátil Nº2","Cinta fija","Cinta transp. Móvil","Elevador de cangilones"],"Laguna dulce":["Bomba Nº2","Bomba de Agua.","Bomba de agua"],"Molino Nº3":["Aliment molino 4,6 ráp y 5,1 lento","Elevador de fosforita","Inyector de aire","Molino Raymond","Separador (Whizzer)","Sin fin hacia el brete","Ventilador Molino"],"N30":["Agitador Nº2","Agitador del tacho microelemento","Agitador reactor UAN 30","Bba de agua de OSE","Bomba de condensado","Motobba de traspase de liquidos"],"N30 Nuevo":["Bba de filtrado Nº1","Bba. Stock Nº2","Bba. Tiosulfato","Bomba de condensado","Cinta de Descarga Tolva","Elevador","Extractor de aire pared sur","Extractor pared norte","Filtro de prensa","Reactor Nº1","Reactor Nº2","Rompeterrones"],"PA1":["Agitador azufre","Agitador pil. flocul D9","Bba FMC 1 aliment. Caldera (Emegencia)","Bba. Desgasificador","Bomba KSB Nº1","Bomba agua KSB refriger. ácido","Bomba alimentación caldera Nº1","Bomba alimentación caldera Nº2","Bomba carga de acido tks 1,2","Bomba cisterna","Bomba condensador Nº1","Bomba condensador Nº2","Bomba de agua 1","Bomba de azufre","Bomba de condensado","Bomba de ácido","Bomba de óleum","Cinta alimentación","Compresor","Desgasificador","Laguna Efluentes.","Motobba ECP 1 piletas flocul.","Motobba ECP 2 piletas floculaci.","Soplador fuller","Soplador roots","Ventilador Oleum","Ventilador de foza de azufre","Ventilador lavado de azufre","Ventilador torre alpina","Ósmosis inv. Bba Triplex Cat","Ósmosis inversa-motobba ECP1","Ósmosis inversa-motobba ECP2"],"PA1 y PA2":["Bomba desgasificador","Carga de acido","Molino de escoria de azufre","Piletas de floculación"],"PA2":["Agua lavado canal refriger.","Bba FMC 1 aliment. Caldera","Bomba FCM 2 alim. caldera","Bomba de azufre","Bomba de enfriamiento Nº3 KSB","Bomba de oleum","Bomba recirculación de ácido","Soplador del Fuller eléctrico","Ventilador de gases (óleum)","Ventilador de gases del óleum"],"PG1":["Alimentador de zaranda 1","Alimentador de zaranda 2","Bomba 2 del venturi","Bomba Scruber","Bomba condensado(motobomba ivet)","Bomba de agua scrubber","Bomba de fuel oil","Bomba de ácido","Bomba del scrubber","Cinta de alimentación","Compresor Atlas Copco","Elevador 1 (alimentación)","Elevador 2","Elevador Nº1(aliment.granulador)","Elevador Nº2(aliment. enfriador)","Elevador Nº3(aliment. zaranda)","Enfriador","Filtro prensa","Molino con rotor de cadenas","Molino con rotor de jaula","Molino de gruesos","Puente de grua","Rompeterrones tolva alimentacion","Secador","Ventil.centrífugo filtros de manga","Ventilador 1","Ventilador 2 scrubber","Ventilador centrífugo chimenea","Ventilador centrífugo enfriador","Ventilador de sala de control","Ventilador horno","Vibrador de tolva de alimentación","Válvula rotativa - filtros manga","Zaranda 1","Zaranda 2","Zaranda 3"],"PG1,PG2":["L. de Efluentes (Balza)"],"PG2":["Agitador reactor Nº2","Bomba de acido","Bomba de condensado","Bomba del venturi","Cinta de alimentación","Elevador 1 (alimentación)","Elevador premolienda","Enfriador","Granulador","Molino de martillos","Rompeterrones tolva 1","Rompeterrones tolva 2","Secador","Ventilador 1 (horno)","Ventilador 2","Ventilador 3","Ventilador del granulador.","Ventilador sala de control","Vibrador zaranda (inferior)","Vibrador zaranda (del medio)"],"PS1":["Agitador derecho mezclador","Agitador izquierdo mezclador","Alimentador del molino","Bba agua lavado de gases","Bomba Argal de ácido","Bomba Scruber","Bomba agua torre alpina","Bomba de desc  ácido sucio","Bomba torre enfriamiento alpina","Cinta movil","Cinta transportadora fija","Cortador","Dilución Nº2","Elevador de super","Mezclador","Molino Raymond","Sin fin fosforita molida Nº2","Ventilador","Ventilador 1 pared sur (abajo)","Ventilador 2 pared sur (abajo)","Ventilador 3 pared sur( arriba)","Ventilador de  gases de lavado","Ventilador molino Raymond","Ventilador torre alpina"],"PS2":["Agitador pileta 4","Alpina","Balanza de polvo","Bba lavado Nº4 (aliment. Venturi)","Bba lavado Nº6 (aliment. Venturi)","Bba. Lavado Nº7","Bomba 2 torre 3","Bomba Nº8","Bomba agua torre enfriami","Bomba de acido","Bomba de condensado","Bomba de sellos","Bomba de ácido 1","Bomba de ácido 2","Bomba lavado Nº5","C.Movil","Cinta inclinada","Cinta solidificadora","Compresor","Cortador","Elevador de fosforita molida","Extractor de aire pared norte","Extractor de aire pared sur","Extractor de polvo","Filtro de prensa","Molino Nº3","Reactor","Ventilador Bernauer","Ventilador este","Ventilador filtro de mangas","Ventilador molino 3","Ventilador sala de control"],"Suministro agua":["Bomba de incendio","Bomba de laguna dulce","Bomba laguna de efluentes","Lag. Dulce, motobba IVET 3"],"Taller":["Banco de prueba de bombas","Compresor Compair","Extractor de aire taller soldadura","Piedra esmeril taller electricid.","Piedra esmeril taller mecánico"],"U.T.A":["Agitador","Bomba salida de agua."],"UTA":["Agitador Grande"],"Varios":["Barredora","Bomba  agua vacia balanza","Bomba OSE","Bomba de descarga de fuel oil","Cinta Nº2","Limpieza de taller","Motobomba Electroconforto","Ventilador almacen","Ventilador alta tensión 1"],"UCB1":["Zaranda","Elevador","Cinta alimentación","Rompeterrones","Vibrador tolva","Cinta carga","Cinta descarga","Mezclador","Acondicionador","Bomba Agrotain","Cinta pesadora","Cinta acumuladora","Sensores de nivel","Balanza tolva","Balanza cinta","Sensores cintas","Luces"],"UCB2":["Zaranda","Elevador","Cinta alimentación","Rompeterrones","Vibrador tolva","Cinta carga","Cinta descarga","Mezclador","Acondicionador","Bomba Agrotain","Cinta pesadora","Cinta acumuladora","Sensores de nivel","Balanza tolva","Balanza cinta","Sensores cintas","Luces"],"UCB3":["Zaranda","Elevador","Cinta alimentación","Rompeterrones","Vibrador tolva","Cinta carga","Cinta descarga","Mezclador","Acondicionador","Bomba Agrotain","Cinta pesadora","Cinta acumuladora","Sensores de nivel","Balanza tolva","Balanza cinta","Sensores cintas","Luces"],"Mototransporte":["Michigan 16","SDLG 51","SDLG 52","SDLG 54","SDLG 56","LGCE 60","SDLG 61","SDLG 62","SDLG 64","SDLG 65","SDLG 66","SDLG 67","SDLG 68","SDLG 73","LiuGong 70","LiuGong 71","LiuGong 72","Hangcha 26","Hangcha 63","Hangcha 69","Generador Principal","Generador Oficinas"]};
 
 let tipo='', prio='', fotoB64='', fotoMime='', fotoName='';
 
@@ -444,7 +464,7 @@ Object.keys(EQ).sort().forEach(p => {
 });
 
 function updateEq() {
-  const p = document.getElementById('f-planta').value;
+  const p  = document.getElementById('f-planta').value;
   const eq = document.getElementById('f-equipo');
   eq.innerHTML = '';
   eq.disabled = !p;
@@ -456,6 +476,19 @@ function updateEq() {
     const o = document.createElement('option'); o.value = e; o.textContent = e; eq.appendChild(o);
   });
   document.getElementById('err-planta').style.display = 'none';
+
+  // — Tipo: Mototransporte usa selector desplegable, el resto usa botones —
+  const esMoto   = p === 'Mototransporte';
+  const botones  = document.getElementById('tipo-buttons');
+  const selector = document.getElementById('tipo-moto');
+  const lbl      = document.getElementById('lbl-disciplina');
+  botones.style.display  = esMoto ? 'none'  : 'flex';
+  selector.style.display = esMoto ? 'block' : 'none';
+  lbl.textContent        = esMoto ? 'Tipo de tarea' : 'Disciplina';
+  // Resetear tipo al cambiar planta
+  tipo = '';
+  selector.value = '';
+  ['e','m','i','s'].forEach(x => { const b = document.getElementById('btn-'+x); if(b) b.className='tipo-btn'; });
 }
 
 function setT(t) {
