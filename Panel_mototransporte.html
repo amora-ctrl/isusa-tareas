@@ -219,7 +219,7 @@ function cargarDatos(){
   fetch(url)
     .then(r=>r.json())
     .then(data=>{
-      const todas=data.tareas||[];
+      const todas=data.denuncias||[];
 
       // ── FILTRO MOTOTRANSPORTE ──
       const vis=todas.filter(d=>{
