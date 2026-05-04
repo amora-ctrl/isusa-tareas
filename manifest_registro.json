@@ -1,0 +1,25 @@
+{
+  "name": "Registro Diario — Mototransporte",
+  "short_name": "Registro",
+  "description": "Registro diario de horómetros y combustible - Mototransporte ISUSA",
+  "start_url": "/isusa-tareas/registro_diario_4.html",
+  "scope": "/isusa-tareas/",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#1a1a1a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-registro-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-registro-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
