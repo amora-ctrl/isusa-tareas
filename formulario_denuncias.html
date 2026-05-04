@@ -791,10 +791,16 @@ function resetForm() {
 
 <script>
 // ── PANEL DE ADMINISTRACIÓN — llama al Apps Script que edita GitHub ──
-const ADMIN_SCRIPT = 'https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycby1NaSe5vqwJxS65GtkEBX4o_8yWOO3mOlN5mO3yCykGGxf9VvRZXkTG33rIza3HZ9f/exec/exec';
+const ADMIN_SCRIPT = 'https://script.google.com/macros/s/TU_URL_ADMIN_AQUI/exec';
 
 let tapCount = 0, tapTimer = null;
+
+// Un solo DOMContentLoaded para todo
 document.addEventListener('DOMContentLoaded', () => {
+  // Poblar plantas al cargar
+  poblarPlantas();
+
+  // Activar panel admin tocando logo/título 5 veces
   document.querySelectorAll('.logo-icon,.logo,.top-logo,h1').forEach(el => {
     el.addEventListener('click', () => {
       tapCount++;
@@ -803,6 +809,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (tapCount >= 5) { tapCount = 0; abrirAdmin(); }
     });
   });
+
+  // Listener del select de planta en el admin
+  const selAdmin = document.getElementById('admin-sel-planta');
+  if (selAdmin) selAdmin.addEventListener('change', renderAdminEquipos);
 });
 
 function abrirAdmin() {
@@ -877,11 +887,6 @@ function renderAdminEquipos() {
     }));
   });
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  const selAdmin = document.getElementById('admin-sel-planta');
-  if (selAdmin) selAdmin.addEventListener('change', renderAdminEquipos);
-});
 
 function renderAdminPersonas() {
   const cont = document.getElementById('admin-personas');
@@ -961,4 +966,3 @@ async function agregarPersona() {
 </script>
 </body>
 </html>
-
