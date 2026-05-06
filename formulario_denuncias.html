@@ -1,3 +1,6 @@
+
+Copiar
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -31,7 +34,7 @@
   .dt-box{background:#f8f8f6;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px}
   .dt-val{font-size:14px;font-weight:600;color:#1a1a1a}
   .dt-lbl{font-size:11px;color:#999}
-  .tipo-group,.prio-group{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .tipo-group,.prio-group{display:flex;gap:8px}
   .tipo-btn,.prio-btn{
     flex:1;padding:10px 8px;
     border:1px solid #ddd;border-radius:8px;
@@ -74,19 +77,19 @@
   }
   .btn-submit:hover{opacity:0.85}
   .btn-submit:disabled{opacity:0.4;cursor:not-allowed}
-
+ 
   /* Estados de envío */
   .state{display:none}
   .state.show{display:block}
   .form-wrap.hide{display:none}
-
+ 
   /* Enviando */
   .sending-card{background:#fff;border:1px solid #e8e8e5;border-radius:12px;padding:2.5rem;text-align:center}
   .spin{width:36px;height:36px;border:3px solid #eee;border-top-color:#1a1a1a;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px}
   @keyframes spin{to{transform:rotate(360deg)}}
   .prog-wrap{background:#f0f0ee;border-radius:4px;height:4px;margin-top:16px;overflow:hidden}
   .prog{height:100%;background:#1a1a1a;border-radius:4px;width:0;transition:width 0.4s ease}
-
+ 
   /* Éxito */
   .ok-card{background:#fff;border:1px solid #e8e8e5;border-radius:12px;padding:2.5rem;text-align:center}
   .ok-circle{width:52px;height:52px;background:#ECFDF5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
@@ -117,16 +120,16 @@
     transition:all 0.15s
   }
   .btn-prog:hover{background:#f5f5f3;border-color:#aaa}
-
+ 
   /* Error de envío */
   .error-card{background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:1.5rem;text-align:center}
-
+ 
   @media(max-width:480px){.g2{grid-template-columns:1fr}.prio-group{flex-wrap:wrap}.prio-btn{min-width:calc(50% - 4px)}}
 </style>
 </head>
 <body>
 <div class="wrap">
-
+ 
   <div class="hdr">
     <div class="logo">
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -139,10 +142,10 @@
       <div class="sub">Registro de fallas — Planta</div>
     </div>
   </div>
-
+ 
   <!-- ═══ FORMULARIO ═══ -->
   <div class="form-wrap" id="form-wrap">
-
+ 
     <!-- Fecha/hora -->
     <div class="card">
       <div class="sec">Fecha y hora</div>
@@ -157,7 +160,7 @@
         </div>
       </div>
     </div>
-
+ 
     <!-- Equipo -->
     <div class="card">
       <div class="sec">Equipo</div>
@@ -178,7 +181,7 @@
         </div>
       </div>
     </div>
-
+ 
     <!-- Tipo y prioridad -->
     <div class="card">
       <div class="sec">Tipo y prioridad</div>
@@ -232,7 +235,7 @@
         <div class="err" id="err-prio">Seleccioná la prioridad</div>
       </div>
     </div>
-
+ 
     <!-- Observaciones -->
     <div class="card">
       <div class="sec">Observaciones</div>
@@ -260,7 +263,7 @@
         </div>
       </div>
     </div>
-
+ 
     <!-- Persona -->
     <div class="card">
       <div class="sec">Datos del reporte</div>
@@ -290,7 +293,7 @@
         <div class="err" id="err-persona">Seleccioná tu nombre</div>
       </div>
     </div>
-
+ 
     <button class="btn-submit" id="btn-sub" type="button" onclick="submit()">
       Registrar y enviar notificación
     </button>
@@ -299,7 +302,7 @@
     </button>
   </div>
   <!-- fin form-wrap -->
-
+ 
   <!-- ═══ ENVIANDO ═══ -->
   <div class="state" id="state-sending">
     <div class="sending-card">
@@ -309,7 +312,7 @@
       <div class="prog-wrap"><div class="prog" id="prog"></div></div>
     </div>
   </div>
-
+ 
   <!-- ═══ ÉXITO ═══ -->
   <div class="state" id="state-ok">
     <div class="ok-card">
@@ -330,7 +333,7 @@
       <button class="btn-new" type="button" onclick="resetForm()">Nueva denuncia</button>
     </div>
   </div>
-
+ 
   <!-- ═══ ERROR ═══ -->
   <div class="state" id="state-err">
     <div class="error-card">
@@ -339,7 +342,7 @@
       <button class="btn-new" type="button" onclick="volverAlForm()">Volver al formulario</button>
     </div>
   </div>
-
+ 
   <!-- ═══ TAREAS PROGRAMADAS ═══ -->
   <div class="state" id="state-prog">
     <div class="hdr">
@@ -352,7 +355,7 @@
       </div>
       <button class="btn-new" type="button" onclick="cerrarProgramadas()">← Volver</button>
     </div>
-
+ 
     <div class="card">
       <div class="sec">Equipo</div>
       <div class="g2">
@@ -370,7 +373,7 @@
         </div>
       </div>
     </div>
-
+ 
     <div class="card">
       <div class="sec">Tipo y prioridad</div>
       <div class="field">
@@ -390,7 +393,7 @@
         </div>
       </div>
     </div>
-
+ 
     <div class="card">
       <div class="sec">Descripción</div>
       <div class="field">
@@ -398,7 +401,7 @@
         <textarea id="p-desc" rows="3" placeholder="Describí la tarea a realizar..."></textarea>
       </div>
     </div>
-
+ 
     <div class="card">
       <div class="sec">Programación</div>
       <div class="field">
@@ -426,10 +429,10 @@
         </select>
       </div>
     </div>
-
+ 
     <button class="btn-submit" type="button" onclick="submitProgramada()">Guardar tarea programada</button>
   </div>
-
+ 
   <!-- ═══ ÉXITO TAREA PROGRAMADA ═══ -->
   <div class="state" id="state-prog-ok">
     <div class="ok-card">
@@ -441,25 +444,23 @@
       <button class="btn-new" type="button" onclick="cerrarProgramadas()">Volver al formulario</button>
     </div>
   </div>
-
+ 
 </div><!-- fin wrap -->
-
+ 
 <script>
 // ══════════════════════════════════════════════════════════════════
 //  ▶  PASO 3: PEGÁ AQUÍ LA URL DE TU GOOGLE APPS SCRIPT
 // ══════════════════════════════════════════════════════════════════
-const SCRIPT_URL = 'https://script.google.com/macros/s/ AKfycbzYcmmkMeFQjrWGDYl_PCMTdFypBK1KZ0ZGPlR1Nyluo4nbJTWOtU6Ae7kLhr92GT0u
-
-/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzZrVFEeBBgsIB-EQtwRlPsxhnKXsIh6-038J7ICIo9PPHyHqOiVVNLDLWspuAfmN-U/exec';
 // ══════════════════════════════════════════════════════════════════
-
+ 
 const EQ = {"Almacen":["B. carga de acido t1,2 y 9 rep..","Bba recirc. Ácido PA2","Bomba pileta de recuperacion P.G","Bomba recirculación de ácido","Cinta transp. movil - repuesto","Dilución del super Nº2","Elevador Super 1 - motor viejo","Mezclador superfosfato","Motobomba IVET Lag. Dulce","Quemador de caldera- P.G1","Repuesto elevador 2 granulado","Soplador Super 1 - repuesto","Ventilador portátil ex PG1","Vibrador"],"Alúmina":["Autoclave 1 - Pfaudler","Autoclave 2 - Pfaudler (1989)","Autoclave Nº3","Bba elevador ácido alúmina","Bba recirculación alúmina líquida","Bomba Argal","Bomba de acido","Bomba de elevar agua","Bomba de recirc. Ácido dilución","Bomba elevadora de agua","Cinta transportadora de bolsas","Elevador de sulfato","Sin fin grueso","Soplador","Ventilador"],"C.Granel":["Bomba Agrotain","Cinta chica Bolsones","Cinta de Descarga","Cinta de alimentación","Cinta transportadora","Elevador","Mezclador","Rompeterrones","Vibrador-Zaranda","Zaranda"],"EMB 1":["Banda Cinta Movil","Cinta de alimentación","Cinta de bolsa chica","Cinta de carro - motor de banda","Cinta inclinada oblicua (nueva)","Cinta transportadora de bolsas","Compresor","Elevador","Elevador grande","Extractor de polvo","Vibrador de zaranda","sin fin"],"EMB 2":["Cinta alimentación - motoreductor","Cinta de carro - motor de banda","Cinta movil","Compresor","Elevador de cangilones","Transportador de bolsones corto","Transportador de bolsones largo","Zaranda"],"EMB 3":["Cinta Movil","Cinta de carga del mezclador","Cinta de descarga mezclador","Elevador","Mezclador","Rompeterrones cinta aliment.","Rompeterrones mezclador","Vibrador inferior de zaranda","Vibrador superior de zaranda"],"Equipo Descarga":["Cinta de descarga a granel Nº1","Cinta de descarga a granel Nº3","Cinta de descarga portátil Nº2","Cinta fija","Cinta transp. Móvil","Elevador de cangilones"],"Laguna dulce":["Bomba Nº2","Bomba de Agua.","Bomba de agua"],"Molino Nº3":["Aliment molino 4,6 ráp y 5,1 lento","Elevador de fosforita","Inyector de aire","Molino Raymond","Separador (Whizzer)","Sin fin hacia el brete","Ventilador Molino"],"N30":["Agitador Nº2","Agitador del tacho microelemento","Agitador reactor UAN 30","Bba de agua de OSE","Bomba de condensado","Motobba de traspase de liquidos"],"N30 Nuevo":["Bba de filtrado Nº1","Bba. Stock Nº2","Bba. Tiosulfato","Bomba de condensado","Cinta de Descarga Tolva","Elevador","Extractor de aire pared sur","Extractor pared norte","Filtro de prensa","Reactor Nº1","Reactor Nº2","Rompeterrones"],"PA1":["Agitador azufre","Agitador pil. flocul D9","Bba FMC 1 aliment. Caldera (Emegencia)","Bba. Desgasificador","Bomba KSB Nº1","Bomba agua KSB refriger. ácido","Bomba alimentación caldera Nº1","Bomba alimentación caldera Nº2","Bomba carga de acido tks 1,2","Bomba cisterna","Bomba condensador Nº1","Bomba condensador Nº2","Bomba de agua 1","Bomba de azufre","Bomba de condensado","Bomba de ácido","Bomba de óleum","Cinta alimentación","Compresor","Desgasificador","Laguna Efluentes.","Motobba ECP 1 piletas flocul.","Motobba ECP 2 piletas floculaci.","Soplador fuller","Soplador roots","Ventilador Oleum","Ventilador de foza de azufre","Ventilador lavado de azufre","Ventilador torre alpina","Ósmosis inv. Bba Triplex Cat","Ósmosis inversa-motobba ECP1","Ósmosis inversa-motobba ECP2"],"PA1 y PA2":["Bomba desgasificador","Carga de acido","Molino de escoria de azufre","Piletas de floculación"],"PA2":["Agua lavado canal refriger.","Bba FMC 1 aliment. Caldera","Bomba FCM 2 alim. caldera","Bomba de azufre","Bomba de enfriamiento Nº3 KSB","Bomba de oleum","Bomba recirculación de ácido","Soplador del Fuller eléctrico","Ventilador de gases (óleum)","Ventilador de gases del óleum"],"PG1":["Alimentador de zaranda 1","Alimentador de zaranda 2","Bomba 2 del venturi","Bomba Scruber","Bomba condensado(motobomba ivet)","Bomba de agua scrubber","Bomba de fuel oil","Bomba de ácido","Bomba del scrubber","Cinta de alimentación","Compresor Atlas Copco","Elevador 1 (alimentación)","Elevador 2","Elevador Nº1(aliment.granulador)","Elevador Nº2(aliment. enfriador)","Elevador Nº3(aliment. zaranda)","Enfriador","Filtro prensa","Molino con rotor de cadenas","Molino con rotor de jaula","Molino de gruesos","Puente de grua","Rompeterrones tolva alimentacion","Secador","Ventil.centrífugo filtros de manga","Ventilador 1","Ventilador 2 scrubber","Ventilador centrífugo chimenea","Ventilador centrífugo enfriador","Ventilador de sala de control","Ventilador horno","Vibrador de tolva de alimentación","Válvula rotativa - filtros manga","Zaranda 1","Zaranda 2","Zaranda 3"],"PG1,PG2":["L. de Efluentes (Balza)"],"PG2":["Agitador reactor Nº2","Bomba de acido","Bomba de condensado","Bomba del venturi","Cinta de alimentación","Elevador 1 (alimentación)","Elevador premolienda","Enfriador","Granulador","Molino de martillos","Rompeterrones tolva 1","Rompeterrones tolva 2","Secador","Ventilador 1 (horno)","Ventilador 2","Ventilador 3","Ventilador del granulador.","Ventilador sala de control","Vibrador zaranda (inferior)","Vibrador zaranda (del medio)"],"PS1":["Agitador derecho mezclador","Agitador izquierdo mezclador","Alimentador del molino","Bba agua lavado de gases","Bomba Argal de ácido","Bomba Scruber","Bomba agua torre alpina","Bomba de desc  ácido sucio","Bomba torre enfriamiento alpina","Cinta movil","Cinta transportadora fija","Cortador","Dilución Nº2","Elevador de super","Mezclador","Molino Raymond","Sin fin fosforita molida Nº2","Ventilador","Ventilador 1 pared sur (abajo)","Ventilador 2 pared sur (abajo)","Ventilador 3 pared sur( arriba)","Ventilador de  gases de lavado","Ventilador molino Raymond","Ventilador torre alpina"],"PS2":["Agitador pileta 4","Alpina","Balanza de polvo","Bba lavado Nº4 (aliment. Venturi)","Bba lavado Nº6 (aliment. Venturi)","Bba. Lavado Nº7","Bomba 2 torre 3","Bomba Nº8","Bomba agua torre enfriami","Bomba de acido","Bomba de condensado","Bomba de sellos","Bomba de ácido 1","Bomba de ácido 2","Bomba lavado Nº5","C.Movil","Cinta inclinada","Cinta solidificadora","Compresor","Cortador","Elevador de fosforita molida","Extractor de aire pared norte","Extractor de aire pared sur","Extractor de polvo","Filtro de prensa","Molino Nº3","Reactor","Ventilador Bernauer","Ventilador este","Ventilador filtro de mangas","Ventilador molino 3","Ventilador sala de control"],"Suministro agua":["Bomba de incendio","Bomba de laguna dulce","Bomba laguna de efluentes","Lag. Dulce, motobba IVET 3"],"Taller":["Banco de prueba de bombas","Compresor Compair","Extractor de aire taller soldadura","Piedra esmeril taller electricid.","Piedra esmeril taller mecánico"],"U.T.A":["Agitador","Bomba salida de agua."],"UTA":["Agitador Grande"],"Varios":["Barredora","Bomba  agua vacia balanza","Bomba OSE","Bomba de descarga de fuel oil","Cinta Nº2","Limpieza de taller","Motobomba Electroconforto","Ventilador almacen","Ventilador alta tensión 1"],"UCB1":["Zaranda","Elevador","Cinta alimentación","Rompeterrones","Vibrador tolva","Cinta carga","Cinta descarga","Mezclador","Acondicionador","Bomba Agrotain","Cinta pesadora","Cinta acumuladora","Sensores de nivel","Balanza tolva","Balanza cinta","Sensores cintas","Luces"],"UCB2":["Zaranda","Elevador","Cinta alimentación","Rompeterrones","Vibrador tolva","Cinta carga","Cinta descarga","Mezclador","Acondicionador","Bomba Agrotain","Cinta pesadora","Cinta acumuladora","Sensores de nivel","Balanza tolva","Balanza cinta","Sensores cintas","Luces"],"UCB3":["Zaranda","Elevador","Cinta alimentación","Rompeterrones","Vibrador tolva","Cinta carga","Cinta descarga","Mezclador","Acondicionador","Bomba Agrotain","Cinta pesadora","Cinta acumuladora","Sensores de nivel","Balanza tolva","Balanza cinta","Sensores cintas","Luces"],"Mototransporte":["Michigan 16","SDLG 51","SDLG 52","SDLG 54","SDLG 56","LGCE 60","SDLG 61","SDLG 62","SDLG 64","SDLG 65","SDLG 66","SDLG 67","SDLG 68","SDLG 73","LiuGong 70","LiuGong 71","LiuGong 72","Hangcha 26","Hangcha 63","Hangcha 69","Generador Principal","Generador Oficinas"]};
-
+ 
 let tipo='', prio='', fotoB64='', fotoMime='', fotoName='';
-
+ 
 // Poblar plantas
 // Las plantas se pueblan via poblarPlantas() al DOMContentLoaded
-
+ 
 function updateEq() {
   const p  = document.getElementById('f-planta').value;
   const eq = document.getElementById('f-equipo');
@@ -473,7 +474,7 @@ function updateEq() {
     const o = document.createElement('option'); o.value = e; o.textContent = e; eq.appendChild(o);
   });
   document.getElementById('err-planta').style.display = 'none';
-
+ 
   // — Tipo: Mototransporte usa selector desplegable, el resto usa botones —
   const esMoto   = p === 'Mototransporte';
   const botones  = document.getElementById('tipo-buttons');
@@ -487,7 +488,7 @@ function updateEq() {
   selector.value = '';
   ['e','m','i','s'].forEach(x => { const b = document.getElementById('btn-'+x); if(b) b.className='tipo-btn'; });
 }
-
+ 
 function setT(t) {
   tipo = t;
   document.getElementById('btn-e').className = 'tipo-btn' + (t === 'Eléctrica' ? ' ae' : '');
@@ -496,7 +497,7 @@ function setT(t) {
   document.getElementById('btn-s').className = 'tipo-btn' + (t === 'Soldadura' ? ' am' : '');
   document.getElementById('err-tipo').style.display = 'none';
 }
-
+ 
 function setP(p) {
   prio = p;
   document.querySelectorAll('.prio-btn').forEach(b => b.classList.remove('on'));
@@ -504,17 +505,17 @@ function setP(p) {
   document.querySelector('.' + map[p]).classList.add('on');
   document.getElementById('err-prio').style.display = 'none';
 }
-
+ 
 const pad = n => String(n).padStart(2, '0');
 function fmtDT(d) { return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}  ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
 function updateClock() { document.getElementById('dt-display').textContent = fmtDT(new Date()); }
 updateClock(); setInterval(updateClock, 15000);
-
+ 
 function previewFoto(input) {
   const file = input.files[0];
   if (!file) return;
   fotoName = file.name; fotoMime = 'image/jpeg';
-
+ 
   const reader = new FileReader();
   reader.onload = e => {
     const img2 = new Image();
@@ -530,7 +531,7 @@ function previewFoto(input) {
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img2, 0, 0, w, h);
       fotoB64 = canvas.toDataURL('image/jpeg', 0.7);
-
+ 
       const zone = document.getElementById('foto-zone');
       const prev = document.getElementById('foto-prev');
       document.getElementById('foto-ph').style.display = 'none';
@@ -542,7 +543,7 @@ function previewFoto(input) {
   };
   reader.readAsDataURL(file);
 }
-
+ 
 function quitarFoto(e) {
   e.stopPropagation();
   fotoB64 = ''; fotoMime = ''; fotoName = '';
@@ -552,7 +553,7 @@ function quitarFoto(e) {
   document.getElementById('btn-rm').style.display = 'none';
   document.getElementById('foto-zone').classList.remove('has');
 }
-
+ 
 function showErr(id) { document.getElementById(id).style.display = 'block'; }
 function setState(id) {
   ['form-wrap', 'state-sending', 'state-ok', 'state-err', 'state-prog', 'state-prog-ok'].forEach(s => {
@@ -561,7 +562,7 @@ function setState(id) {
     else { el.classList.toggle('show', s === id); }
   });
 }
-
+ 
 // ── ANIMACIÓN DE PROGRESO ──────────────────────────────────────────
 function animarProgreso(cb) {
   const pasos = [
@@ -579,7 +580,7 @@ function animarProgreso(cb) {
     i++;
   }, 700);
 }
-
+ 
 // ── SUBMIT REAL ────────────────────────────────────────────────────
 function submit() {
   let ok = true;
@@ -590,10 +591,10 @@ function submit() {
   if (!document.getElementById('f-desc').value.trim()) { showErr('err-desc'); ok = false; }
   if (!document.getElementById('f-persona').value.trim()) { showErr('err-persona'); ok = false; }
   if (!ok) return;
-
+ 
   setState('state-sending');
   document.getElementById('prog').style.width = '0';
-
+ 
   const payload = {
     planta:      document.getElementById('f-planta').value,
     equipo:      document.getElementById('f-equipo').value,
@@ -605,9 +606,9 @@ function submit() {
     fotoMime:    fotoMime || 'image/jpeg',
     fotoNombre:  fotoName || 'foto.jpg'
   };
-
+ 
   animarProgreso(() => {});
-
+ 
   fetch(SCRIPT_URL, {
     method: 'POST',
     mode: 'no-cors',
@@ -625,7 +626,7 @@ function submit() {
     setState('state-err');
   });
 }
-
+ 
 function mostrarExito(payload) {
   setState('state-ok');
   const now = new Date();
@@ -636,12 +637,12 @@ function mostrarExito(payload) {
   document.getElementById('ok-tags').innerHTML =
     `<span class="tag ${tc}">${payload.tipo}</span><span class="tag ${pc}">${payload.prioridad}</span>`;
 }
-
+ 
 function volverAlForm() { setState('form-wrap'); }
-
+ 
 // ── TAREAS PROGRAMADAS ──────────────────────────────────────────
 let tipoProg = '', prioProg = '', repProg = 'una_vez';
-
+ 
 function abrirProgramadas() {
   // Poblar plantas (incluyendo las extras del admin)
   poblarPlantas();
@@ -654,9 +655,9 @@ function abrirProgramadas() {
   setRep('una_vez');
   setState('state-prog');
 }
-
+ 
 function cerrarProgramadas() { setState('form-wrap'); }
-
+ 
 function updateEqProg() {
   const p = document.getElementById('p-planta').value;
   const eq = document.getElementById('p-equipo');
@@ -665,7 +666,7 @@ function updateEqProg() {
   const def = document.createElement('option'); def.value=''; def.textContent='— Seleccionar equipo —'; eq.appendChild(def);
   (EQ[p]||[]).forEach(e => { const o=document.createElement('option'); o.value=e; o.textContent=e; eq.appendChild(o); });
 }
-
+ 
 function setTP(t) {
   tipoProg = t;
   ['e','m','i','s'].forEach(x => document.getElementById('pb-'+x).className='tipo-btn');
@@ -673,34 +674,34 @@ function setTP(t) {
   const cls = {'Eléctrica':' ae','Mecánica':' am','Indefinida':' ae','Soldadura':' am'};
   document.getElementById(map[t]).className = 'tipo-btn' + cls[t];
 }
-
+ 
 function setPP(p) {
   prioProg = p;
   document.querySelectorAll('#state-prog .prio-btn').forEach(b => b.classList.remove('on'));
   document.querySelector('#state-prog .'+(p==='Baja'?'pb':'pc')).classList.add('on');
 }
-
+ 
 function setRep(r) {
   repProg = r;
   document.getElementById('prep-unica').classList.toggle('on', r==='una_vez');
   document.getElementById('prep-diaria').classList.toggle('on', r==='diaria');
 }
-
+ 
 function submitProgramada() {
   const planta  = document.getElementById('p-planta').value;
   const equipo  = document.getElementById('p-equipo').value;
   const desc    = document.getElementById('p-desc').value.trim();
   const fecha   = document.getElementById('p-fecha').value;
   const persona = document.getElementById('p-persona').value;
-
+ 
   if (!planta||!equipo||!tipoProg||!prioProg||!desc||!fecha||!persona) {
     alert('Completá todos los campos obligatorios'); return;
   }
-
+ 
   const tarea = { planta, equipo, tipo: tipoProg, prioridad: prioProg,
     descripcion: desc, fecha_programada: new Date(fecha).getTime(),
     persona, repeticion: repProg };
-
+ 
   const url = SCRIPT_URL + '?tarea=' + encodeURIComponent(JSON.stringify(tarea));
   const img = new Image();
   img.onload = img.onerror = () => {
@@ -714,7 +715,7 @@ function submitProgramada() {
   };
   img.src = url;
 }
-
+ 
 function resetForm() {
   document.getElementById('f-planta').value = '';
   document.getElementById('f-equipo').innerHTML = '<option value="">— Primero la planta —</option>';
@@ -738,15 +739,15 @@ function resetForm() {
      ═══════════════════════════════════════════════════════════ -->
 <div id="admin-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:14px;width:92%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.3)">
-
+ 
     <!-- Header -->
     <div style="background:#1a1a1a;padding:16px 20px;border-radius:14px 14px 0 0;display:flex;align-items:center;justify-content:space-between">
       <div style="color:#fff;font-weight:700;font-size:15px;letter-spacing:0.03em">⚙ Administración</div>
       <button onclick="cerrarAdmin()" style="background:none;border:none;color:#999;font-size:20px;cursor:pointer;line-height:1">×</button>
     </div>
-
+ 
     <div style="padding:20px">
-
+ 
       <!-- PLANTAS -->
       <div style="margin-bottom:20px">
         <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0ee">Plantas</div>
@@ -757,7 +758,7 @@ function resetForm() {
           <button onclick="agregarPlanta()" style="padding:8px 16px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">+ Agregar</button>
         </div>
       </div>
-
+ 
       <!-- EQUIPOS -->
       <div style="margin-bottom:20px">
         <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0ee">Equipos por planta</div>
@@ -772,7 +773,7 @@ function resetForm() {
           <button onclick="agregarEquipoAdmin()" style="padding:8px 16px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">+ Agregar</button>
         </div>
       </div>
-
+ 
       <!-- PERSONAS -->
       <div style="margin-bottom:20px">
         <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0ee">Personas que denuncian</div>
@@ -783,25 +784,25 @@ function resetForm() {
           <button onclick="agregarPersona()" style="padding:8px 16px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">+ Agregar</button>
         </div>
       </div>
-
+ 
       <div id="admin-status" style="display:none;font-size:13px;font-weight:600;padding:10px 14px;background:#f8f8f6;border-radius:8px;margin-bottom:12px;text-align:center"></div>
-
+ 
       <button onclick="cerrarAdmin()" style="width:100%;padding:12px;background:#f5f5f3;border:1px solid #e8e8e5;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:#555">Cerrar</button>
     </div>
   </div>
 </div>
-
+ 
 <script>
 // ── PANEL DE ADMINISTRACIÓN — llama al Apps Script que edita GitHub ──
-const ADMIN_SCRIPT = 'https://script.google.com/macros/s/AKfycby1NaSe5vqwJxS65GtkEBX4o_8yWOO3mOlN5mO3yCykGGxf9VvRZXkTG33rIza3HZ9f/exec';
-
+const ADMIN_SCRIPT = 'https://script.google.com/macros/s/AKfycbwXr7TRGR37kYys8NVHY7qnu4iRDio0EhHLDVkVeFBvoaXp9ZGuRmLzjFfS3hNf1z4Zjw/exec';
+ 
 let tapCount = 0, tapTimer = null;
-
+ 
 // Un solo DOMContentLoaded para todo
 document.addEventListener('DOMContentLoaded', () => {
   // Poblar plantas al cargar
   poblarPlantas();
-
+ 
   // Activar panel admin tocando logo/título 5 veces
   document.querySelectorAll('.logo-icon,.logo,.top-logo,h1').forEach(el => {
     el.addEventListener('click', () => {
@@ -811,22 +812,22 @@ document.addEventListener('DOMContentLoaded', () => {
       if (tapCount >= 5) { tapCount = 0; abrirAdmin(); }
     });
   });
-
+ 
   // Listener del select de planta en el admin
   const selAdmin = document.getElementById('admin-sel-planta');
   if (selAdmin) selAdmin.addEventListener('change', renderAdminEquipos);
 });
-
+ 
 function abrirAdmin() {
   document.getElementById('admin-overlay').style.display = 'flex';
   renderAdminPlantas();
   renderAdminPersonas();
 }
-
+ 
 function cerrarAdmin() {
   document.getElementById('admin-overlay').style.display = 'none';
 }
-
+ 
 async function llamarAdmin(payload) {
   const encoded = encodeURIComponent(JSON.stringify(payload));
   await new Promise(r => {
@@ -836,7 +837,7 @@ async function llamarAdmin(payload) {
     img.src = ADMIN_SCRIPT + '?payload=' + encoded;
   });
 }
-
+ 
 function setAdminStatus(msg, ok) {
   const el = document.getElementById('admin-status');
   if (!el) return;
@@ -844,7 +845,7 @@ function setAdminStatus(msg, ok) {
   el.style.color = ok ? '#059669' : '#f59e0b';
   el.style.display = 'block';
 }
-
+ 
 function tag(texto, onRemove) {
   const div = document.createElement('div');
   div.style.cssText = 'display:inline-flex;align-items:center;gap:5px;background:#f0f0ee;border:1px solid #ddd;border-radius:20px;padding:3px 10px;font-size:12px;font-family:inherit';
@@ -856,7 +857,7 @@ function tag(texto, onRemove) {
   div.appendChild(btn);
   return div;
 }
-
+ 
 function renderAdminPlantas() {
   const cont = document.getElementById('admin-plantas');
   cont.innerHTML = '';
@@ -872,7 +873,7 @@ function renderAdminPlantas() {
     }));
   });
 }
-
+ 
 function renderAdminEquipos() {
   const planta = document.getElementById('admin-sel-planta').value;
   const cont = document.getElementById('admin-equipos');
@@ -889,7 +890,7 @@ function renderAdminEquipos() {
     }));
   });
 }
-
+ 
 function renderAdminPersonas() {
   const cont = document.getElementById('admin-personas');
   cont.innerHTML = '';
@@ -907,7 +908,7 @@ function renderAdminPersonas() {
     }));
   });
 }
-
+ 
 function poblarPlantas() {
   ['f-planta','p-planta','admin-sel-planta'].forEach(id => {
     const sel = document.getElementById(id);
@@ -923,7 +924,7 @@ function poblarPlantas() {
     sel.value = current;
   });
 }
-
+ 
 async function agregarPlanta() {
   const val = document.getElementById('nueva-planta').value.trim();
   if (!val) return;
@@ -935,7 +936,7 @@ async function agregarPlanta() {
   poblarPlantas();
   setAdminStatus('✓ Planta "' + val + '" agregada. GitHub se actualiza en ~1 min.', true);
 }
-
+ 
 async function agregarEquipoAdmin() {
   const planta = document.getElementById('admin-sel-planta').value;
   const val    = document.getElementById('nuevo-equipo').value.trim();
@@ -948,7 +949,7 @@ async function agregarEquipoAdmin() {
   renderAdminEquipos();
   setAdminStatus('✓ Equipo "' + val + '" agregado. GitHub se actualiza en ~1 min.', true);
 }
-
+ 
 async function agregarPersona() {
   const val = document.getElementById('nueva-persona').value.trim().toUpperCase();
   if (!val) return;
