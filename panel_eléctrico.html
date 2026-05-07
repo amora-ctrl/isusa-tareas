@@ -3,73 +3,73 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mototransporte — Panel de Control</title>
+<title>Taller Eléctrico — Panel de Control</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0f1a;color:#fff;min-height:100vh}
-.topbar{background:#0d1424;border-bottom:2px solid #78350f;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between}
+.topbar{background:#0d1424;border-bottom:2px solid #1d3a6e;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between}
 .topbar-left{display:flex;align-items:center;gap:14px}
-.top-logo{width:36px;height:36px;background:#b45309;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.top-logo{width:36px;height:36px;background:#1d4ed8;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .top-title{font-size:15px;font-weight:700;color:#fff;letter-spacing:0.03em;text-transform:uppercase}
-.top-taller{font-size:12px;color:#fbbf24;margin-top:2px;font-weight:600}
+.top-taller{font-size:12px;color:#60a5fa;margin-top:2px;font-weight:600}
 .top-right{display:flex;align-items:center;gap:12px}
-.top-clock{font-size:13px;color:#fcd34d;font-family:'Courier New',monospace;white-space:nowrap}
-.sync-status{font-size:11px;color:#92400e;font-family:'Courier New',monospace}
+.top-clock{font-size:13px;color:#93c5fd;font-family:'Courier New',monospace;white-space:nowrap}
+.sync-status{font-size:11px;color:#4b6fa8;font-family:'Courier New',monospace}
 .dot-live{width:10px;height:10px;background:#34d399;border-radius:50%;animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 .main{padding:14px 24px}
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-.metric{background:#0d1424;border:1px solid #78350f;border-radius:10px;padding:14px 18px}
+.metric{background:#0d1424;border:1px solid #1d3a6e;border-radius:10px;padding:14px 18px}
 .metric-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;display:flex;align-items:center;gap:5px}
 .metric-val{font-size:36px;font-weight:700;line-height:1}
 .metric-sub{font-size:11px;color:#6b7280;margin-top:4px}
-.mb .metric-lbl,.mb .metric-val{color:#fbbf24}
-.ma .metric-lbl,.ma .metric-val{color:#fb923c}
+.mb .metric-lbl,.mb .metric-val{color:#60a5fa}
+.ma .metric-lbl,.ma .metric-val{color:#fbbf24}
 .mg .metric-lbl,.mg .metric-val{color:#34d399}
 .mp .metric-lbl,.mp .metric-val{color:#a78bfa}
-.panel{background:#0d1424;border:1px solid #78350f;border-radius:10px;overflow:hidden}
-.panel-hdr{padding:12px 18px;border-bottom:1px solid #78350f;display:flex;align-items:center;justify-content:space-between}
+.panel{background:#0d1424;border:1px solid #1d3a6e;border-radius:10px;overflow:hidden}
+.panel-hdr{padding:12px 18px;border-bottom:1px solid #1d3a6e;display:flex;align-items:center;justify-content:space-between}
 .panel-title{font-size:14px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px}
-.acento{color:#fbbf24}
+.acento{color:#60a5fa}
 table{width:100%;border-collapse:collapse}
 thead tr{background:#060c16}
-th{padding:10px 14px;font-size:11px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:0.08em;text-align:left;border-bottom:1px solid #78350f;white-space:nowrap}
+th{padding:10px 14px;font-size:11px;font-weight:700;color:#4b6fa8;text-transform:uppercase;letter-spacing:0.08em;text-align:left;border-bottom:1px solid #1d3a6e;white-space:nowrap}
 td{padding:12px 14px;font-size:14px;color:#d1d5db;border-bottom:1px solid #111827;white-space:nowrap}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:#1a1000}
+tr:hover td{background:#111d33}
 .td-eq{font-weight:600;color:#fff;font-size:14px;max-width:220px;overflow:hidden;text-overflow:ellipsis}
-.td-pl{font-size:14px;font-weight:600;color:#fbbf24}
+.td-pl{font-size:14px;font-weight:600;color:#60a5fa}
 .td-fecha{font-family:'Courier New',monospace;font-size:12px;color:#6b7280}
 .op-cell{display:flex;align-items:center;gap:8px}
-.av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;background:#78350f;color:#fbbf24}
+.av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;background:#1d3a6e;color:#60a5fa}
 .tc-run{color:#34d399;font-family:'Courier New',monospace;font-size:13px}
 .tc-pend{color:#fbbf24;font-family:'Courier New',monospace;font-size:13px}
 .tc-stop{color:#6b7280;font-family:'Courier New',monospace;font-size:13px}
 .badge{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
 .b-pend{background:#292208;color:#fbbf24;border:1px solid #713f12}
-.b-proc{background:#1a0a00;color:#fb923c;border:1px solid #7c2d12}
+.b-proc{background:#0c1a3a;color:#60a5fa;border:1px solid #1d3a6e}
 .b-fin{background:#052e16;color:#34d399;border:1px solid #14532d}
 .b-mp{background:#2d0a0a;color:#f87171;border:1px solid #7f1d1d}
 .b-baja{background:#052e16;color:#34d399;border:1px solid #14532d}
-.b-correctivo{background:#1a0a00;color:#fb923c;border:1px solid #7c2d12}
-.b-service{background:#1c1400;color:#fbbf24;border:1px solid #713f12}
-.b-electrico{background:#0c1a3a;color:#60a5fa;border:1px solid #1d3a6e}
-.b-otro{background:#1f2937;color:#9ca3af;border:1px solid #374151}
-.panel-footer{padding:10px 18px;border-top:1px solid #78350f;display:flex;justify-content:space-between;align-items:center}
-.footer-txt{font-size:12px;color:#92400e}
+.b-elec{background:#0c1a3a;color:#60a5fa;border:1px solid #1d3a6e}
+.b-mec{background:#1c0a00;color:#fb923c;border:1px solid #7c2d12}
+.b-indef{background:#1f2937;color:#9ca3af;border:1px solid #374151}
+.panel-footer{padding:10px 18px;border-top:1px solid #1d3a6e;display:flex;justify-content:space-between;align-items:center}
+.footer-txt{font-size:12px;color:#4b6fa8}
 .empty-row td{text-align:center;color:#4b5563;padding:2.5rem;font-size:14px}
 .tr-mp{animation:blink-row 1.2s ease-in-out infinite}
 @keyframes blink-row{0%,100%{background:transparent}50%{background:rgba(248,113,113,0.15)}}
-.alerta{position:fixed;top:16px;right:16px;background:#92400e;border:2px solid #fbbf24;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:700;color:#fff;display:none;z-index:99;max-width:300px;line-height:1.5}
+.alerta{position:fixed;top:16px;right:16px;background:#1d4ed8;border:2px solid #60a5fa;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:700;color:#fff;display:none;z-index:99;max-width:300px;line-height:1.5}
 .alerta.show{display:block;animation:slideIn 0.3s ease}
 @keyframes slideIn{from{transform:translateX(120%)}to{transform:translateX(0)}}
-.alerta-titulo{font-size:11px;color:#fcd34d;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px}
+.alerta-titulo{font-size:11px;color:#93c5fd;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px}
 .alerta-eq{font-size:15px;font-weight:700;color:#fff;margin-bottom:2px}
-.alerta-pl{font-size:12px;color:#fcd34d}
+.alerta-pl{font-size:12px;color:#93c5fd}
 </style>
 </head>
 <body>
 
+<!-- Overlay para desbloquear audio -->
 <div id="audio-unlock" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:999;cursor:pointer" onclick="unlockAudio()">
   <div style="text-align:center;color:#fff">
     <div style="font-size:48px;margin-bottom:16px">🔊</div>
@@ -79,7 +79,7 @@ tr:hover td{background:#1a1000}
 </div>
 
 <div class="alerta" id="alerta">
-  <div class="alerta-titulo">Nueva tarea — Mototransporte</div>
+  <div class="alerta-titulo">Nueva denuncia — Taller Eléctrico</div>
   <div class="alerta-eq" id="alerta-eq">—</div>
   <div class="alerta-pl" id="alerta-pl">—</div>
 </div>
@@ -87,16 +87,11 @@ tr:hover td{background:#1a1000}
 <div class="topbar">
   <div class="topbar-left">
     <div class="top-logo">
-      <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
-        <rect x="2" y="13" width="18" height="5" rx="2" stroke="white" stroke-width="1.5"/>
-        <path d="M5 13V9a6 6 0 0 1 12 0v4" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-        <circle cx="6" cy="16" r="1" fill="white"/>
-        <circle cx="16" cy="16" r="1" fill="white"/>
-      </svg>
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1.5" y="3" width="15" height="12" rx="2" stroke="white" stroke-width="1.5" fill="none"/><path d="M5 8h8M5 11h5" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
     </div>
     <div>
-      <div class="top-title">Panel de Control — Tareas de Equipos</div>
-      <div class="top-taller">Mototransporte &nbsp;·&nbsp; Martin Zuccolini · Damian Hernandez · Ernesto Davila</div>
+      <div class="top-title">Panel de Control — Denuncias de Equipos</div>
+      <div class="top-taller">Taller Eléctrico &nbsp;·&nbsp; Luis Brun · Carlos Palermo · Lautaro Bigolin · Jhon Cooper</div>
     </div>
   </div>
   <div class="top-right">
@@ -109,34 +104,22 @@ tr:hover td{background:#1a1000}
 <div class="main">
   <div class="metrics">
     <div class="metric mb">
-      <div class="metric-lbl">
-        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><rect x="0.5" y="1.5" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.1" fill="none"/><path d="M2 4.5h7M2 6.5h5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
-        Tareas totales
-      </div>
+      <div class="metric-lbl"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><rect x="0.5" y="1.5" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.1" fill="none"/><path d="M2 4.5h7M2 6.5h5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>Denuncias totales</div>
       <div class="metric-val" id="m-total">—</div>
       <div class="metric-sub" id="m-tsub">Cargando...</div>
     </div>
     <div class="metric ma">
-      <div class="metric-lbl">
-        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 1L1 9.5h9L5.5 1z" stroke="currentColor" stroke-width="1.1" fill="none"/><path d="M5.5 4.5v2M5.5 7.5v.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
-        Pendientes / En proceso
-      </div>
+      <div class="metric-lbl"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 1L1 9.5h9L5.5 1z" stroke="currentColor" stroke-width="1.1" fill="none"/><path d="M5.5 4.5v2M5.5 7.5v.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>Pendientes / En proceso</div>
       <div class="metric-val" id="m-abier">—</div>
       <div class="metric-sub" id="m-asub">—</div>
     </div>
     <div class="metric mg">
-      <div class="metric-lbl">
-        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Finalizadas
-      </div>
+      <div class="metric-lbl"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Finalizadas</div>
       <div class="metric-val" id="m-fin">—</div>
       <div class="metric-sub" id="m-fsub">—</div>
     </div>
     <div class="metric mp">
-      <div class="metric-lbl">
-        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><circle cx="5.5" cy="5.5" r="4.5" stroke="currentColor" stroke-width="1.1" fill="none"/><path d="M5.5 2.5v3l2 2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
-        Tiempo prom. resolución
-      </div>
+      <div class="metric-lbl"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><circle cx="5.5" cy="5.5" r="4.5" stroke="currentColor" stroke-width="1.1" fill="none"/><path d="M5.5 2.5v3l2 2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>Tiempo prom. resolución</div>
       <div class="metric-val" id="m-tiempo">—</div>
       <div class="metric-sub">Promedio partes</div>
     </div>
@@ -144,7 +127,7 @@ tr:hover td{background:#1a1000}
 
   <div class="panel">
     <div class="panel-hdr">
-      <div class="panel-title">Lista de control — <span class="acento">Mototransporte</span></div>
+      <div class="panel-title">Lista de control — <span class="acento">Taller Eléctrico</span></div>
       <div class="footer-txt" id="f-fecha">Cargando datos...</div>
     </div>
     <div style="overflow-x:auto">
@@ -152,8 +135,9 @@ tr:hover td{background:#1a1000}
         <thead>
           <tr>
             <th>Fecha</th>
+            <th>Planta</th>
             <th>Equipo</th>
-            <th>Tipo de tarea</th>
+            <th>Tipo</th>
             <th>Prioridad</th>
             <th>Operario</th>
             <th>Tiempo transcurrido</th>
@@ -165,7 +149,7 @@ tr:hover td{background:#1a1000}
     </div>
     <div class="panel-footer">
       <div class="footer-txt" id="f-count">—</div>
-      <div class="footer-txt">Actualización cada 5 seg</div>
+      <div class="footer-txt">Actualización cada 30 seg</div>
     </div>
   </div>
 </div>
@@ -176,12 +160,14 @@ let ultimosIds = new Set();
 let primeraVez = true;
 let audioCtx = null;
 let tiemposInicio = {};
+let alarmaIv = null;  // intervalo para sonido continuo MP
 
 function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
 
 function sonar(esMP){
   try{
     const ctx=getAudio();
+    // Desbloquear contexto si está suspendido
     if(ctx.state==='suspended')ctx.resume();
     const freqs=esMP?[880,660,880,660]:[660,880];
     let t=ctx.currentTime;
@@ -195,9 +181,11 @@ function sonar(esMP){
   }catch(e){}
 }
 
+// Intentar desbloquear audio automáticamente al cargar
 window.addEventListener('load',()=>{
   try{
     const ctx=getAudio();
+    // Crear y reproducir silencio para desbloquear
     const o=ctx.createOscillator(),g=ctx.createGain();
     g.gain.setValueAtTime(0,ctx.currentTime);
     o.connect(g);g.connect(ctx.destination);
@@ -208,7 +196,7 @@ window.addEventListener('load',()=>{
 
 function mostrarAlerta(d){
   document.getElementById('alerta-eq').textContent=d.equipo;
-  document.getElementById('alerta-pl').textContent=d.tipo+' · '+d.prioridad;
+  document.getElementById('alerta-pl').textContent=d.planta+' · '+d.prioridad;
   const al=document.getElementById('alerta');
   al.classList.add('show');
   setTimeout(()=>al.classList.remove('show'),5000);
@@ -220,17 +208,18 @@ function cargarDatos(){
     .then(r=>r.json())
     .then(data=>{
       const todas=data.denuncias||[];
-
-      // ── FILTRO MOTOTRANSPORTE ──
       const vis=todas.filter(d=>{
         if(d.estado==='Finalizado'||d.estado==='Reprogramada') return false;
-        if(d.planta!=='Mototransporte') return false;
+        if(!(d.tipo==='Eléctrica'||d.tipo==='Indefinida')) return false;
+        // Todas las prioridades van al taller por defecto, excepto si fue reprogramada
+        if(d.estado==='Reprogramada') return false;
         return true;
       });
-
       if(!primeraVez){
         vis.forEach(d=>{
           if(!ultimosIds.has(String(d.id))){sonar(d.prioridad==='Máquina parada');mostrarAlerta(d);}
+          // Usar hora_inicio del Sheet para cronómetro consistente en todos los dispositivos
+          // Usar hora_inicio del Sheet — igual en todos los dispositivos
           if(d.estado==='En proceso'&&d.hora_inicio&&Number(d.hora_inicio)>0){
             tiemposInicio[String(d.id)]=new Date(Number(d.hora_inicio));
           }
@@ -238,10 +227,7 @@ function cargarDatos(){
       }
       ultimosIds=new Set(vis.map(d=>String(d.id)));
       primeraVez=false;
-
-      // métricas sobre todas las de Mototransporte (incluyendo finalizadas)
-      const base=todas.filter(d=>d.planta==='Mototransporte');
-      renderMetrics(base,data.promedio_min);
+      renderMetrics(todas,data.promedio_min);
       renderTabla(vis);
       document.getElementById('sync-status').textContent='OK '+fmtNow();
       document.getElementById('f-fecha').textContent='Actualizado: '+fmtNow();
@@ -249,39 +235,30 @@ function cargarDatos(){
     .catch(err=>{document.getElementById('sync-status').textContent='Error: '+err.message;});
 }
 
-function renderMetrics(base,promedio){
-  const total=base.length;
-  const abier=base.filter(d=>d.estado!=='Finalizado').length;
-  const fin=base.filter(d=>d.estado==='Finalizado').length;
+function renderMetrics(todas,promedio){
+  const base=todas.filter(d=>d.tipo==='Eléctrica'||d.tipo==='Indefinida');
+  const total=base.length,abier=base.filter(d=>d.estado!=='Finalizado').length,fin=base.filter(d=>d.estado==='Finalizado').length;
+  const cd=base.filter(d=>d.duracion_min);
   const prom=promedio?(promedio>=60?(promedio/60).toFixed(1)+' hs':promedio+' min'):'—';
   document.getElementById('m-total').textContent=total;
   document.getElementById('m-abier').textContent=abier;
   document.getElementById('m-fin').textContent=fin;
   document.getElementById('m-tiempo').textContent=prom;
-  document.getElementById('m-tsub').textContent='Mototransporte';
+  document.getElementById('m-tsub').textContent='Taller Eléctrico';
   document.getElementById('m-asub').textContent=abier+' requieren atención';
   document.getElementById('m-fsub').textContent=fin+' resueltas';
-}
-
-function badgeTipo(tipo){
-  if(!tipo) return 'b-otro';
-  const t=tipo.toLowerCase();
-  if(t.includes('correctivo'))        return 'b-correctivo';
-  if(t.includes('service'))           return 'b-service';
-  if(t.includes('eléctrico'))         return 'b-electrico';
-  return 'b-otro';
 }
 
 function fmtElapsed(ini){const s=Math.max(0,Math.floor((Date.now()-ini.getTime())/1000));return pad(Math.floor(s/3600))+'h '+pad(Math.floor((s%3600)/60))+'m '+pad(s%60)+'s';}
 
 function renderTabla(list){
   const tb=document.getElementById('tbody');
-  if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="7">No hay tareas activas en Mototransporte</td></tr>';document.getElementById('f-count').textContent='0 tareas';return;}
+  if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="8">No hay denuncias activas</td></tr>';document.getElementById('f-count').textContent='0 denuncias';return;}
   const eo={'En proceso':0,'Pendiente':1,'Finalizado':2},po={'Máquina parada':0,'Baja':1};
   list.sort((a,b)=>(eo[a.estado]||0)-(eo[b.estado]||0)||(po[a.prioridad]||1)-(po[b.prioridad]||1));
   tb.innerHTML=list.map(d=>{
     const esMP=d.prioridad==='Máquina parada'&&d.estado==='Pendiente';
-    const bT=badgeTipo(d.tipo);
+    const bT=d.tipo==='Eléctrica'?'b-elec':d.tipo==='Mecánica'?'b-mec':'b-indef';
     const bP=esMP?'b-mp':'b-baja';
     const bE=d.estado==='Finalizado'?'b-fin':d.estado==='En proceso'?'b-proc':'b-pend';
     const op=d.operario||'—';
@@ -293,37 +270,29 @@ function renderTabla(list){
       :'<span class="tc-stop">—</span>';
     return `<tr class="${esMP?'tr-mp':''}">
       <td class="td-fecha">${d.fecha} ${d.hora}</td>
+      <td class="td-pl">${d.planta}</td>
       <td class="td-eq">${d.equipo}</td>
-      <td><span class="badge ${bT}">${d.tipo||'—'}</span></td>
+      <td><span class="badge ${bT}">${d.tipo}</span></td>
       <td><span class="badge ${bP}">${d.prioridad}</span></td>
       <td><div class="op-cell"><div class="av">${ini}</div>${op}</div></td>
       <td>${tc}</td>
       <td><span class="badge ${bE}">${d.estado}</span></td>
     </tr>`;
   }).join('');
-  document.getElementById('f-count').textContent=list.length+' tareas activas';
+  document.getElementById('f-count').textContent=list.length+' denuncias activas';
 }
 
 function pad(n){return String(n).padStart(2,'0');}
 function fmtNow(){const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());}
-
-setInterval(()=>{
-  const d=new Date();
-  document.getElementById('clock').textContent=pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
-},1000);
-
-setInterval(()=>{
-  Object.keys(tiemposInicio).forEach(id=>{
-    const el=document.getElementById('tel'+id);
-    if(el)el.textContent=fmtElapsed(tiemposInicio[id]);
-  });
-},1000);
-
+setInterval(()=>{const d=new Date();document.getElementById('clock').textContent=pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());},1000);
+setInterval(()=>{Object.keys(tiemposInicio).forEach(id=>{const el=document.getElementById('tel'+id);if(el)el.textContent=fmtElapsed(tiemposInicio[id]);});},1000);
 cargarDatos();
 setInterval(cargarDatos,5000);
-
 function unlockAudio(){
-  try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();audioCtx.resume();}catch(e){}
+  try{
+    audioCtx = new(window.AudioContext||window.webkitAudioContext)();
+    audioCtx.resume();
+  }catch(e){}
   document.getElementById('audio-unlock').style.display='none';
 }
 </script>
