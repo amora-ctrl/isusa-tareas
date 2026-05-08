@@ -84,6 +84,10 @@ tr:hover td{background:#111827}
 .btn-reprog{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:none;cursor:pointer;background:#2d1f4e;color:#a78bfa;font-family:inherit}
 .btn-taller:hover{background:#2a4a8e}
 .btn-reprog:hover{background:#3d2a6e}
+.btn-tercerizada{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:none;cursor:pointer;background:#1a2e1a;color:#4ade80;font-family:inherit}
+.btn-tercerizada:hover{background:#2d4a2d}
+.btn-active-terc{background:#166534!important;color:#fff!important;border:1px solid #4ade80}
+.modal-terc select{width:100%;background:#060c16;border:1px solid #2a2f3e;border-radius:8px;color:#fff;padding:9px 12px;font-size:14px;font-family:inherit;outline:none;margin-bottom:14px}
 .btn-active{background:#059669!important;color:#fff!important;border:1px solid #34d399}
 .btn-active-reprog{background:#7c3aed!important;color:#fff!important;border:1px solid #a78bfa}
 </style>
@@ -282,6 +286,36 @@ function confirmarReprog(){
   setTimeout(cargarDatos, 2000);
 }
 
+let tercId = null;
+
+function abrirTerc(id){
+  tercId = id;
+  const d = TODAS.find(x=>String(x.id)===String(id));
+  document.getElementById('modal-terc-desc').textContent = d ? (d.equipo+' — '+d.planta) : id;
+  document.getElementById('modal-terc-empresa').value = d && d.tercerizada ? d.tercerizada : '';
+  document.getElementById('modal-terc-bg').classList.add('show');
+}
+
+function cerrarModalTerc(){
+  document.getElementById('modal-terc-bg').classList.remove('show');
+  tercId = null;
+}
+
+function confirmarTerc(){
+  if(!tercId) return;
+  const empresa = document.getElementById('modal-terc-empresa').value;
+  if(!empresa){alert('Seleccioná una empresa');return;}
+  fetch(SCRIPT_URL_POST,{
+    method:'POST',mode:'no-cors',
+    body:JSON.stringify({accion:'tercerizar',id_denuncia:tercId,empresa:empresa})
+  }).catch(()=>{});
+  const d=TODAS.find(x=>String(x.id)===String(tercId));
+  if(d){d.tercerizada=empresa;d.visible_taller='';d.estado=d.estado==='Reprogramada'?'Pendiente':d.estado;}
+  cerrarModalTerc();
+  renderTabla();
+  setTimeout(cargarDatos,2000);
+}
+
 function cargarDatos(){
   fetch(SCRIPT_URL+'?t='+Date.now())
     .then(r=>r.json())
@@ -330,6 +364,7 @@ function filtradas(){
   const est=document.getElementById('f-estado').value;
   const tipo=document.getElementById('f-tipo').value;
   let list=[...TODAS];
+  // Supervisor ve TODO — incluyendo las que están en taller
   if(est==='activas') list=list.filter(d=>d.estado!=='Finalizado');
   else if(est!=='all') list=list.filter(d=>d.estado===est);
   if(tipo!=='all') list=list.filter(d=>d.tipo===tipo);
@@ -401,8 +436,26 @@ function fmtNow(){const d=new Date();return pad(d.getHours())+':'+pad(d.getMinut
 setInterval(()=>{const d=new Date();document.getElementById('clock').textContent=pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());},1000);
 setInterval(()=>{Object.keys(tiemposInicio).forEach(id=>{const el=document.getElementById('tel'+id);if(el)el.textContent=fmtElapsed(tiemposInicio[id]);});},1000);
 cargarDatos();
-setInterval(cargarDatos,30000);
+setInterval(cargarDatos,5000);
 </script>
+<!-- Modal tercerizada -->
+<div class="modal-bg" id="modal-terc-bg">
+  <div class="modal">
+    <div class="modal-title">🏢 Tercerizar denuncia</div>
+    <div class="modal-sub" id="modal-terc-desc">—</div>
+    <select id="modal-terc-empresa" class="modal-terc">
+      <option value="">— Seleccionar empresa —</option>
+      <option value="Almeida">Almeida</option>
+      <option value="Rojas">Rojas</option>
+      <option value="Piston">Piston</option>
+    </select>
+    <div class="modal-btns">
+      <button class="mbtn mbtn-cancel" onclick="cerrarModalTerc()">Cancelar</button>
+      <button class="mbtn mbtn-ok" style="background:#166534" onclick="confirmarTerc()">Tercerizar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal reprogramar -->
 <div class="modal-bg" id="modal-bg">
   <div class="modal">
