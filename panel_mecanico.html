@@ -284,8 +284,26 @@ setInterval(()=>{const d=new Date();document.getElementById('clock').textContent
 setInterval(()=>{Object.keys(tiemposInicio).forEach(id=>{const el=document.getElementById('tel'+id);if(el)el.textContent=fmtElapsed(tiemposInicio[id]);});},1000);
 cargarDatos();
 setInterval(cargarDatos,5000);
-// Audio iniciado automáticamente
-try{ audioCtx = new(window.AudioContext||window.webkitAudioContext)(); audioCtx.resume(); }catch(e){}
+// Iniciar AudioContext automáticamente
+function initAudio(){
+  try{
+    if(!audioCtx){
+      audioCtx = new(window.AudioContext||window.webkitAudioContext)();
+    }
+    if(audioCtx.state==='suspended') audioCtx.resume();
+  }catch(e){}
+}
+// Intentar cada segundo hasta que funcione
+const audioInitIv = setInterval(()=>{
+  try{
+    if(!audioCtx) audioCtx = new(window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='running'){
+      clearInterval(audioInitIv);
+    } else {
+      audioCtx.resume();
+    }
+  }catch(e){}
+}, 1000);
 </script>
 </body>
 </html>
