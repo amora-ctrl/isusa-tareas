@@ -51,6 +51,7 @@ tr:hover td{background:#111827}
 .b-pend{background:#292208;color:#fbbf24;border:1px solid #713f12}
 .b-proc{background:#0c1a3a;color:#60a5fa;border:1px solid #1d3a6e}
 .b-fin{background:#052e16;color:#34d399;border:1px solid #14532d}
+.b-ot{background:#1a0d3a;color:#c084fc;border:1px solid #7c3aed}
 .b-mp{background:#2d0a0a;color:#f87171;border:1px solid #7f1d1d}
 .b-baja{background:#052e16;color:#34d399;border:1px solid #14532d}
 .b-elec{background:#0c1a3a;color:#60a5fa;border:1px solid #1d3a6e}
@@ -70,6 +71,7 @@ tr:hover td{background:#111827}
 .alerta-titulo{font-size:11px;color:#c4b5fd;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px}
 .alerta-eq{font-size:15px;font-weight:700;color:#fff;margin-bottom:2px}
 .alerta-pl{font-size:12px;color:#c4b5fd}
+/* Modal base */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:100}
 .modal-bg.show{display:flex}
 .modal{background:#0d1424;border:1px solid #4c1d95;border-radius:14px;padding:24px;min-width:320px;max-width:400px}
@@ -84,8 +86,70 @@ tr:hover td{background:#111827}
 .btn-reprog{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:none;cursor:pointer;background:#2d1f4e;color:#a78bfa;font-family:inherit}
 .btn-taller:hover{background:#2a4a8e}
 .btn-reprog:hover{background:#3d2a6e}
+.btn-tercerizada{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:none;cursor:pointer;background:#1a2e1a;color:#4ade80;font-family:inherit}
+.btn-tercerizada:hover{background:#2d4a2d}
+.btn-active-terc{background:#166534!important;color:#fff!important;border:1px solid #4ade80}
+.modal-terc select{width:100%;background:#060c16;border:1px solid #2a2f3e;border-radius:8px;color:#fff;padding:9px 12px;font-size:14px;font-family:inherit;outline:none;margin-bottom:14px}
 .btn-active{background:#059669!important;color:#fff!important;border:1px solid #34d399}
 .btn-active-reprog{background:#7c3aed!important;color:#fff!important;border:1px solid #a78bfa}
+/* Botón generar OT */
+.btn-ot{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:none;cursor:pointer;background:#3b0764;color:#c084fc;font-family:inherit;margin-right:4px}
+.btn-ot:hover{background:#4c0a8e}
+.btn-ot-active{background:#7c3aed!important;color:#fff!important;border:1px solid #a78bfa}
+/* Modal OT — más ancho */
+.modal-ot{background:#0d1424;border:1px solid #7c3aed;border-radius:14px;padding:28px;width:560px;max-width:96vw;max-height:90vh;overflow-y:auto}
+.ot-header{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #2a2f3e}
+.ot-icon{width:38px;height:38px;background:#3b0764;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ot-title{font-size:16px;font-weight:700;color:#fff}
+.ot-sub{font-size:12px;color:#a78bfa;margin-top:2px}
+.ot-den-card{background:#060c16;border:1px solid #2a2f3e;border-radius:8px;padding:12px 14px;margin-bottom:18px}
+.ot-den-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.ot-den-chip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px}
+.ot-den-desc{font-size:13px;color:#9ca3af;margin-top:6px;line-height:1.5}
+.ot-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6d28d9;margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid #1a1f2e}
+.ot-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ot-field{display:flex;flex-direction:column;gap:4px}
+.ot-field.full{grid-column:1/-1}
+.ot-label{font-size:11px;font-weight:600;color:#6b7280}
+.ot-label .req{color:#f87171}
+.ot-input{background:#060c16;border:1px solid #2a2f3e;border-radius:7px;color:#e5e7eb;font-size:13px;padding:8px 11px;font-family:inherit;outline:none;transition:border-color .15s}
+.ot-input:focus{border-color:#7c3aed}
+.ot-select{background:#060c16;border:1px solid #2a2f3e;border-radius:7px;color:#e5e7eb;font-size:13px;padding:8px 11px;font-family:inherit;outline:none}
+.ot-textarea{background:#060c16;border:1px solid #2a2f3e;border-radius:7px;color:#e5e7eb;font-size:13px;padding:8px 11px;font-family:inherit;outline:none;resize:vertical;min-height:72px;transition:border-color .15s}
+.ot-textarea:focus{border-color:#7c3aed}
+.ot-tipo-group{display:flex;gap:8px}
+.ot-tipo-btn{flex:1;padding:9px;border:1px solid #2a2f3e;border-radius:7px;background:#060c16;cursor:pointer;font-size:12px;font-weight:700;color:#6b7280;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .12s;font-family:inherit}
+.ot-tipo-btn.on-corr{background:#1c0a00;border-color:#d97706;color:#fbbf24}
+.ot-tipo-btn.on-prev{background:#0c1a3a;border-color:#3b82f6;color:#60a5fa}
+.ot-tipo-btn.on-elec{background:#0c1a3a;border-color:#60a5fa;color:#93c5fd}
+.ot-tipo-btn.on-mec{background:#1c0a00;border-color:#fb923c;color:#fdba74}
+.ot-tipo-btn.on-moto{background:#052e16;border-color:#34d399;color:#6ee7b7}
+.ot-prio-group{display:flex;gap:8px}
+.ot-prio-btn{flex:1;padding:8px;border:1px solid #2a2f3e;border-radius:7px;background:#060c16;cursor:pointer;font-size:11px;font-weight:700;color:#6b7280;transition:all .12s;font-family:inherit}
+.ot-prio-btn.on-baja{background:#052e16;border-color:#059669;color:#34d399}
+.ot-prio-btn.on-mp{background:#2d0a0a;border-color:#dc2626;color:#f87171}
+.ot-err{font-size:11px;color:#f87171;display:none;margin-top:2px}
+.ot-footer{display:flex;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid #2a2f3e}
+.ot-btn-cancel{flex:0 0 auto;padding:10px 18px;border:1px solid #2a2f3e;border-radius:8px;background:none;color:#6b7280;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.ot-btn-ok{flex:1;padding:10px;border:none;border-radius:8px;background:#7c3aed;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px}
+.ot-btn-ok:hover{background:#6d28d9}
+.ot-btn-ok:disabled{opacity:.5;cursor:not-allowed}
+.ot-num-preview{font-size:11px;color:#a78bfa;font-family:'Courier New',monospace}
+/* Tabla OT */
+.panel-ot-hdr{background:#12082a;border-bottom:1px solid #3b0764}
+.panel-ot-hdr .panel-title{color:#c084fc}
+.tb-ot-num{font-family:'Courier New',monospace;font-size:12px;color:#a78bfa;font-weight:700}
+.b-ot-pend{background:#1a0d3a;color:#c084fc;border:1px solid #7c3aed}
+.b-ot-proc{background:#0c1a3a;color:#60a5fa;border:1px solid #1d3a6e}
+.b-ot-fin{background:#052e16;color:#34d399;border:1px solid #14532d}
+.tag-corr{background:#1c0a00;color:#fbbf24;border:1px solid #713f12;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.tag-prev{background:#0c1a3a;color:#60a5fa;border:1px solid #1d3a6e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+/* Fila expandida OT */
+.ot-expand-row td{background:#0d1424;padding:0}
+.ot-expand-inner{padding:12px 18px;border-top:1px solid #1e2030;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ot-expand-field{display:flex;flex-direction:column;gap:3px}
+.ot-expand-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#4b5563}
+.ot-expand-val{font-size:13px;color:#d1d5db}
 </style>
 </head>
 <body>
@@ -136,44 +200,66 @@ tr:hover td{background:#111827}
       <div class="metric-sub">Resueltas</div>
     </div>
     <div class="metric m5">
-      <div class="metric-lbl">Tiempo prom.</div>
-      <div class="metric-val" id="m-tiempo">—</div>
-      <div class="metric-sub">Promedio partes</div>
+      <div class="metric-lbl">OTs generadas</div>
+      <div class="metric-val" id="m-ot">—</div>
+      <div class="metric-sub">Órdenes de trabajo</div>
     </div>
   </div>
 
+  <!-- TABLA UNIFICADA DENUNCIAS / OTs -->
   <div class="panel">
-    <div class="panel-hdr">
-      <div class="panel-title">Lista completa de denuncias</div>
+    <div class="panel-hdr" id="tabla-hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="panel-title" id="tabla-titulo">Denuncias — Generar OT</div>
+      </div>
       <div class="filters">
-        <select class="fsel" id="f-estado" onchange="renderTabla()">
-          <option value="activas">Activas (Pend + Proc)</option>
-          <option value="all">Todos los estados</option>
-          <option value="Pendiente">Pendiente</option>
-          <option value="En proceso">En proceso</option>
-          <option value="Finalizado">Finalizado</option>
+        <!-- Selector principal vista -->
+        <select class="fsel" id="f-vista" onchange="cambiarVista()" style="font-weight:700;color:#a78bfa;border-color:#4c1d95">
+          <option value="denuncias">📋 Denuncias</option>
+          <option value="ots">⚙ Órdenes de trabajo</option>
         </select>
-        <select class="fsel" id="f-tipo" onchange="renderTabla()">
-          <option value="all">Todos los tipos</option>
-          <option value="Eléctrica">Eléctrica</option>
-          <option value="Mecánica">Mecánica</option>
-          <option value="Soldadura">Soldadura</option>
-          <option value="Indefinida">Indefinida</option>
-        </select>
+        <!-- Filtros denuncias -->
+        <span id="filtros-den" style="display:flex;gap:8px">
+          <select class="fsel" id="f-estado" onchange="renderTabla()">
+            <option value="activas">Activas (Pend + Proc)</option>
+            <option value="all">Todos los estados</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="OT generada">OT generada</option>
+            <option value="Finalizado">Finalizado</option>
+          </select>
+          <select class="fsel" id="f-tipo" onchange="renderTabla()">
+            <option value="all">Todos los tipos</option>
+            <option value="Eléctrica">Eléctrica</option>
+            <option value="Mecánica">Mecánica</option>
+            <option value="Soldadura">Soldadura</option>
+            <option value="Indefinida">Indefinida</option>
+          </select>
+        </span>
+        <!-- Filtros OTs -->
+        <span id="filtros-ot" style="display:none;gap:8px">
+          <select class="fsel" id="fot-estado" onchange="renderOTs()">
+            <option value="activas">Activas</option>
+            <option value="all">Todas</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="En proceso">En proceso</option>
+            <option value="Finalizado">Finalizado</option>
+          </select>
+        </span>
         <div class="footer-txt" id="f-fecha">—</div>
       </div>
     </div>
-    <div style="overflow-x:auto">
+
+    <!-- Vista denuncias -->
+    <div id="vista-denuncias" style="overflow-x:auto">
       <table>
         <thead>
           <tr>
+            <th>N° Den.</th>
             <th>Fecha</th>
             <th>Planta</th>
             <th>Equipo</th>
             <th>Tipo</th>
             <th>Prioridad</th>
-            <th>Operario</th>
-            <th>Tiempo</th>
             <th>Estado</th>
             <th>Acciones</th>
           </tr>
@@ -181,113 +267,199 @@ tr:hover td{background:#111827}
         <tbody id="tbody"></tbody>
       </table>
     </div>
+
+    <!-- Vista OTs -->
+    <div id="vista-ots" style="overflow-x:auto;display:none">
+      <table>
+        <thead>
+          <tr>
+            <th>N° OT</th>
+            <th>N° Den.</th>
+            <th>Fecha</th>
+            <th>Planta</th>
+            <th>Equipo</th>
+            <th>Taller</th>
+            <th>Tipo trabajo</th>
+            <th>Prioridad</th>
+            <th>Operario</th>
+            <th>Tiempo</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody-ot"></tbody>
+      </table>
+    </div>
+
     <div class="panel-footer">
       <div class="footer-txt" id="f-count">—</div>
-      <div class="footer-txt">Actualización cada 30 seg</div>
+      <div class="footer-txt">Actualización cada 5 seg</div>
+    </div>
+  </div>
+
+  <!-- Panel OTs oculto (necesario para compatibilidad) -->
+  <div class="panel" style="display:none">
+    <div class="panel-hdr panel-ot-hdr">
+      <div class="panel-title">📋 Órdenes de trabajo</div>
+      <div class="filters">
+        <div class="footer-txt" id="fot-count">—</div>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>N° OT</th>
+            <th>N° Den.</th>
+            <th>Fecha</th>
+            <th>Planta</th>
+            <th>Equipo</th>
+            <th>Tipo trabajo</th>
+            <th>Prioridad</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody-ot-hidden"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal OT -->
+<div class="modal-bg" id="modal-ot-bg">
+  <div class="modal-ot">
+    <div class="ot-header">
+      <div class="ot-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="2" stroke="#c084fc" stroke-width="1.5" fill="none"/><path d="M7 6h6M7 9h6M7 12h4" stroke="#c084fc" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </div>
+      <div>
+        <div class="ot-title">Generar Orden de Trabajo</div>
+        <div class="ot-sub" id="ot-sub-num">—</div>
+      </div>
+    </div>
+
+    <!-- Card con datos de la denuncia origen -->
+    <div class="ot-den-card" id="ot-den-card"></div>
+
+    <div class="ot-section">Tipo de trabajo</div>
+    <div class="ot-tipo-group">
+      <button class="ot-tipo-btn" id="ot-btn-corr" type="button" onclick="setOTTipo('Correctivo')">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 11L11 2M2 2l9 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Correctivo
+      </button>
+      <button class="ot-tipo-btn" id="ot-btn-prev" type="button" onclick="setOTTipo('Preventivo')">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v2M6.5 10v2M1 6.5h2M10 6.5h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="6.5" cy="6.5" r="2.5" stroke="currentColor" stroke-width="1.3"/></svg>
+        Preventivo
+      </button>
+    </div>
+    <div class="ot-err" id="err-ot-tipo">Seleccioná el tipo de trabajo</div>
+
+    <div class="ot-section">Prioridad</div>
+    <div class="ot-prio-group">
+      <button class="ot-prio-btn" id="ot-btn-baja" type="button" onclick="setOTPrio('Baja')">Baja</button>
+      <button class="ot-prio-btn" id="ot-btn-mp" type="button" onclick="setOTPrio('Máquina parada')">Máquina parada</button>
+    </div>
+    <div class="ot-err" id="err-ot-prio">Seleccioná la prioridad</div>
+
+    <div class="ot-section">Detalles de la orden</div>
+    <div class="ot-grid">
+      <div class="ot-field">
+        <div class="ot-label">Trabajo a realizar <span class="req">*</span></div>
+        <!-- Input texto para plantas normales -->
+        <input id="ot-trabajo" class="ot-input" type="text" placeholder="Describí el trabajo a realizar">
+        <!-- Selector para Mototransporte -->
+        <select id="ot-trabajo-moto" class="ot-select" style="display:none">
+          <option value="">— Seleccionar tipo de tarea —</option>
+          <option>Service Motor</option>
+          <option>Service Caja</option>
+          <option>Service Diferencial</option>
+          <option>Sist. frenos</option>
+          <option>Carrocería</option>
+          <option>Sist. Eléctrico</option>
+          <option>Aire acondicionado</option>
+          <option>Ejes</option>
+          <option>Chasis/Equipo de trabajo</option>
+          <option>Transmisión</option>
+        </select>
+        <div class="ot-err" id="err-ot-trabajo">Campo obligatorio</div>
+      </div>
+      <div class="ot-field">
+        <div class="ot-label">Material utilizado</div>
+        <input id="ot-material" class="ot-input" type="text" placeholder="Repuestos, materiales...">
+      </div>
+      <div class="ot-field full">
+        <div class="ot-label">Observaciones</div>
+        <textarea id="ot-obs" class="ot-textarea" placeholder="Observaciones adicionales, condiciones del equipo, advertencias..."></textarea>
+      </div>
+    </div>
+
+    <div class="ot-footer">
+      <button class="ot-btn-cancel" onclick="cerrarModalOT()">Cancelar</button>
+      <button class="ot-btn-ok" id="ot-btn-ok" onclick="confirmarOT()">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="2" y="1.5" width="11" height="12" rx="2" stroke="white" stroke-width="1.4" fill="none"/><path d="M5 5h5M5 7.5h5M5 10h3" stroke="white" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Generar OT
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal tercerizada -->
+<div class="modal-bg" id="modal-terc-bg">
+  <div class="modal">
+    <div class="modal-title">🏢 Tercerizar denuncia</div>
+    <div class="modal-sub" id="modal-terc-desc">—</div>
+    <select id="modal-terc-empresa" class="modal-terc">
+      <option value="">— Seleccionar empresa —</option>
+      <option value="Almeida">Almeida</option>
+      <option value="Rojas">Rojas</option>
+      <option value="Piston">Piston</option>
+    </select>
+    <div class="modal-btns">
+      <button class="mbtn mbtn-cancel" onclick="cerrarModalTerc()">Cancelar</button>
+      <button class="mbtn mbtn-ok" style="background:#166534" onclick="confirmarTerc()">Tercerizar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal reprogramar -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <div class="modal-title">⏱ Reprogramar denuncia</div>
+    <div class="modal-sub" id="modal-desc">—</div>
+    <input type="datetime-local" id="modal-fecha">
+    <div class="modal-btns">
+      <button class="mbtn mbtn-cancel" onclick="cerrarModal()">Cancelar</button>
+      <button class="mbtn mbtn-ok" onclick="confirmarReprog()">Reprogramar</button>
     </div>
   </div>
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYcmmkMeFQjrWGDYl_PCMTdFypBK1KZ0ZGPlR1Nyluo4nbJTWOtU6Ae7kLhr92GT0u/exec';
+const SCRIPT_URL      = 'https://script.google.com/macros/s/AKfycbzZrVFEeBBgsIB-EQtwRlPsxhnKXsIh6-038J7ICIo9PPHyHqOiVVNLDLWspuAfmN-U/exec';
+const SCRIPT_URL_POST = 'https://script.google.com/macros/s/AKfycbzZrVFEeBBgsIB-EQtwRlPsxhnKXsIh6-038J7ICIo9PPHyHqOiVVNLDLWspuAfmN-U/exec';
+
 let TODAS = [];
+let OTS   = [];
 let ultimosIds = new Set();
 let primeraVez = true;
-let audioCtx = null;
 let tiemposInicio = {};
+let otTipo = '', otPrio = '', otDenId = null, otTaller = '';
 
+// ── AUDIO ────────────────────────────────────────────────────────
+let audioCtx = null;
 setTimeout(()=>{try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}},100);
-document.addEventListener('click',()=>{try{if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();}catch(e){}});
-document.addEventListener('touchstart',()=>{try{if(!audioCtx){audioCtx=new(window.AudioContext||window.webkitAudioContext)();}if(audioCtx.state==='suspended')audioCtx.resume();}catch(e){}},{once:true});
+function sonar(esMP){try{const f=esMP?880:660;const ctx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();const o=ctx.createOscillator();const g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=f;g.gain.setValueAtTime(0.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);o.start();o.stop(ctx.currentTime+0.4);}catch(e){}}
+function mostrarAlerta(d){document.getElementById('alerta-eq').textContent=d.equipo;document.getElementById('alerta-pl').textContent=d.planta+' · '+d.tipo+' · '+d.prioridad;const al=document.getElementById('alerta');al.classList.add('show');setTimeout(()=>al.classList.remove('show'),6000);}
 
-function sonar(esMP){
-  try{
-    if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-    if(audioCtx.state==='suspended')audioCtx.resume();
-    const freqs=esMP?[880,660,880,660]:[660,880];
-    let t=audioCtx.currentTime;
-    freqs.forEach(freq=>{
-      const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-      o.connect(g);g.connect(audioCtx.destination);
-      o.frequency.value=freq;o.type='sine';
-      g.gain.setValueAtTime(0.5,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.4);
-      o.start(t);o.stop(t+0.4);t+=0.45;
-    });
-  }catch(e){}
-}
-
-function mostrarAlerta(d){
-  document.getElementById('alerta-eq').textContent=d.equipo;
-  document.getElementById('alerta-pl').textContent=d.planta+' · '+d.tipo+' · '+d.prioridad;
-  const al=document.getElementById('alerta');
-  al.classList.add('show');
-  setTimeout(()=>al.classList.remove('show'),6000);
-}
-
-const SCRIPT_URL_POST = 'https://script.google.com/macros/s/AKfycbzYcmmkMeFQjrWGDYl_PCMTdFypBK1KZ0ZGPlR1Nyluo4nbJTWOtU6Ae7kLhr92GT0u/exec';
-let reprogId = null;
-
-function enviarATaller(id){
-  fetch(SCRIPT_URL_POST,{
-    method:'POST',mode:'no-cors',
-    body:JSON.stringify({accion:'enviar_a_taller',id_denuncia:id})
-  }).catch(()=>{});
-  const d=TODAS.find(x=>String(x.id)===String(id));
-  if(d){
-    d.visible_taller='si';
-    d.estado = d.estado==='Reprogramada' ? 'Pendiente' : d.estado;
-    d.reprogramada='';
-  }
-  renderTabla();
-}
-
-function abrirReprog(id){
-  reprogId=id;
-  const d=TODAS.find(x=>String(x.id)===String(id));
-  document.getElementById('modal-desc').textContent=d?(d.equipo+' — '+d.planta):id;
-  const pad=n=>String(n).padStart(2,'0');
-
-  // Si ya tiene fecha programada, mostrarla; sino default mañana 08:00
-  let fechaVal;
-  if(d && d.reprogramada && Number(d.reprogramada) > 0) {
-    const fp = new Date(Number(d.reprogramada));
-    fechaVal = fp.getFullYear()+'-'+pad(fp.getMonth()+1)+'-'+pad(fp.getDate())+'T'+pad(fp.getHours())+':'+pad(fp.getMinutes());
-  } else {
-    const manana=new Date();manana.setDate(manana.getDate()+1);manana.setHours(8,0,0,0);
-    fechaVal = manana.getFullYear()+'-'+pad(manana.getMonth()+1)+'-'+pad(manana.getDate())+'T08:00';
-  }
-  document.getElementById('modal-fecha').value = fechaVal;
-  document.getElementById('modal-bg').classList.add('show');
-}
-
-function cerrarModal(){
-  document.getElementById('modal-bg').classList.remove('show');
-  reprogId=null;
-}
-
-function confirmarReprog(){
-  if(!reprogId) return;
-  const fecha=document.getElementById('modal-fecha').value;
-  if(!fecha){alert('Seleccioná una fecha');return;}
-  fetch(SCRIPT_URL_POST,{
-    method:'POST',mode:'no-cors',
-    body:JSON.stringify({accion:'reprogramar',id_denuncia:reprogId,fecha_prog:new Date(fecha).getTime()})
-  }).catch(()=>{});
-  // Actualizar local
-  const d=TODAS.find(x=>String(x.id)===String(reprogId));
-  if(d){d.estado='Reprogramada';d.visible_taller='';}
-  cerrarModal();
-  renderTabla();
-  // Recargar datos del Sheet después de 2 segundos para reflejar cambio real
-  setTimeout(cargarDatos, 2000);
-}
-
+// ── CARGA DE DATOS ───────────────────────────────────────────────
 function cargarDatos(){
   fetch(SCRIPT_URL+'?t='+Date.now())
     .then(r=>r.json())
     .then(data=>{
-      TODAS=data.denuncias||[];
-      const activas=TODAS.filter(d=>d.estado!=='Finalizado');
+      TODAS = data.denuncias||[];
+      OTS   = data.ots||[];
+      const activas = TODAS.filter(d=>d.estado!=='Finalizado'&&d.estado!=='OT generada');
       if(!primeraVez){
         activas.forEach(d=>{
           if(!ultimosIds.has(String(d.id))){sonar(d.prioridad==='Máquina parada');mostrarAlerta(d);}
@@ -302,30 +474,32 @@ function cargarDatos(){
           }
         });
       }
-      ultimosIds=new Set(activas.map(d=>String(d.id)));
-      primeraVez=false;
+      ultimosIds = new Set(activas.map(d=>String(d.id)));
+      primeraVez = false;
       renderMetrics(data.promedio_min);
       renderTabla();
+      renderOTs();
       document.getElementById('sync-status').textContent='OK '+fmtNow();
       document.getElementById('f-fecha').textContent='Actualizado: '+fmtNow();
     })
     .catch(()=>{document.getElementById('sync-status').textContent='Error de conexión';});
 }
 
+// ── MÉTRICAS ─────────────────────────────────────────────────────
 function renderMetrics(promedio){
   const total=TODAS.length;
   const pend=TODAS.filter(d=>d.estado==='Pendiente').length;
   const proc=TODAS.filter(d=>d.estado==='En proceso').length;
   const fin=TODAS.filter(d=>d.estado==='Finalizado').length;
-  const prom=promedio?(promedio>=60?(promedio/60).toFixed(1)+' hs':promedio+' min'):'—';
   document.getElementById('m-total').textContent=total;
   document.getElementById('m-pend').textContent=pend;
   document.getElementById('m-proc').textContent=proc;
   document.getElementById('m-fin').textContent=fin;
-  document.getElementById('m-tiempo').textContent=prom;
+  document.getElementById('m-ot').textContent=OTS.length;
   document.getElementById('m-pend-sub').textContent=pend+' sin atender';
 }
 
+// ── TABLA DENUNCIAS ──────────────────────────────────────────────
 function filtradas(){
   const est=document.getElementById('f-estado').value;
   const tipo=document.getElementById('f-tipo').value;
@@ -341,79 +515,347 @@ function fmtElapsed(ini){const s=Math.max(0,Math.floor((Date.now()-ini.getTime()
 function renderTabla(){
   const list=filtradas();
   const tb=document.getElementById('tbody');
-  if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="9">No hay denuncias</td></tr>';document.getElementById('f-count').textContent='0 denuncias';return;}
-  const eo={'En proceso':0,'Pendiente':1,'Finalizado':2},po={'Máquina parada':0,'Baja':1};
+  if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="8">No hay denuncias</td></tr>';document.getElementById('f-count').textContent='0 denuncias';return;}
+  const eo={'Pendiente':0,'En proceso':1,'OT generada':2,'Finalizado':3};
+  const po={'Máquina parada':0,'Baja':1};
   list.sort((a,b)=>(eo[a.estado]||0)-(eo[b.estado]||0)||(po[a.prioridad]||1)-(po[b.prioridad]||1));
   tb.innerHTML=list.map(d=>{
     const esMP=d.prioridad==='Máquina parada'&&d.estado==='Pendiente';
     const bT=d.tipo==='Eléctrica'?'b-elec':d.tipo==='Mecánica'?'b-mec':d.tipo==='Soldadura'?'b-sold':'b-indef';
     const dotC=d.tipo==='Eléctrica'?'dot-e':d.tipo==='Mecánica'?'dot-m':d.tipo==='Soldadura'?'dot-s':'dot-i';
     const bP=d.prioridad==='Máquina parada'?'b-mp':'b-baja';
-    const bE=d.estado==='Finalizado'?'b-fin':d.estado==='En proceso'?'b-proc':'b-pend';
+    const yaOT = d.estado==='OT generada';
+    const bE=yaOT?'b-ot':d.estado==='Finalizado'?'b-fin':d.estado==='En proceso'?'b-proc':'b-pend';
     const op=d.operario||'—';
     const ini=op!=='—'?op.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase():'?';
     const tc=d.estado==='En proceso'&&tiemposInicio[String(d.id)]
       ?`<span class="tc-run" id="tel${d.id}">${fmtElapsed(tiemposInicio[String(d.id)])}</span>`
-      :d.estado==='Pendiente'
+      :d.estado==='Pendiente'||d.estado==='OT generada'
       ?'<span class="tc-pend">Sin tomar</span>'
       :d.estado==='Reprogramada'
       ?'<span class="tc-stop">Reprogramada</span>'
       :'<span class="tc-stop">—</span>';
-    // Botones solo para Baja + Pendiente o Reprogramada
-    const esBaja = d.prioridad==='Baja';
-    const esAccionable = esBaja && (d.estado==='Pendiente'||d.estado==='Reprogramada');
-    // Estado visual de acciones
-    const enTaller = d.visible_taller === 'si';
-    const esReprog = d.estado === 'Reprogramada';
-    let tdAcciones;
-    if(esBaja) {
-      // Botón activo resaltado, el otro disponible pero apagado
-      tdAcciones = `<td style="white-space:nowrap;vertical-align:middle">
-        <button class="btn-taller${enTaller?' btn-active':''}"
-          onclick="enviarATaller('${d.id}')" title="${enTaller?'Ya enviada al taller':'Enviar al taller'}">
-          ${enTaller?'✓ En taller':'→ Taller'}
+    // Botón OT
+    let tdAcc;
+    if(yaOT){
+      const ot=OTS.find(o=>String(o.id_denuncia)===String(d.id));
+      tdAcc=`<td><span class="btn-ot btn-ot-active" title="OT generada: ${ot?ot.num_ot:'—'}">${ot?ot.num_ot:'✓ OT'}</span></td>`;
+    } else if(d.estado==='Finalizado'){
+      tdAcc=`<td style="color:#374151;font-size:12px">—</td>`;
+    } else {
+      tdAcc=`<td>
+        <button class="btn-ot" onclick="abrirModalOT('${d.id}')" title="Generar Orden de Trabajo">
+          + Generar OT
         </button>
-        <button class="btn-reprog${esReprog?' btn-active-reprog':''}"
-          onclick="abrirReprog('${d.id}')" title="${esReprog?'Reprogramada — click para cambiar fecha':'Reprogramar para más tarde'}">
-          ${esReprog?'✓ Reprog.':'⏱ Reprog.'}
+        <button class="btn-reprog${d.estado==='Reprogramada'?' btn-active-reprog':''}" onclick="abrirReprog('${d.id}')" style="margin-left:4px">
+          ${d.estado==='Reprogramada'?'✓ Reprog.':'⏱'}
         </button>
       </td>`;
-    } else {
-      tdAcciones = '<td style="color:#374151;font-size:12px">—</td>';
     }
     return `<tr class="${esMP?'tr-mp':''}">
+      <td class="td-fecha" style="font-family:'Courier New',monospace;font-size:12px;color:#a78bfa;font-weight:700">#${d.id}</td>
       <td class="td-fecha">${d.fecha} ${d.hora}</td>
       <td class="td-pl">${d.planta}</td>
       <td class="td-eq">${d.equipo}</td>
       <td><span class="taller-dot ${dotC}"></span><span class="badge ${bT}">${d.tipo}</span></td>
       <td><span class="badge ${bP}">${d.prioridad}</span></td>
-      <td><div class="op-cell"><div class="av">${ini}</div>${op}</div></td>
-      <td>${tc}</td>
-      <td><span class="badge ${bE}">${d.estado}</span></td>
-      ${tdAcciones}
+      <td><span class="badge ${bE}">${d.estado==='OT generada'?'OT generada':d.estado}</span></td>
+      ${tdAcc}
     </tr>`;
   }).join('');
   document.getElementById('f-count').textContent=list.length+' denuncias';
 }
 
+// ── TABLA OTs ─────────────────────────────────────────────────────
+function renderOTs(){
+  const est=document.getElementById('fot-estado').value;
+  let list=[...OTS];
+  if(est==='activas') list=list.filter(o=>o.estado!=='Finalizado');
+  else if(est!=='all') list=list.filter(o=>o.estado===est);
+  list.sort((a,b)=>String(b.num_ot).localeCompare(String(a.num_ot)));
+  const tb=document.getElementById('tbody-ot');
+  document.getElementById('fot-count').textContent=list.length+' OTs';
+  document.getElementById('f-count').textContent=list.length+' OTs';
+  if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="12">No hay órdenes de trabajo</td></tr>';return;}
+  tb.innerHTML=list.map(o=>{
+    const bE=o.estado==='Finalizado'?'b-ot-fin':o.estado==='En proceso'?'b-ot-proc':'b-ot-pend';
+    const tagTipo=o.tipo_trabajo==='Preventivo'?'tag-prev':'tag-corr';
+    // Taller: usar el del dato o calcularlo desde planta/tipo
+    const tallerVal = o.taller && o.taller!=='—' ? o.taller
+                    : o.planta==='Mototransporte' ? 'Mototransporte'
+                    : o.tipo==='Eléctrica'        ? 'Eléctrico'
+                    : 'Mecánico';
+    const tallerColor=tallerVal==='Eléctrico'?'b-elec':tallerVal==='Mototransporte'?'b-fin':'b-mec';
+    // Fecha: normalizar formato ISO a dd/mm/aaaa
+    let fechaFmt=o.fecha||'—';
+    if(fechaFmt.includes('T')){
+      const fd=new Date(fechaFmt);
+      if(!isNaN(fd)){fechaFmt=pad(fd.getDate())+'/'+pad(fd.getMonth()+1)+'/'+fd.getFullYear();}
+    }
+    // Operario y tiempo en OT
+    const opOT = o.operario || '—';
+    const iniOT = opOT !== '—' ? opOT.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase() : '?';
+    const tcOT = o.estado==='En proceso' && o.hora_inicio && Number(o.hora_inicio)>0
+      ? `<span class="tc-run" id="tot${o.num_ot.replace(/[^a-z0-9]/gi,'-')}">${fmtElapsed(new Date(Number(o.hora_inicio)))}</span>`
+      : o.estado==='Pendiente'
+      ? '<span class="tc-pend">Sin tomar</span>'
+      : '<span class="tc-stop">—</span>';
+    return `<tr>
+      <td class="tb-ot-num">${o.num_ot}</td>
+      <td class="td-fecha">#${o.id_denuncia}</td>
+      <td class="td-fecha">${fechaFmt}${o.hora?' '+o.hora:''}</td>
+      <td class="td-pl">${o.planta}</td>
+      <td class="td-eq">${o.equipo}</td>
+      <td><span class="badge ${tallerColor}">${tallerVal}</span></td>
+      <td><span class="${tagTipo}">${o.tipo_trabajo||'—'}</span></td>
+      <td><span class="badge ${o.prioridad==='Máquina parada'?'b-mp':'b-baja'}">${o.prioridad}</span></td>
+      <td><div class="op-cell"><div class="av">${iniOT}</div>${opOT}</div></td>
+      <td>${tcOT}</td>
+      <td><span class="badge ${bE}">${o.estado}</span></td>
+      <td><button class="btn-ot" onclick="toggleOTExpand('ot-${o.num_ot}')" style="padding:3px 8px;font-size:10px">▼ Detalle</button></td>
+    </tr>
+    <tr class="ot-expand-row" id="ot-${o.num_ot.replace(/[^a-z0-9]/gi,'-')}" style="display:none">
+      <td colspan="12">
+        <div class="ot-expand-inner">
+          <div class="ot-expand-field"><div class="ot-expand-lbl">Trabajo realizado</div><div class="ot-expand-val">${o.trabajo||'—'}</div></div>
+          <div class="ot-expand-field"><div class="ot-expand-lbl">Material utilizado</div><div class="ot-expand-val">${o.material||'—'}</div></div>
+          <div class="ot-expand-field"><div class="ot-expand-lbl">Observaciones</div><div class="ot-expand-val">${o.observaciones||'—'}</div></div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('fot-fecha').textContent='Actualizado: '+fmtNow();
+}
+
+function toggleOTExpand(id){
+  const safe=id.replace(/[^a-z0-9]/gi,'-');
+  const row=document.getElementById(safe);
+  if(!row)return;
+  row.style.display=row.style.display==='none'?'':'none';
+}
+
+// ── MODAL OT ─────────────────────────────────────────────────────
+function abrirModalOT(id){
+  otDenId=id;
+  otTipo='';otPrio='';
+  const d=TODAS.find(x=>String(x.id)===String(id));
+  if(!d)return;
+
+  // Prellenar prioridad desde la denuncia
+  otPrio=d.prioridad||'';
+  document.getElementById('ot-btn-baja').className='ot-prio-btn'+(otPrio==='Baja'?' on-baja':'');
+  document.getElementById('ot-btn-mp').className='ot-prio-btn'+(otPrio==='Máquina parada'?' on-mp':'');
+
+  // Card denuncia origen
+  const bT=d.tipo==='Eléctrica'?'b-elec':d.tipo==='Mecánica'?'b-mec':d.tipo==='Soldadura'?'b-sold':'b-indef';
+  const bP=d.prioridad==='Máquina parada'?'b-mp':'b-baja';
+
+  // Taller responsable — automático según planta y tipo
+  otTaller = d.planta==='Mototransporte' ? 'Mototransporte'
+           : d.tipo==='Eléctrica'        ? 'Eléctrico'
+           : 'Mecánico';
+  const taller = otTaller;
+  const bTaller = taller==='Eléctrico'      ? 'background:#0c1a3a;color:#60a5fa;border:1px solid #1d3a6e'
+                : taller==='Mototransporte' ? 'background:#052e16;color:#34d399;border:1px solid #14532d'
+                : 'background:#1c0a00;color:#fb923c;border:1px solid #7c2d12';
+
+  document.getElementById('ot-den-card').innerHTML=`
+    <div style="font-size:11px;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Denuncia origen #${d.id}</div>
+    <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px">${d.equipo}</div>
+    <div style="font-size:12px;color:#a78bfa;margin-bottom:8px">${d.planta}</div>
+    <div class="ot-den-row">
+      <span class="badge ${bT} ot-den-chip">${d.tipo}</span>
+      <span class="badge ${bP} ot-den-chip">${d.prioridad}</span>
+      <span style="font-size:11px;color:#6b7280">${d.fecha}</span>
+    </div>
+    <div style="margin-top:8px;display:flex;align-items:center;gap:6px">
+      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7280">Taller</span>
+      <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;${bTaller}">${taller}</span>
+    </div>
+    <div class="ot-den-desc" style="margin-top:8px">${d.descripcion||''}</div>`;
+
+  // Calcular próximo N° OT
+  const nextN=OTS.length+1;
+  const numOT='OT-'+String(nextN).padStart(3,'0');
+  document.getElementById('ot-sub-num').textContent=numOT;
+
+  // Mostrar selector o input según planta
+  const esMoto = d.planta === 'Mototransporte';
+  document.getElementById('ot-trabajo').style.display      = esMoto ? 'none' : '';
+  document.getElementById('ot-trabajo-moto').style.display = esMoto ? '' : 'none';
+
+  // Prellenar selector con el tipo de la denuncia si coincide
+  if(esMoto){
+    const sel=document.getElementById('ot-trabajo-moto');
+    sel.value = [...sel.options].some(o=>o.value===d.tipo) ? d.tipo : '';
+  }
+
+  // Limpiar campos
+  document.getElementById('ot-btn-corr').className='ot-tipo-btn';
+  document.getElementById('ot-btn-prev').className='ot-tipo-btn';
+  if(!esMoto) document.getElementById('ot-trabajo').value='';
+  document.getElementById('ot-material').value='';
+  document.getElementById('ot-obs').value='';
+  document.querySelectorAll('.ot-err').forEach(e=>e.style.display='none');
+
+  document.getElementById('modal-ot-bg').classList.add('show');
+}
+
+function cerrarModalOT(){
+  document.getElementById('modal-ot-bg').classList.remove('show');
+  otDenId=null;otTipo='';otPrio='';otTaller='';
+}
+
+function setOTTipo(t){
+  otTipo=t;
+  document.getElementById('ot-btn-corr').className='ot-tipo-btn'+(t==='Correctivo'?' on-corr':'');
+  document.getElementById('ot-btn-prev').className='ot-tipo-btn'+(t==='Preventivo'?' on-prev':'');
+  document.getElementById('err-ot-tipo').style.display='none';
+}
+
+function setOTPrio(p){
+  otPrio=p;
+  document.getElementById('ot-btn-baja').className='ot-prio-btn'+(p==='Baja'?' on-baja':'');
+  document.getElementById('ot-btn-mp').className='ot-prio-btn'+(p==='Máquina parada'?' on-mp':'');
+  document.getElementById('err-ot-prio').style.display='none';
+}
+
+function confirmarOT(){
+  const d=TODAS.find(x=>String(x.id)===String(otDenId));
+  if(!d)return;
+
+  let ok=true;
+  if(!otTipo){document.getElementById('err-ot-tipo').style.display='block';ok=false;}
+  if(!otPrio){document.getElementById('err-ot-prio').style.display='block';ok=false;}
+  const esMoto = d.planta === 'Mototransporte';
+  const trab = esMoto
+    ? document.getElementById('ot-trabajo-moto').value.trim()
+    : document.getElementById('ot-trabajo').value.trim();
+  if(!trab){document.getElementById('err-ot-trabajo').style.display='block';ok=false;}
+  if(!ok)return;
+
+  const nextN=OTS.length+1;
+  const numOT='OT-'+String(nextN).padStart(3,'0');
+  const now=new Date();
+  const fecha=pad(now.getDate())+'/'+pad(now.getMonth()+1)+'/'+now.getFullYear();
+  const hora=pad(now.getHours())+':'+pad(now.getMinutes());
+
+  const payload={
+    accion:'crear_ot',
+    num_ot:numOT,
+    id_denuncia:otDenId,
+    fecha:fecha,
+    hora:hora,
+    planta:d.planta,
+    equipo:d.equipo,
+    tipo:d.tipo,
+    taller:otTaller,
+    tipo_trabajo:otTipo,
+    prioridad:otPrio,
+    descripcion:d.descripcion,
+    trabajo:trab,
+    material:document.getElementById('ot-material').value.trim(),
+    observaciones:document.getElementById('ot-obs').value.trim()
+  };
+
+  // Envío por POST no-cors (más confiable que img.src para payloads largos)
+  fetch(SCRIPT_URL_POST,{
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify(payload)
+  }).catch(()=>{});
+
+  // Actualización local inmediata
+  d.estado='OT generada';
+  OTS.push({
+    num_ot:numOT,
+    id_denuncia:otDenId,
+    fecha:fecha,
+    hora:hora,
+    planta:d.planta,
+    equipo:d.equipo,
+    tipo:d.tipo,
+    taller:otTaller,
+    tipo_trabajo:otTipo,
+    prioridad:otPrio,
+    descripcion:d.descripcion,
+    trabajo:trab,
+    material:payload.material,
+    observaciones:payload.observaciones,
+    estado:'Pendiente'
+  });
+
+  cerrarModalOT();
+  renderMetrics(0);
+  renderTabla();
+  renderOTs();
+
+  // Recargar del Sheet después de 3s para reflejar cambios reales
+  setTimeout(cargarDatos,3000);
+}
+
+// ── REPROGRAMAR ───────────────────────────────────────────────────
+let reprogId=null;
+function abrirReprog(id){
+  reprogId=id;
+  const d=TODAS.find(x=>String(x.id)===String(id));
+  document.getElementById('modal-desc').textContent=d?(d.equipo+' — '+d.planta):id;
+  const manana=new Date();manana.setDate(manana.getDate()+1);manana.setHours(8,0,0,0);
+  document.getElementById('modal-fecha').value=manana.getFullYear()+'-'+pad(manana.getMonth()+1)+'-'+pad(manana.getDate())+'T08:00';
+  document.getElementById('modal-bg').classList.add('show');
+}
+function cerrarModal(){document.getElementById('modal-bg').classList.remove('show');reprogId=null;}
+function confirmarReprog(){
+  if(!reprogId)return;
+  const fecha=document.getElementById('modal-fecha').value;
+  if(!fecha){alert('Seleccioná una fecha');return;}
+  fetch(SCRIPT_URL_POST,{method:'POST',mode:'no-cors',body:JSON.stringify({accion:'reprogramar',id_denuncia:reprogId,fecha_prog:new Date(fecha).getTime()})}).catch(()=>{});
+  const d=TODAS.find(x=>String(x.id)===String(reprogId));
+  if(d){d.estado='Reprogramada';d.visible_taller='';}
+  cerrarModal();renderTabla();
+  setTimeout(cargarDatos,2000);
+}
+
+// ── TERCERIZAR ────────────────────────────────────────────────────
+let tercId=null;
+function abrirTerc(id){tercId=id;const d=TODAS.find(x=>String(x.id)===String(id));document.getElementById('modal-terc-desc').textContent=d?(d.equipo+' — '+d.planta):id;document.getElementById('modal-terc-empresa').value='';document.getElementById('modal-terc-bg').classList.add('show');}
+function cerrarModalTerc(){document.getElementById('modal-terc-bg').classList.remove('show');tercId=null;}
+function confirmarTerc(){
+  if(!tercId)return;const empresa=document.getElementById('modal-terc-empresa').value;if(!empresa){alert('Seleccioná una empresa');return;}
+  fetch(SCRIPT_URL_POST,{method:'POST',mode:'no-cors',body:JSON.stringify({accion:'tercerizar',id_denuncia:tercId,empresa:empresa})}).catch(()=>{});
+  const d=TODAS.find(x=>String(x.id)===String(tercId));if(d){d.tercerizada=empresa;d.visible_taller='';d.estado=d.estado==='Reprogramada'?'Pendiente':d.estado;}
+  cerrarModalTerc();renderTabla();setTimeout(cargarDatos,2000);
+}
+
+// ── UTILIDADES ────────────────────────────────────────────────────
+function cambiarVista(){
+  const v=document.getElementById('f-vista').value;
+  const esDen=v==='denuncias';
+  document.getElementById('vista-denuncias').style.display=esDen?'':'none';
+  document.getElementById('vista-ots').style.display=esDen?'none':'';
+  document.getElementById('filtros-den').style.display=esDen?'flex':'none';
+  document.getElementById('filtros-ot').style.display=esDen?'none':'flex';
+  document.getElementById('tabla-titulo').textContent=esDen?'Denuncias — Generar OT':'Órdenes de trabajo';
+  document.getElementById('tabla-hdr').className='panel-hdr'+(esDen?'':' panel-ot-hdr');
+  if(esDen) renderTabla(); else renderOTs();
+}
+
 function pad(n){return String(n).padStart(2,'0');}
 function fmtNow(){const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());}
 setInterval(()=>{const d=new Date();document.getElementById('clock').textContent=pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());},1000);
-setInterval(()=>{Object.keys(tiemposInicio).forEach(id=>{const el=document.getElementById('tel'+id);if(el)el.textContent=fmtElapsed(tiemposInicio[id]);});},1000);
+setInterval(()=>{
+  Object.keys(tiemposInicio).forEach(id=>{const el=document.getElementById('tel'+id);if(el)el.textContent=fmtElapsed(tiemposInicio[id]);});
+  OTS.forEach(o=>{
+    if(o.estado==='En proceso'&&o.hora_inicio&&Number(o.hora_inicio)>0){
+      const el=document.getElementById('tot'+o.num_ot.replace(/[^a-z0-9]/gi,'-'));
+      if(el)el.textContent=fmtElapsed(new Date(Number(o.hora_inicio)));
+    }
+  });
+},1000);
+
 cargarDatos();
-setInterval(cargarDatos,30000);
+setInterval(cargarDatos,5000);
 </script>
-<!-- Modal reprogramar -->
-<div class="modal-bg" id="modal-bg">
-  <div class="modal">
-    <div class="modal-title">⏱ Reprogramar denuncia</div>
-    <div class="modal-sub" id="modal-desc">—</div>
-    <input type="datetime-local" id="modal-fecha">
-    <div class="modal-btns">
-      <button class="mbtn mbtn-cancel" onclick="cerrarModal()">Cancelar</button>
-      <button class="mbtn mbtn-ok" onclick="confirmarReprog()">Reprogramar</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
