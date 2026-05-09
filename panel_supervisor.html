@@ -1,861 +1,470 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Supervisor — Panel General</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0f1a;color:#fff;min-height:100vh}
-.topbar{background:#0d1424;border-bottom:2px solid #2a2f3e;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between}
-.topbar-left{display:flex;align-items:center;gap:14px}
-.top-logo{width:36px;height:36px;background:#7c3aed;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.top-title{font-size:15px;font-weight:700;color:#fff;letter-spacing:0.03em;text-transform:uppercase}
-.top-taller{font-size:12px;color:#a78bfa;margin-top:2px;font-weight:600}
-.top-right{display:flex;align-items:center;gap:12px}
-.top-clock{font-size:13px;color:#c4b5fd;font-family:'Courier New',monospace;white-space:nowrap}
-.sync-status{font-size:11px;color:#6d28d9;font-family:'Courier New',monospace}
-.dot-live{width:10px;height:10px;background:#34d399;border-radius:50%;animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
-.main{padding:14px 24px}
-.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
-.metric{background:#0d1424;border:1px solid #2a2f3e;border-radius:10px;padding:14px 18px}
-.metric-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
-.metric-val{font-size:36px;font-weight:700;line-height:1}
-.metric-sub{font-size:11px;color:#6b7280;margin-top:4px}
-.m1 .metric-lbl,.m1 .metric-val{color:#a78bfa}
-.m2 .metric-lbl,.m2 .metric-val{color:#fbbf24}
-.m3 .metric-lbl,.m3 .metric-val{color:#34d399}
-.m4 .metric-lbl,.m4 .metric-val{color:#60a5fa}
-.m5 .metric-lbl,.m5 .metric-val{color:#fb923c}
-.panel{background:#0d1424;border:1px solid #2a2f3e;border-radius:10px;overflow:hidden;margin-bottom:14px}
-.panel-hdr{padding:12px 18px;border-bottom:1px solid #2a2f3e;display:flex;align-items:center;justify-content:space-between}
-.panel-title{font-size:14px;font-weight:700;color:#fff}
-.filters{display:flex;gap:8px;align-items:center}
-.fsel{background:#0a0f1a;border:1px solid #2a2f3e;border-radius:6px;color:#9ca3af;font-size:12px;padding:6px 10px;font-family:inherit;outline:none}
-table{width:100%;border-collapse:collapse}
-thead tr{background:#060c16}
-th{padding:10px 14px;font-size:11px;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:0.08em;text-align:left;border-bottom:1px solid #2a2f3e;white-space:nowrap}
-td{padding:11px 14px;font-size:14px;color:#d1d5db;border-bottom:1px solid #111827;white-space:nowrap}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:#111827}
-.td-fecha{font-family:'Courier New',monospace;font-size:12px;color:#6b7280}
-.td-eq{font-weight:600;color:#fff;font-size:14px;max-width:200px;overflow:hidden;text-overflow:ellipsis}
-.td-pl{font-size:14px;font-weight:600;color:#a78bfa}
-.op-cell{display:flex;align-items:center;gap:8px}
-.av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;background:#2a1f4e;color:#a78bfa}
-.tc-run{color:#34d399;font-family:'Courier New',monospace;font-size:12px}
-.tc-pend{color:#fbbf24;font-family:'Courier New',monospace;font-size:12px}
-.tc-stop{color:#6b7280;font-family:'Courier New',monospace;font-size:12px}
-.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
-.b-pend{background:#292208;color:#fbbf24;border:1px solid #713f12}
-.b-proc{background:#0c1a3a;color:#60a5fa;border:1px solid #1d3a6e}
-.b-fin{background:#052e16;color:#34d399;border:1px solid #14532d}
-.b-ot{background:#1a0d3a;color:#c084fc;border:1px solid #7c3aed}
-.b-mp{background:#2d0a0a;color:#f87171;border:1px solid #7f1d1d}
-.b-baja{background:#052e16;color:#34d399;border:1px solid #14532d}
-.b-elec{background:#0c1a3a;color:#60a5fa;border:1px solid #1d3a6e}
-.b-mec{background:#1c0a00;color:#fb923c;border:1px solid #7c2d12}
-.b-indef{background:#1f2937;color:#9ca3af;border:1px solid #374151}
-.b-sold{background:#1a0a2e;color:#c084fc;border:1px solid #7e22ce}
-.panel-footer{padding:10px 18px;border-top:1px solid #2a2f3e;display:flex;justify-content:space-between;align-items:center}
-.footer-txt{font-size:12px;color:#4b5563}
-.empty-row td{text-align:center;color:#4b5563;padding:2.5rem;font-size:14px}
-.tr-mp{animation:blink-row 1.2s ease-in-out infinite}
-@keyframes blink-row{0%,100%{background:transparent}50%{background:rgba(248,113,113,0.12)}}
-.taller-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
-.dot-e{background:#60a5fa}.dot-m{background:#fb923c}.dot-s{background:#c084fc}.dot-i{background:#9ca3af}
-.alerta{position:fixed;top:16px;right:16px;background:#4c1d95;border:2px solid #a78bfa;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:700;color:#fff;display:none;z-index:99;max-width:300px;line-height:1.5}
-.alerta.show{display:block;animation:slideIn 0.3s ease}
-@keyframes slideIn{from{transform:translateX(120%)}to{transform:translateX(0)}}
-.alerta-titulo{font-size:11px;color:#c4b5fd;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px}
-.alerta-eq{font-size:15px;font-weight:700;color:#fff;margin-bottom:2px}
-.alerta-pl{font-size:12px;color:#c4b5fd}
-/* Modal base */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:100}
-.modal-bg.show{display:flex}
-.modal{background:#0d1424;border:1px solid #4c1d95;border-radius:14px;padding:24px;min-width:320px;max-width:400px}
-.modal-title{font-size:15px;font-weight:700;color:#fff;margin-bottom:6px}
-.modal-sub{font-size:12px;color:#6b7280;margin-bottom:18px}
-.modal input[type=datetime-local]{width:100%;background:#060c16;border:1px solid #2a2f3e;border-radius:8px;color:#fff;padding:9px 12px;font-size:14px;font-family:inherit;outline:none;margin-bottom:14px}
-.modal-btns{display:flex;gap:8px}
-.mbtn{flex:1;padding:10px;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
-.mbtn-cancel{background:#1f2937;color:#9ca3af}
-.mbtn-ok{background:#7c3aed;color:#fff}
-.btn-taller{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:none;cursor:pointer;background:#1d3a6e;color:#60a5fa;margin-right:4px;font-family:inherit}
-.btn-reprog{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:none;cursor:pointer;background:#2d1f4e;color:#a78bfa;font-family:inherit}
-.btn-taller:hover{background:#2a4a8e}
-.btn-reprog:hover{background:#3d2a6e}
-.btn-tercerizada{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:none;cursor:pointer;background:#1a2e1a;color:#4ade80;font-family:inherit}
-.btn-tercerizada:hover{background:#2d4a2d}
-.btn-active-terc{background:#166534!important;color:#fff!important;border:1px solid #4ade80}
-.modal-terc select{width:100%;background:#060c16;border:1px solid #2a2f3e;border-radius:8px;color:#fff;padding:9px 12px;font-size:14px;font-family:inherit;outline:none;margin-bottom:14px}
-.btn-active{background:#059669!important;color:#fff!important;border:1px solid #34d399}
-.btn-active-reprog{background:#7c3aed!important;color:#fff!important;border:1px solid #a78bfa}
-/* Botón generar OT */
-.btn-ot{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:none;cursor:pointer;background:#3b0764;color:#c084fc;font-family:inherit;margin-right:4px}
-.btn-ot:hover{background:#4c0a8e}
-.btn-ot-active{background:#7c3aed!important;color:#fff!important;border:1px solid #a78bfa}
-/* Modal OT — más ancho */
-.modal-ot{background:#0d1424;border:1px solid #7c3aed;border-radius:14px;padding:28px;width:560px;max-width:96vw;max-height:90vh;overflow-y:auto}
-.ot-header{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #2a2f3e}
-.ot-icon{width:38px;height:38px;background:#3b0764;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.ot-title{font-size:16px;font-weight:700;color:#fff}
-.ot-sub{font-size:12px;color:#a78bfa;margin-top:2px}
-.ot-den-card{background:#060c16;border:1px solid #2a2f3e;border-radius:8px;padding:12px 14px;margin-bottom:18px}
-.ot-den-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
-.ot-den-chip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px}
-.ot-den-desc{font-size:13px;color:#9ca3af;margin-top:6px;line-height:1.5}
-.ot-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6d28d9;margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid #1a1f2e}
-.ot-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.ot-field{display:flex;flex-direction:column;gap:4px}
-.ot-field.full{grid-column:1/-1}
-.ot-label{font-size:11px;font-weight:600;color:#6b7280}
-.ot-label .req{color:#f87171}
-.ot-input{background:#060c16;border:1px solid #2a2f3e;border-radius:7px;color:#e5e7eb;font-size:13px;padding:8px 11px;font-family:inherit;outline:none;transition:border-color .15s}
-.ot-input:focus{border-color:#7c3aed}
-.ot-select{background:#060c16;border:1px solid #2a2f3e;border-radius:7px;color:#e5e7eb;font-size:13px;padding:8px 11px;font-family:inherit;outline:none}
-.ot-textarea{background:#060c16;border:1px solid #2a2f3e;border-radius:7px;color:#e5e7eb;font-size:13px;padding:8px 11px;font-family:inherit;outline:none;resize:vertical;min-height:72px;transition:border-color .15s}
-.ot-textarea:focus{border-color:#7c3aed}
-.ot-tipo-group{display:flex;gap:8px}
-.ot-tipo-btn{flex:1;padding:9px;border:1px solid #2a2f3e;border-radius:7px;background:#060c16;cursor:pointer;font-size:12px;font-weight:700;color:#6b7280;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .12s;font-family:inherit}
-.ot-tipo-btn.on-corr{background:#1c0a00;border-color:#d97706;color:#fbbf24}
-.ot-tipo-btn.on-prev{background:#0c1a3a;border-color:#3b82f6;color:#60a5fa}
-.ot-tipo-btn.on-elec{background:#0c1a3a;border-color:#60a5fa;color:#93c5fd}
-.ot-tipo-btn.on-mec{background:#1c0a00;border-color:#fb923c;color:#fdba74}
-.ot-tipo-btn.on-moto{background:#052e16;border-color:#34d399;color:#6ee7b7}
-.ot-prio-group{display:flex;gap:8px}
-.ot-prio-btn{flex:1;padding:8px;border:1px solid #2a2f3e;border-radius:7px;background:#060c16;cursor:pointer;font-size:11px;font-weight:700;color:#6b7280;transition:all .12s;font-family:inherit}
-.ot-prio-btn.on-baja{background:#052e16;border-color:#059669;color:#34d399}
-.ot-prio-btn.on-mp{background:#2d0a0a;border-color:#dc2626;color:#f87171}
-.ot-err{font-size:11px;color:#f87171;display:none;margin-top:2px}
-.ot-footer{display:flex;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid #2a2f3e}
-.ot-btn-cancel{flex:0 0 auto;padding:10px 18px;border:1px solid #2a2f3e;border-radius:8px;background:none;color:#6b7280;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
-.ot-btn-ok{flex:1;padding:10px;border:none;border-radius:8px;background:#7c3aed;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px}
-.ot-btn-ok:hover{background:#6d28d9}
-.ot-btn-ok:disabled{opacity:.5;cursor:not-allowed}
-.ot-num-preview{font-size:11px;color:#a78bfa;font-family:'Courier New',monospace}
-/* Tabla OT */
-.panel-ot-hdr{background:#12082a;border-bottom:1px solid #3b0764}
-.panel-ot-hdr .panel-title{color:#c084fc}
-.tb-ot-num{font-family:'Courier New',monospace;font-size:12px;color:#a78bfa;font-weight:700}
-.b-ot-pend{background:#1a0d3a;color:#c084fc;border:1px solid #7c3aed}
-.b-ot-proc{background:#0c1a3a;color:#60a5fa;border:1px solid #1d3a6e}
-.b-ot-fin{background:#052e16;color:#34d399;border:1px solid #14532d}
-.tag-corr{background:#1c0a00;color:#fbbf24;border:1px solid #713f12;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
-.tag-prev{background:#0c1a3a;color:#60a5fa;border:1px solid #1d3a6e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
-/* Fila expandida OT */
-.ot-expand-row td{background:#0d1424;padding:0}
-.ot-expand-inner{padding:12px 18px;border-top:1px solid #1e2030;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.ot-expand-field{display:flex;flex-direction:column;gap:3px}
-.ot-expand-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#4b5563}
-.ot-expand-val{font-size:13px;color:#d1d5db}
-</style>
-</head>
-<body>
+// ─── CONFIGURACIÓN ───────────────────────────────────────────────
+const SHEET_ID   = '14GpOYxG_WQkzqomcuOybzJXhKkB4p8xolqo4wez5EcA';
+const FOLDER_ID  = '1fhIvWFnh_y9I0l9A76rL-dWZ9eKMdbNW';
+const EMAIL_DEST = 'mantenimiento-ruta1@isusa.com.uy';
+const PARTES_ID  = '1sd42JL3l9pBIfS0eDpiDyF48rR3-U9bMRABgwyWYk3E';
+// ─────────────────────────────────────────────────────────────────
 
-<div class="alerta" id="alerta">
-  <div class="alerta-titulo">🔔 Nueva denuncia</div>
-  <div class="alerta-eq" id="alerta-eq">—</div>
-  <div class="alerta-pl" id="alerta-pl">—</div>
-</div>
+// ── OBTENER / CREAR HOJA OT ──────────────────────────────────────
+function getHojaOT() {
+  const wb = SpreadsheetApp.openById(SHEET_ID);
+  let sh = wb.getSheetByName('ORDENES_TRABAJO');
+  if (!sh) {
+    sh = wb.insertSheet('ORDENES_TRABAJO');
+    sh.appendRow([
+      'N° OT','N° Denuncia','Fecha','Hora','Planta','Equipo',
+      'Tipo disciplina','Taller','Tipo trabajo','Prioridad','Descripción denuncia',
+      'Trabajo a realizar','Material utilizado','Observaciones',
+      'Estado','Operario','Hora inicio','Hora fin','Duración (min)'
+    ]);
+    sh.getRange(1,1,1,20).setFontWeight('bold').setBackground('#3b0764').setFontColor('#ffffff');
+    sh.setFrozenRows(1);
+    sh.setColumnWidths(1,18,120);
+  }
+  return sh;
+}
 
-<div class="topbar">
-  <div class="topbar-left">
-    <div class="top-logo">
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2l2.5 5 5.5.8-4 3.9.95 5.5L9 14.75 4.05 17.2 5 11.7 1 7.8l5.5-.8z" stroke="white" stroke-width="1.4" fill="none" stroke-linejoin="round"/></svg>
-    </div>
-    <div>
-      <div class="top-title">Panel Supervisor — Vista General</div>
-      <div class="top-taller">Todos los talleres · Eléctrico · Mecánico · Soldadura</div>
-    </div>
-  </div>
-  <div class="top-right">
-    <div class="sync-status" id="sync-status">Conectando...</div>
-    <div class="top-clock" id="clock">—</div>
-    <div class="dot-live"></div>
-  </div>
-</div>
-
-<div class="main">
-  <div class="metrics">
-    <div class="metric m1">
-      <div class="metric-lbl">Total denuncias</div>
-      <div class="metric-val" id="m-total">—</div>
-      <div class="metric-sub">Todos los talleres</div>
-    </div>
-    <div class="metric m2">
-      <div class="metric-lbl">Pendientes</div>
-      <div class="metric-val" id="m-pend">—</div>
-      <div class="metric-sub" id="m-pend-sub">Sin atender</div>
-    </div>
-    <div class="metric m3">
-      <div class="metric-lbl">En proceso</div>
-      <div class="metric-val" id="m-proc">—</div>
-      <div class="metric-sub">Siendo atendidas</div>
-    </div>
-    <div class="metric m4">
-      <div class="metric-lbl">Finalizadas</div>
-      <div class="metric-val" id="m-fin">—</div>
-      <div class="metric-sub">Resueltas</div>
-    </div>
-    <div class="metric m5">
-      <div class="metric-lbl">OTs generadas</div>
-      <div class="metric-val" id="m-ot">—</div>
-      <div class="metric-sub">Órdenes de trabajo</div>
-    </div>
-  </div>
-
-  <!-- TABLA UNIFICADA DENUNCIAS / OTs -->
-  <div class="panel">
-    <div class="panel-hdr" id="tabla-hdr">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="panel-title" id="tabla-titulo">Denuncias — Generar OT</div>
-      </div>
-      <div class="filters">
-        <!-- Selector principal vista -->
-        <select class="fsel" id="f-vista" onchange="cambiarVista()" style="font-weight:700;color:#a78bfa;border-color:#4c1d95">
-          <option value="denuncias">📋 Denuncias</option>
-          <option value="ots">⚙ Órdenes de trabajo</option>
-        </select>
-        <!-- Filtros denuncias -->
-        <span id="filtros-den" style="display:flex;gap:8px">
-          <select class="fsel" id="f-estado" onchange="renderTabla()">
-            <option value="activas">Activas (Pend + Proc)</option>
-            <option value="all">Todos los estados</option>
-            <option value="Pendiente">Pendiente</option>
-            <option value="OT generada">OT generada</option>
-            <option value="Finalizado">Finalizado</option>
-          </select>
-          <select class="fsel" id="f-tipo" onchange="renderTabla()">
-            <option value="all">Todos los tipos</option>
-            <option value="Eléctrica">Eléctrica</option>
-            <option value="Mecánica">Mecánica</option>
-            <option value="Soldadura">Soldadura</option>
-            <option value="Indefinida">Indefinida</option>
-          </select>
-        </span>
-        <!-- Filtros OTs -->
-        <span id="filtros-ot" style="display:none;gap:8px">
-          <select class="fsel" id="fot-estado" onchange="renderOTs()">
-            <option value="activas">Activas</option>
-            <option value="all">Todas</option>
-            <option value="Pendiente">Pendiente</option>
-            <option value="En proceso">En proceso</option>
-            <option value="Finalizado">Finalizado</option>
-          </select>
-        </span>
-        <div class="footer-txt" id="f-fecha">—</div>
-      </div>
-    </div>
-
-    <!-- Vista denuncias -->
-    <div id="vista-denuncias" style="overflow-x:auto">
-      <table>
-        <thead>
-          <tr>
-            <th>N° Den.</th>
-            <th>Fecha</th>
-            <th>Planta</th>
-            <th>Equipo</th>
-            <th>Tipo</th>
-            <th>Prioridad</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
-
-    <!-- Vista OTs -->
-    <div id="vista-ots" style="overflow-x:auto;display:none">
-      <table>
-        <thead>
-          <tr>
-            <th>N° OT</th>
-            <th>N° Den.</th>
-            <th>Fecha</th>
-            <th>Planta</th>
-            <th>Equipo</th>
-            <th>Taller</th>
-            <th>Tipo trabajo</th>
-            <th>Prioridad</th>
-            <th>Operario</th>
-            <th>Tiempo</th>
-            <th>Estado</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="tbody-ot"></tbody>
-      </table>
-    </div>
-
-    <div class="panel-footer">
-      <div class="footer-txt" id="f-count">—</div>
-      <div class="footer-txt">Actualización cada 5 seg</div>
-    </div>
-  </div>
-
-  <!-- Panel OTs oculto (necesario para compatibilidad) -->
-  <div class="panel" style="display:none">
-    <div class="panel-hdr panel-ot-hdr">
-      <div class="panel-title">📋 Órdenes de trabajo</div>
-      <div class="filters">
-        <div class="footer-txt" id="fot-count">—</div>
-      </div>
-    </div>
-    <div style="overflow-x:auto">
-      <table>
-        <thead>
-          <tr>
-            <th>N° OT</th>
-            <th>N° Den.</th>
-            <th>Fecha</th>
-            <th>Planta</th>
-            <th>Equipo</th>
-            <th>Tipo trabajo</th>
-            <th>Prioridad</th>
-            <th>Estado</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="tbody-ot-hidden"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- Modal OT -->
-<div class="modal-bg" id="modal-ot-bg">
-  <div class="modal-ot">
-    <div class="ot-header">
-      <div class="ot-icon">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="2" stroke="#c084fc" stroke-width="1.5" fill="none"/><path d="M7 6h6M7 9h6M7 12h4" stroke="#c084fc" stroke-width="1.2" stroke-linecap="round"/></svg>
-      </div>
-      <div>
-        <div class="ot-title">Generar Orden de Trabajo</div>
-        <div class="ot-sub" id="ot-sub-num">—</div>
-      </div>
-    </div>
-
-    <!-- Card con datos de la denuncia origen -->
-    <div class="ot-den-card" id="ot-den-card"></div>
-
-    <div class="ot-section">Tipo de trabajo</div>
-    <div class="ot-tipo-group">
-      <button class="ot-tipo-btn" id="ot-btn-corr" type="button" onclick="setOTTipo('Correctivo')">
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 11L11 2M2 2l9 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        Correctivo
-      </button>
-      <button class="ot-tipo-btn" id="ot-btn-prev" type="button" onclick="setOTTipo('Preventivo')">
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v2M6.5 10v2M1 6.5h2M10 6.5h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="6.5" cy="6.5" r="2.5" stroke="currentColor" stroke-width="1.3"/></svg>
-        Preventivo
-      </button>
-    </div>
-    <div class="ot-err" id="err-ot-tipo">Seleccioná el tipo de trabajo</div>
-
-    <div class="ot-section">Prioridad</div>
-    <div class="ot-prio-group">
-      <button class="ot-prio-btn" id="ot-btn-baja" type="button" onclick="setOTPrio('Baja')">Baja</button>
-      <button class="ot-prio-btn" id="ot-btn-mp" type="button" onclick="setOTPrio('Máquina parada')">Máquina parada</button>
-    </div>
-    <div class="ot-err" id="err-ot-prio">Seleccioná la prioridad</div>
-
-    <div class="ot-section">Detalles de la orden</div>
-    <div class="ot-grid">
-      <div class="ot-field">
-        <div class="ot-label">Trabajo a realizar <span class="req">*</span></div>
-        <!-- Input texto para plantas normales -->
-        <input id="ot-trabajo" class="ot-input" type="text" placeholder="Describí el trabajo a realizar">
-        <!-- Selector para Mototransporte -->
-        <select id="ot-trabajo-moto" class="ot-select" style="display:none">
-          <option value="">— Seleccionar tipo de tarea —</option>
-          <option>Service Motor</option>
-          <option>Service Caja</option>
-          <option>Service Diferencial</option>
-          <option>Sist. frenos</option>
-          <option>Carrocería</option>
-          <option>Sist. Eléctrico</option>
-          <option>Aire acondicionado</option>
-          <option>Ejes</option>
-          <option>Chasis/Equipo de trabajo</option>
-          <option>Transmisión</option>
-        </select>
-        <div class="ot-err" id="err-ot-trabajo">Campo obligatorio</div>
-      </div>
-      <div class="ot-field">
-        <div class="ot-label">Material utilizado</div>
-        <input id="ot-material" class="ot-input" type="text" placeholder="Repuestos, materiales...">
-      </div>
-      <div class="ot-field full">
-        <div class="ot-label">Observaciones</div>
-        <textarea id="ot-obs" class="ot-textarea" placeholder="Observaciones adicionales, condiciones del equipo, advertencias..."></textarea>
-      </div>
-    </div>
-
-    <div class="ot-footer">
-      <button class="ot-btn-cancel" onclick="cerrarModalOT()">Cancelar</button>
-      <button class="ot-btn-ok" id="ot-btn-ok" onclick="confirmarOT()">
-        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="2" y="1.5" width="11" height="12" rx="2" stroke="white" stroke-width="1.4" fill="none"/><path d="M5 5h5M5 7.5h5M5 10h3" stroke="white" stroke-width="1.2" stroke-linecap="round"/></svg>
-        Generar OT
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal tercerizada -->
-<div class="modal-bg" id="modal-terc-bg">
-  <div class="modal">
-    <div class="modal-title">🏢 Tercerizar denuncia</div>
-    <div class="modal-sub" id="modal-terc-desc">—</div>
-    <select id="modal-terc-empresa" class="modal-terc">
-      <option value="">— Seleccionar empresa —</option>
-      <option value="Almeida">Almeida</option>
-      <option value="Rojas">Rojas</option>
-      <option value="Piston">Piston</option>
-    </select>
-    <div class="modal-btns">
-      <button class="mbtn mbtn-cancel" onclick="cerrarModalTerc()">Cancelar</button>
-      <button class="mbtn mbtn-ok" style="background:#166534" onclick="confirmarTerc()">Tercerizar</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal reprogramar -->
-<div class="modal-bg" id="modal-bg">
-  <div class="modal">
-    <div class="modal-title">⏱ Reprogramar denuncia</div>
-    <div class="modal-sub" id="modal-desc">—</div>
-    <input type="datetime-local" id="modal-fecha">
-    <div class="modal-btns">
-      <button class="mbtn mbtn-cancel" onclick="cerrarModal()">Cancelar</button>
-      <button class="mbtn mbtn-ok" onclick="confirmarReprog()">Reprogramar</button>
-    </div>
-  </div>
-</div>
-
-<script>
-const SCRIPT_URL      = 'https://script.google.com/macros/s/AKfycbzZrVFEeBBgsIB-EQtwRlPsxhnKXsIh6-038J7ICIo9PPHyHqOiVVNLDLWspuAfmN-U/exec';
-const SCRIPT_URL_POST = 'https://script.google.com/macros/s/AKfycbzZrVFEeBBgsIB-EQtwRlPsxhnKXsIh6-038J7ICIo9PPHyHqOiVVNLDLWspuAfmN-U/exec';
-
-let TODAS = [];
-let OTS   = [];
-let ultimosIds = new Set();
-let primeraVez = true;
-let tiemposInicio = {};
-let otTipo = '', otPrio = '', otDenId = null, otTaller = '';
-
-// ── AUDIO ────────────────────────────────────────────────────────
-let audioCtx = null;
-setTimeout(()=>{try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}},100);
-function sonar(esMP){try{const f=esMP?880:660;const ctx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();const o=ctx.createOscillator();const g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=f;g.gain.setValueAtTime(0.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);o.start();o.stop(ctx.currentTime+0.4);}catch(e){}}
-function mostrarAlerta(d){document.getElementById('alerta-eq').textContent=d.equipo;document.getElementById('alerta-pl').textContent=d.planta+' · '+d.tipo+' · '+d.prioridad;const al=document.getElementById('alerta');al.classList.add('show');setTimeout(()=>al.classList.remove('show'),6000);}
-
-// ── CARGA DE DATOS ───────────────────────────────────────────────
-function cargarDatos(){
-  fetch(SCRIPT_URL+'?t='+Date.now())
-    .then(r=>r.json())
-    .then(data=>{
-      TODAS = data.denuncias||[];
-      OTS   = data.ots||[];
-      const activas = TODAS.filter(d=>d.estado!=='Finalizado'&&d.estado!=='OT generada');
-      if(!primeraVez){
-        activas.forEach(d=>{
-          if(!ultimosIds.has(String(d.id))){sonar(d.prioridad==='Máquina parada');mostrarAlerta(d);}
-          if(d.estado==='En proceso'&&d.hora_inicio&&Number(d.hora_inicio)>0){
-            tiemposInicio[String(d.id)]=new Date(Number(d.hora_inicio));
-          }
-        });
-      } else {
-        activas.forEach(d=>{
-          if(d.estado==='En proceso'&&d.hora_inicio&&Number(d.hora_inicio)>0){
-            tiemposInicio[String(d.id)]=new Date(Number(d.hora_inicio));
-          }
-        });
+// ── OBTENER EMAIL DE CONTACTO ────────────────────────────────────
+function getEmailContacto(nombre) {
+  try {
+    const wb = SpreadsheetApp.openById(SHEET_ID);
+    let sh = wb.getSheetByName('Contactos');
+    if (!sh) {
+      sh = wb.insertSheet('Contactos');
+      sh.appendRow(['Nombre', 'Correo']);
+      sh.getRange(1, 1, 1, 2).setFontWeight('bold');
+      sh.setColumnWidth(1, 200);
+      sh.setColumnWidth(2, 250);
+      return null;
+    }
+    const rows = sh.getDataRange().getValues();
+    for (let i = 1; i < rows.length; i++) {
+      if (String(rows[i][0]).trim().toUpperCase() === String(nombre).trim().toUpperCase()) {
+        return rows[i][1] ? String(rows[i][1]).trim() : null;
       }
-      ultimosIds = new Set(activas.map(d=>String(d.id)));
-      primeraVez = false;
-      renderMetrics(data.promedio_min);
-      renderTabla();
-      renderOTs();
-      document.getElementById('sync-status').textContent='OK '+fmtNow();
-      document.getElementById('f-fecha').textContent='Actualizado: '+fmtNow();
-    })
-    .catch(()=>{document.getElementById('sync-status').textContent='Error de conexión';});
-}
-
-// ── MÉTRICAS ─────────────────────────────────────────────────────
-function renderMetrics(promedio){
-  const total=TODAS.length;
-  const pend=TODAS.filter(d=>d.estado==='Pendiente').length;
-  const proc=TODAS.filter(d=>d.estado==='En proceso').length;
-  const fin=TODAS.filter(d=>d.estado==='Finalizado').length;
-  document.getElementById('m-total').textContent=total;
-  document.getElementById('m-pend').textContent=pend;
-  document.getElementById('m-proc').textContent=proc;
-  document.getElementById('m-fin').textContent=fin;
-  document.getElementById('m-ot').textContent=OTS.length;
-  document.getElementById('m-pend-sub').textContent=pend+' sin atender';
-}
-
-// ── TABLA DENUNCIAS ──────────────────────────────────────────────
-function filtradas(){
-  const est=document.getElementById('f-estado').value;
-  const tipo=document.getElementById('f-tipo').value;
-  let list=[...TODAS];
-  if(est==='activas') list=list.filter(d=>d.estado!=='Finalizado');
-  else if(est!=='all') list=list.filter(d=>d.estado===est);
-  if(tipo!=='all') list=list.filter(d=>d.tipo===tipo);
-  return list;
-}
-
-function fmtElapsed(ini){const s=Math.max(0,Math.floor((Date.now()-ini.getTime())/1000));return pad(Math.floor(s/3600))+'h '+pad(Math.floor((s%3600)/60))+'m '+pad(s%60)+'s';}
-
-function renderTabla(){
-  const list=filtradas();
-  const tb=document.getElementById('tbody');
-  if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="8">No hay denuncias</td></tr>';document.getElementById('f-count').textContent='0 denuncias';return;}
-  const eo={'Pendiente':0,'En proceso':1,'OT generada':2,'Finalizado':3};
-  const po={'Máquina parada':0,'Baja':1};
-  list.sort((a,b)=>(eo[a.estado]||0)-(eo[b.estado]||0)||(po[a.prioridad]||1)-(po[b.prioridad]||1));
-  tb.innerHTML=list.map(d=>{
-    const esMP=d.prioridad==='Máquina parada'&&d.estado==='Pendiente';
-    const bT=d.tipo==='Eléctrica'?'b-elec':d.tipo==='Mecánica'?'b-mec':d.tipo==='Soldadura'?'b-sold':'b-indef';
-    const dotC=d.tipo==='Eléctrica'?'dot-e':d.tipo==='Mecánica'?'dot-m':d.tipo==='Soldadura'?'dot-s':'dot-i';
-    const bP=d.prioridad==='Máquina parada'?'b-mp':'b-baja';
-    const yaOT = d.estado==='OT generada';
-    const bE=yaOT?'b-ot':d.estado==='Finalizado'?'b-fin':d.estado==='En proceso'?'b-proc':'b-pend';
-    const op=d.operario||'—';
-    const ini=op!=='—'?op.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase():'?';
-    const tc=d.estado==='En proceso'&&tiemposInicio[String(d.id)]
-      ?`<span class="tc-run" id="tel${d.id}">${fmtElapsed(tiemposInicio[String(d.id)])}</span>`
-      :d.estado==='Pendiente'||d.estado==='OT generada'
-      ?'<span class="tc-pend">Sin tomar</span>'
-      :d.estado==='Reprogramada'
-      ?'<span class="tc-stop">Reprogramada</span>'
-      :'<span class="tc-stop">—</span>';
-    // Botón OT
-    let tdAcc;
-    if(yaOT){
-      const ot=OTS.find(o=>String(o.id_denuncia)===String(d.id));
-      tdAcc=`<td><span class="btn-ot btn-ot-active" title="OT generada: ${ot?ot.num_ot:'—'}">${ot?ot.num_ot:'✓ OT'}</span></td>`;
-    } else if(d.estado==='Finalizado'){
-      tdAcc=`<td style="color:#374151;font-size:12px">—</td>`;
-    } else {
-      tdAcc=`<td>
-        <button class="btn-ot" onclick="abrirModalOT('${d.id}')" title="Generar Orden de Trabajo">
-          + Generar OT
-        </button>
-        <button class="btn-reprog${d.estado==='Reprogramada'?' btn-active-reprog':''}" onclick="abrirReprog('${d.id}')" style="margin-left:4px">
-          ${d.estado==='Reprogramada'?'✓ Reprog.':'⏱'}
-        </button>
-      </td>`;
     }
-    return `<tr class="${esMP?'tr-mp':''}">
-      <td class="td-fecha" style="font-family:'Courier New',monospace;font-size:12px;color:#a78bfa;font-weight:700">#${d.id}</td>
-      <td class="td-fecha">${d.fecha} ${d.hora}</td>
-      <td class="td-pl">${d.planta}</td>
-      <td class="td-eq">${d.equipo}</td>
-      <td><span class="taller-dot ${dotC}"></span><span class="badge ${bT}">${d.tipo}</span></td>
-      <td><span class="badge ${bP}">${d.prioridad}</span></td>
-      <td><span class="badge ${bE}">${d.estado==='OT generada'?'OT generada':d.estado}</span></td>
-      ${tdAcc}
-    </tr>`;
-  }).join('');
-  document.getElementById('f-count').textContent=list.length+' denuncias';
+    return null;
+  } catch(e) { return null; }
 }
 
-// ── TABLA OTs ─────────────────────────────────────────────────────
-function renderOTs(){
-  const est=document.getElementById('fot-estado').value;
-  let list=[...OTS];
-  if(est==='activas') list=list.filter(o=>o.estado!=='Finalizado');
-  else if(est!=='all') list=list.filter(o=>o.estado===est);
-  list.sort((a,b)=>String(b.num_ot).localeCompare(String(a.num_ot)));
-  const tb=document.getElementById('tbody-ot');
-  document.getElementById('fot-count').textContent=list.length+' OTs';
-  document.getElementById('f-count').textContent=list.length+' OTs';
-  if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="12">No hay órdenes de trabajo</td></tr>';return;}
-  tb.innerHTML=list.map(o=>{
-    const bE=o.estado==='Finalizado'?'b-ot-fin':o.estado==='En proceso'?'b-ot-proc':'b-ot-pend';
-    const tagTipo=o.tipo_trabajo==='Preventivo'?'tag-prev':'tag-corr';
-    // Taller: usar el del dato o calcularlo desde planta/tipo
-    const tallerVal = o.taller && o.taller!=='—' ? o.taller
-                    : o.planta==='Mototransporte' ? 'Mototransporte'
-                    : o.tipo==='Eléctrica'        ? 'Eléctrico'
-                    : 'Mecánico';
-    const tallerColor=tallerVal==='Eléctrico'?'b-elec':tallerVal==='Mototransporte'?'b-fin':'b-mec';
-    // Fecha: normalizar formato ISO a dd/mm/aaaa
-    let fechaFmt=o.fecha||'—';
-    if(fechaFmt.includes('T')){
-      const fd=new Date(fechaFmt);
-      if(!isNaN(fd)){fechaFmt=pad(fd.getDate())+'/'+pad(fd.getMonth()+1)+'/'+fd.getFullYear();}
+// ── CREAR OT ─────────────────────────────────────────────────────
+function crearOT(data) {
+  const sh = getHojaOT();
+
+  let fechaTexto = data.fecha || '';
+  if (fechaTexto && fechaTexto.toString().includes('T')) {
+    const fd = new Date(fechaTexto);
+    if (!isNaN(fd)) {
+      fechaTexto = Utilities.formatDate(fd, Session.getScriptTimeZone(), 'dd/MM/yyyy');
     }
-    // Operario y tiempo en OT
-    const opOT = o.operario || '—';
-    const iniOT = opOT !== '—' ? opOT.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase() : '?';
-    const tcOT = o.estado==='En proceso' && o.hora_inicio && Number(o.hora_inicio)>0
-      ? `<span class="tc-run" id="tot${o.num_ot.replace(/[^a-z0-9]/gi,'-')}">${fmtElapsed(new Date(Number(o.hora_inicio)))}</span>`
-      : o.estado==='Pendiente'
-      ? '<span class="tc-pend">Sin tomar</span>'
-      : '<span class="tc-stop">—</span>';
-    return `<tr>
-      <td class="tb-ot-num">${o.num_ot}</td>
-      <td class="td-fecha">#${o.id_denuncia}</td>
-      <td class="td-fecha">${fechaFmt}${o.hora?' '+o.hora:''}</td>
-      <td class="td-pl">${o.planta}</td>
-      <td class="td-eq">${o.equipo}</td>
-      <td><span class="badge ${tallerColor}">${tallerVal}</span></td>
-      <td><span class="${tagTipo}">${o.tipo_trabajo||'—'}</span></td>
-      <td><span class="badge ${o.prioridad==='Máquina parada'?'b-mp':'b-baja'}">${o.prioridad}</span></td>
-      <td><div class="op-cell"><div class="av">${iniOT}</div>${opOT}</div></td>
-      <td>${tcOT}</td>
-      <td><span class="badge ${bE}">${o.estado}</span></td>
-      <td><button class="btn-ot" onclick="toggleOTExpand('ot-${o.num_ot}')" style="padding:3px 8px;font-size:10px">▼ Detalle</button></td>
-    </tr>
-    <tr class="ot-expand-row" id="ot-${o.num_ot.replace(/[^a-z0-9]/gi,'-')}" style="display:none">
-      <td colspan="12">
-        <div class="ot-expand-inner">
-          <div class="ot-expand-field"><div class="ot-expand-lbl">Trabajo realizado</div><div class="ot-expand-val">${o.trabajo||'—'}</div></div>
-          <div class="ot-expand-field"><div class="ot-expand-lbl">Material utilizado</div><div class="ot-expand-val">${o.material||'—'}</div></div>
-          <div class="ot-expand-field"><div class="ot-expand-lbl">Observaciones</div><div class="ot-expand-val">${o.observaciones||'—'}</div></div>
-        </div>
-      </td>
-    </tr>`;
-  }).join('');
-  document.getElementById('fot-fecha').textContent='Actualizado: '+fmtNow();
-}
-
-function toggleOTExpand(id){
-  const safe=id.replace(/[^a-z0-9]/gi,'-');
-  const row=document.getElementById(safe);
-  if(!row)return;
-  row.style.display=row.style.display==='none'?'':'none';
-}
-
-// ── MODAL OT ─────────────────────────────────────────────────────
-function abrirModalOT(id){
-  otDenId=id;
-  otTipo='';otPrio='';
-  const d=TODAS.find(x=>String(x.id)===String(id));
-  if(!d)return;
-
-  // Prellenar prioridad desde la denuncia
-  otPrio=d.prioridad||'';
-  document.getElementById('ot-btn-baja').className='ot-prio-btn'+(otPrio==='Baja'?' on-baja':'');
-  document.getElementById('ot-btn-mp').className='ot-prio-btn'+(otPrio==='Máquina parada'?' on-mp':'');
-
-  // Card denuncia origen
-  const bT=d.tipo==='Eléctrica'?'b-elec':d.tipo==='Mecánica'?'b-mec':d.tipo==='Soldadura'?'b-sold':'b-indef';
-  const bP=d.prioridad==='Máquina parada'?'b-mp':'b-baja';
-
-  // Taller responsable — automático según planta y tipo
-  otTaller = d.planta==='Mototransporte' ? 'Mototransporte'
-           : d.tipo==='Eléctrica'        ? 'Eléctrico'
-           : 'Mecánico';
-  const taller = otTaller;
-  const bTaller = taller==='Eléctrico'      ? 'background:#0c1a3a;color:#60a5fa;border:1px solid #1d3a6e'
-                : taller==='Mototransporte' ? 'background:#052e16;color:#34d399;border:1px solid #14532d'
-                : 'background:#1c0a00;color:#fb923c;border:1px solid #7c2d12';
-
-  document.getElementById('ot-den-card').innerHTML=`
-    <div style="font-size:11px;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Denuncia origen #${d.id}</div>
-    <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px">${d.equipo}</div>
-    <div style="font-size:12px;color:#a78bfa;margin-bottom:8px">${d.planta}</div>
-    <div class="ot-den-row">
-      <span class="badge ${bT} ot-den-chip">${d.tipo}</span>
-      <span class="badge ${bP} ot-den-chip">${d.prioridad}</span>
-      <span style="font-size:11px;color:#6b7280">${d.fecha}</span>
-    </div>
-    <div style="margin-top:8px;display:flex;align-items:center;gap:6px">
-      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7280">Taller</span>
-      <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;${bTaller}">${taller}</span>
-    </div>
-    <div class="ot-den-desc" style="margin-top:8px">${d.descripcion||''}</div>`;
-
-  // Calcular próximo N° OT
-  const nextN=OTS.length+1;
-  const numOT='OT-'+String(nextN).padStart(3,'0');
-  document.getElementById('ot-sub-num').textContent=numOT;
-
-  // Mostrar selector o input según planta
-  const esMoto = d.planta === 'Mototransporte';
-  document.getElementById('ot-trabajo').style.display      = esMoto ? 'none' : '';
-  document.getElementById('ot-trabajo-moto').style.display = esMoto ? '' : 'none';
-
-  // Prellenar selector con el tipo de la denuncia si coincide
-  if(esMoto){
-    const sel=document.getElementById('ot-trabajo-moto');
-    sel.value = [...sel.options].some(o=>o.value===d.tipo) ? d.tipo : '';
   }
 
-  // Limpiar campos
-  document.getElementById('ot-btn-corr').className='ot-tipo-btn';
-  document.getElementById('ot-btn-prev').className='ot-tipo-btn';
-  if(!esMoto) document.getElementById('ot-trabajo').value='';
-  document.getElementById('ot-material').value='';
-  document.getElementById('ot-obs').value='';
-  document.querySelectorAll('.ot-err').forEach(e=>e.style.display='none');
+  // FIX 1: guardar hora como texto plano para evitar que Sheets la convierta a Date
+  const horaTexto = data.hora ? String(data.hora) : '';
 
-  document.getElementById('modal-ot-bg').classList.add('show');
+  const colores = {'Máquina parada':'#FCEBEB','Baja':'#EAF3DE'};
+  const color   = colores[data.prioridad] || '#FFFFFF';
+  const lastRow = sh.getLastRow() + 1;
+
+  sh.appendRow([
+    data.num_ot,        // A - N° OT
+    data.id_denuncia,   // B - N° Denuncia
+    fechaTexto,         // C - Fecha (texto)
+    horaTexto,          // D - Hora (texto) ← FIX 1
+    data.planta,        // E - Planta
+    data.equipo,        // F - Equipo
+    data.tipo,          // G - Tipo disciplina
+    data.taller || '',  // H - Taller
+    data.tipo_trabajo,  // I - Tipo trabajo
+    data.prioridad,     // J - Prioridad
+    data.descripcion,   // K - Descripción denuncia
+    data.trabajo,       // L - Trabajo a realizar
+    data.material || '',      // M - Material utilizado
+    data.observaciones || '', // N - Observaciones
+    'Pendiente',        // O - Estado
+    '',                 // P - Operario
+    '',                 // Q - Hora inicio
+    '',                 // R - Hora fin
+    ''                  // S - Duración (min)
+  ]);
+
+  // Forzar col D como texto para que Sheets no la reinterprete
+  sh.getRange(lastRow, 4).setNumberFormat('@');
+  sh.getRange(lastRow, 4).setValue(horaTexto);
+
+  sh.getRange(sh.getLastRow(), 1, 1, 20).setBackground(color);
+
+  // Marcar denuncia como "OT generada"
+  const shDen = SpreadsheetApp.openById(SHEET_ID).getSheets()[0];
+  const rows  = shDen.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][0]) === String(data.id_denuncia)) {
+      shDen.getRange(i + 1, 11).setValue('OT generada');
+      break;
+    }
+  }
+
+  try {
+    MailApp.sendEmail({
+      to: EMAIL_DEST,
+      subject: '[OT] ' + data.num_ot + ' — ' + data.equipo + ' (' + data.planta + ')',
+      body: 'Se generó una nueva Orden de Trabajo.\n\n' +
+        'N° OT: ' + data.num_ot + '\n' +
+        'Denuncia origen: #' + data.id_denuncia + '\n' +
+        'Planta: ' + data.planta + '\n' +
+        'Equipo: ' + data.equipo + '\n' +
+        'Taller: ' + (data.taller || '—') + '\n' +
+        'Tipo trabajo: ' + data.tipo_trabajo + '\n' +
+        'Prioridad: ' + data.prioridad + '\n' +
+        'Trabajo a realizar: ' + data.trabajo + '\n' +
+        'Material: ' + (data.material || '—') + '\n' +
+        'Observaciones: ' + (data.observaciones || '—')
+    });
+  } catch(e) {}
 }
 
-function cerrarModalOT(){
-  document.getElementById('modal-ot-bg').classList.remove('show');
-  otDenId=null;otTipo='';otPrio='';otTaller='';
+// ── LEER OTs PARA LOS DASHBOARDS ─────────────────────────────────
+function leerOTs() {
+  try {
+    const sh   = getHojaOT();
+    const rows = sh.getDataRange().getValues();
+    return rows.slice(1).filter(r => r[0]).map(r => {
+      let fecha = r[2] || '';
+      if (fecha instanceof Date) {
+        fecha = Utilities.formatDate(fecha, Session.getScriptTimeZone(), 'dd/MM/yyyy');
+      }
+
+      // FIX 2: si r[3] es Date (Sheets lo interpretó como hora), formatearlo correctamente
+      let hora = r[3] || '';
+      if (hora instanceof Date) {
+        hora = Utilities.formatDate(hora, Session.getScriptTimeZone(), 'HH:mm');
+      } else {
+        hora = String(hora);
+      }
+
+      return {
+        num_ot:        String(r[0]  || ''),
+        id_denuncia:   String(r[1]  || ''),
+        fecha:         String(fecha),
+        hora:          hora,                  // ← FIX 2
+        planta:        String(r[4]  || ''),
+        equipo:        String(r[5]  || ''),
+        tipo:          String(r[6]  || ''),
+        taller:        String(r[7]  || ''),
+        tipo_trabajo:  String(r[8]  || ''),
+        prioridad:     String(r[9]  || ''),
+        descripcion:   String(r[10] || ''),
+        trabajo:       String(r[11] || ''),
+        material:      String(r[12] || ''),
+        observaciones: String(r[13] || ''),
+        estado:        String(r[14] || 'Pendiente'),
+        operario:      String(r[15] || ''),
+        hora_inicio:   (function(v){ if(!v) return ''; var s=String(v); if(s.indexOf('ts:')===0) return Number(s.slice(3)); if(v instanceof Date) return v.getTime(); var n=Number(v); return n>0?n:''; })(r[16]),
+        hora_fin:      r[17] || '',
+        duracion_min:  r[18] || 0
+      };
+    });
+  } catch(e) { return []; }
 }
 
-function setOTTipo(t){
-  otTipo=t;
-  document.getElementById('ot-btn-corr').className='ot-tipo-btn'+(t==='Correctivo'?' on-corr':'');
-  document.getElementById('ot-btn-prev').className='ot-tipo-btn'+(t==='Preventivo'?' on-prev':'');
-  document.getElementById('err-ot-tipo').style.display='none';
+// ── ACTUALIZAR ESTADO DE OT (desde panel operarios) ──────────────
+function actualizarEstadoOT(data) {
+  const sh   = getHojaOT();
+  const rows = sh.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][0]) === String(data.num_ot)) {
+      sh.getRange(i + 1, 15).setValue(data.estado);     // O - Estado
+      sh.getRange(i + 1, 16).setValue(data.operario);   // P - Operario
+      if (data.estado === 'En proceso' && data.hora_inicio) {
+        // Guardar como string con prefijo para evitar que Sheets interprete el número como fecha serial
+        sh.getRange(i + 1, 17).setNumberFormat('@');
+        sh.getRange(i + 1, 17).setValue('ts:' + Number(data.hora_inicio)); // Q - "ts:1234567890"
+      }
+      if (data.estado === 'Finalizado') {
+        if (data.hora_fin) {
+          sh.getRange(i + 1, 18).setNumberFormat('@');
+          sh.getRange(i + 1, 18).setValue(data.hora_fin); // R - Hora fin
+        }
+        if (data.duracion_min) {
+          sh.getRange(i + 1, 19).setValue(Number(data.duracion_min)); // S - Duración (min)
+        }
+        if (data.observaciones) {
+          const obsActual = String(rows[i][13] || '');
+          const nuevaObs  = obsActual ? obsActual + '\n' + data.observaciones : data.observaciones;
+          sh.getRange(i + 1, 14).setValue(nuevaObs);    // N - Observaciones
+        }
+        // Marcar denuncia como Finalizado también
+        const shDen   = SpreadsheetApp.openById(SHEET_ID).getSheets()[0];
+        const rowsDen = shDen.getDataRange().getValues();
+        for (let j = 1; j < rowsDen.length; j++) {
+          if (String(rowsDen[j][0]) === String(rows[i][1])) {
+            shDen.getRange(j + 1, 11).setValue('Finalizado');
+            shDen.getRange(j + 1, 12).setValue(data.operario);
+            break;
+          }
+        }
+      }
+      break;
+    }
+  }
 }
 
-function setOTPrio(p){
-  otPrio=p;
-  document.getElementById('ot-btn-baja').className='ot-prio-btn'+(p==='Baja'?' on-baja':'');
-  document.getElementById('ot-btn-mp').className='ot-prio-btn'+(p==='Máquina parada'?' on-mp':'');
-  document.getElementById('err-ot-prio').style.display='none';
+// ── doGet ────────────────────────────────────────────────────────
+function doGet(e) {
+
+  if (e.parameter && e.parameter.tarea) {
+    try { guardarTareaProgramada(JSON.parse(decodeURIComponent(e.parameter.tarea))); } catch(err) {}
+    return ContentService.createTextOutput('OK').setMimeType(ContentService.MimeType.TEXT);
+  }
+
+  if (e.parameter && e.parameter.payload) {
+    try {
+      const data = JSON.parse(decodeURIComponent(e.parameter.payload));
+
+      if (data.accion === 'crear_ot') {
+        crearOT(data);
+        return ContentService.createTextOutput('OK').setMimeType(ContentService.MimeType.TEXT);
+      }
+
+      if (data.accion === 'actualizar_estado_ot') {
+        actualizarEstadoOT(data);
+        return ContentService.createTextOutput('OK').setMimeType(ContentService.MimeType.TEXT);
+      }
+
+      // Nueva denuncia via GET
+      const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('Denuncias')
+                    || SpreadsheetApp.openById(SHEET_ID).getSheets()[0];
+      if (sheet.getLastRow() === 0) {
+        sheet.appendRow(['N° Denuncia','Fecha','Hora','Planta','Equipo','Tipo','Prioridad','Descripción','Foto (link)','Reportado por','Estado','Operario']);
+        sheet.getRange(1,1,1,12).setFontWeight('bold');
+      }
+      let fotoUrl = '';
+      if (data.fotoB64 && data.fotoB64.length > 100) {
+        const base64 = data.fotoB64.split(',')[1];
+        const blob = Utilities.newBlob(Utilities.base64Decode(base64), data.fotoMime||'image/jpeg', data.fotoNombre||'foto.jpg');
+        const archivo = DriveApp.getFolderById(FOLDER_ID).createFile(blob);
+        archivo.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        fotoUrl = archivo.getUrl();
+      }
+      const nDenuncia = Math.max(sheet.getLastRow(), 1);
+      const ahora = new Date();
+      const fecha = Utilities.formatDate(ahora, Session.getScriptTimeZone(), 'dd/MM/yyyy');
+      const hora  = Utilities.formatDate(ahora, Session.getScriptTimeZone(), 'HH:mm');
+      sheet.appendRow([nDenuncia, fecha, hora, data.planta, data.equipo, data.tipo, data.prioridad, data.descripcion, fotoUrl, data.persona, 'Pendiente', '']);
+      const colores = {'Máquina parada':'#FCEBEB','Baja':'#EAF3DE'};
+      sheet.getRange(sheet.getLastRow(),1,1,12).setBackground(colores[data.prioridad]||'#FFFFFF');
+      const asunto = '['+data.prioridad.toUpperCase()+'] Denuncia #'+nDenuncia+' — '+data.equipo+' ('+data.planta+')';
+      MailApp.sendEmail({to: EMAIL_DEST, subject: asunto, body: 'Equipo: '+data.equipo+'\nPlanta: '+data.planta+'\nTipo: '+data.tipo+'\nPrioridad: '+data.prioridad+'\nDescripción: '+data.descripcion+'\nReportado por: '+data.persona});
+      const emailComp = getEmailContacto(data.persona);
+      if (emailComp) {
+        MailApp.sendEmail({to: emailComp, subject: '✓ Denuncia #'+nDenuncia+' recibida — '+data.equipo, body: 'Hola '+data.persona+', tu denuncia fue registrada. N° #'+nDenuncia+' — '+data.equipo+' ('+data.planta+') — '+data.prioridad+' — '+data.descripcion+' — ISUSA Mantenimiento'});
+      }
+    } catch(err) {}
+    return ContentService.createTextOutput('OK').setMimeType(ContentService.MimeType.TEXT);
+  }
+
+  // Sin payload — devuelve denuncias + OTs
+  try {
+    const wbD   = SpreadsheetApp.openById(SHEET_ID);
+    const shD   = wbD.getSheets()[0];
+    const rowsD = shD.getDataRange().getValues();
+
+    const wbP   = SpreadsheetApp.openById(PARTES_ID);
+    const shP   = wbP.getSheetByName('Partes diarios');
+    const rowsP = shP ? shP.getDataRange().getValues() : [];
+
+    const denuncias = rowsD.slice(1).filter(r => r[0]).map(r => ({
+      id:          r[0],
+      fecha:       r[1] ? Utilities.formatDate(new Date(r[1]), Session.getScriptTimeZone(), 'dd/MM/yyyy') : '',
+      hora:        r[2] ? Utilities.formatDate(new Date(r[2]), Session.getScriptTimeZone(), 'HH:mm') : '',
+      planta:      r[3]  || '',
+      equipo:      r[4]  || '',
+      tipo:        r[5]  || '',
+      prioridad:   r[6]  || '',
+      descripcion: r[7]  || '',
+      foto:        r[8]  || '',
+      persona:     r[9]  || '',
+      estado:         r[10] || 'Pendiente',
+      operario:       r[11] || '',
+      hora_inicio:    r[12] || '',
+      pausado_en:     r[13] || 0,
+      visible_taller: r[14] || '',
+      reprogramada:   r[15] ? new Date(r[15]).getTime() : '',
+      observaciones:  r[16] || ''
+    }));
+
+    const ots = leerOTs();
+
+    const durs     = rowsP.slice(1).filter(r => r[11] && Number(r[11]) > 0).map(r => Number(r[11]));
+    const promedio = durs.length ? Math.round(durs.reduce((a, b) => a + b, 0) / durs.length) : 0;
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ denuncias, ots, promedio_min: promedio }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ error: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
-function confirmarOT(){
-  const d=TODAS.find(x=>String(x.id)===String(otDenId));
-  if(!d)return;
+// ── doPost ───────────────────────────────────────────────────────
+function doPost(e) {
+  try {
+    const raw = e.postData ? e.postData.contents : (e.parameter && e.parameter.payload ? decodeURIComponent(e.parameter.payload) : '{}');
+    const data = JSON.parse(raw);
 
-  let ok=true;
-  if(!otTipo){document.getElementById('err-ot-tipo').style.display='block';ok=false;}
-  if(!otPrio){document.getElementById('err-ot-prio').style.display='block';ok=false;}
-  const esMoto = d.planta === 'Mototransporte';
-  const trab = esMoto
-    ? document.getElementById('ot-trabajo-moto').value.trim()
-    : document.getElementById('ot-trabajo').value.trim();
-  if(!trab){document.getElementById('err-ot-trabajo').style.display='block';ok=false;}
-  if(!ok)return;
+    if (data.accion === 'crear_ot') {
+      crearOT(data);
+      return ContentService.createTextOutput(JSON.stringify({ ok: true })).setMimeType(ContentService.MimeType.JSON);
+    }
 
-  const nextN=OTS.length+1;
-  const numOT='OT-'+String(nextN).padStart(3,'0');
-  const now=new Date();
-  const fecha=pad(now.getDate())+'/'+pad(now.getMonth()+1)+'/'+now.getFullYear();
-  const hora=pad(now.getHours())+':'+pad(now.getMinutes());
+    if (data.accion === 'actualizar_estado_ot') {
+      actualizarEstadoOT(data);
+      return ContentService.createTextOutput(JSON.stringify({ ok: true })).setMimeType(ContentService.MimeType.JSON);
+    }
 
-  const payload={
-    accion:'crear_ot',
-    num_ot:numOT,
-    id_denuncia:otDenId,
-    fecha:fecha,
-    hora:hora,
-    planta:d.planta,
-    equipo:d.equipo,
-    tipo:d.tipo,
-    taller:otTaller,
-    tipo_trabajo:otTipo,
-    prioridad:otPrio,
-    descripcion:d.descripcion,
-    trabajo:trab,
-    material:document.getElementById('ot-material').value.trim(),
-    observaciones:document.getElementById('ot-obs').value.trim()
-  };
+    if (data.accion === 'enviar_a_taller') {
+      const sheet = SpreadsheetApp.openById(SHEET_ID).getSheets()[0];
+      const rows  = sheet.getDataRange().getValues();
+      for (let i = 1; i < rows.length; i++) {
+        if (String(rows[i][0]) === String(data.id_denuncia)) {
+          sheet.getRange(i + 1, 15).setValue('si');
+          sheet.getRange(i + 1, 16).setValue('');
+          if (rows[i][10] === 'Reprogramada') sheet.getRange(i + 1, 11).setValue('Pendiente');
+          break;
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({ ok: true })).setMimeType(ContentService.MimeType.JSON);
+    }
 
-  // Envío por POST no-cors (más confiable que img.src para payloads largos)
-  fetch(SCRIPT_URL_POST,{
-    method:'POST',
-    mode:'no-cors',
-    headers:{'Content-Type':'text/plain'},
-    body:JSON.stringify(payload)
-  }).catch(()=>{});
+    if (data.accion === 'reprogramar') {
+      const sheet = SpreadsheetApp.openById(SHEET_ID).getSheets()[0];
+      const rows  = sheet.getDataRange().getValues();
+      for (let i = 1; i < rows.length; i++) {
+        if (String(rows[i][0]) === String(data.id_denuncia)) {
+          sheet.getRange(i + 1, 15).setValue('');
+          sheet.getRange(i + 1, 16).setValue(new Date(data.fecha_prog));
+          sheet.getRange(i + 1, 11).setValue('Reprogramada');
+          break;
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({ ok: true })).setMimeType(ContentService.MimeType.JSON);
+    }
 
-  // Actualización local inmediata
-  d.estado='OT generada';
-  OTS.push({
-    num_ot:numOT,
-    id_denuncia:otDenId,
-    fecha:fecha,
-    hora:hora,
-    planta:d.planta,
-    equipo:d.equipo,
-    tipo:d.tipo,
-    taller:otTaller,
-    tipo_trabajo:otTipo,
-    prioridad:otPrio,
-    descripcion:d.descripcion,
-    trabajo:trab,
-    material:payload.material,
-    observaciones:payload.observaciones,
-    estado:'Pendiente'
-  });
+    if (data.accion === 'actualizar_estado') {
+      const sheet = SpreadsheetApp.openById(SHEET_ID).getSheets()[0];
+      const rows  = sheet.getDataRange().getValues();
+      for (let i = 1; i < rows.length; i++) {
+        if (String(rows[i][0]) === String(data.id_denuncia)) {
+          sheet.getRange(i + 1, 11).setValue(data.estado);
+          sheet.getRange(i + 1, 12).setValue(data.operario);
+          if (data.estado === 'En proceso' && data.hora_inicio) sheet.getRange(i + 1, 13).setValue(data.hora_inicio);
+          if (data.pausado_en) sheet.getRange(i + 1, 14).setValue(data.pausado_en);
+          if (data.estado === 'Finalizado') {
+            sheet.getRange(i + 1, 13).setValue('');
+            sheet.getRange(i + 1, 14).setValue('');
+          }
+          if (data.observaciones) {
+            const obsActual = String(rows[i][16] || '');
+            const nuevaObs  = obsActual ? obsActual + '\n' + data.observaciones : data.observaciones;
+            sheet.getRange(i + 1, 17).setValue(nuevaObs);
+          }
+          break;
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({ ok: true })).setMimeType(ContentService.MimeType.JSON);
+    }
 
-  cerrarModalOT();
-  renderMetrics(0);
-  renderTabla();
-  renderOTs();
+    // Nueva denuncia via POST
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('Denuncias')
+                  || SpreadsheetApp.openById(SHEET_ID).getSheets()[0];
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(['N° Denuncia','Fecha','Hora','Planta','Equipo','Tipo','Prioridad','Descripción','Foto (link)','Reportado por','Estado','Operario']);
+      sheet.getRange(1, 1, 1, 12).setFontWeight('bold');
+    }
+    let fotoUrl = '';
+    if (data.fotoB64 && data.fotoB64.length > 100) {
+      const base64 = data.fotoB64.split(',')[1];
+      const blob   = Utilities.newBlob(Utilities.base64Decode(base64), data.fotoMime || 'image/jpeg', data.fotoNombre || 'foto.jpg');
+      const folder  = DriveApp.getFolderById(FOLDER_ID);
+      const archivo = folder.createFile(blob);
+      archivo.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      fotoUrl = archivo.getUrl();
+    }
+    const nDenuncia = Math.max(sheet.getLastRow(), 1);
+    const ahora = new Date();
+    const fecha = Utilities.formatDate(ahora, Session.getScriptTimeZone(), 'dd/MM/yyyy');
+    const hora  = Utilities.formatDate(ahora, Session.getScriptTimeZone(), 'HH:mm');
+    sheet.appendRow([nDenuncia, fecha, hora, data.planta, data.equipo, data.tipo, data.prioridad, data.descripcion, fotoUrl, data.persona, 'Pendiente', '']);
+    const colores   = { 'Máquina parada':'#FCEBEB', 'Baja':'#EAF3DE' };
+    sheet.getRange(sheet.getLastRow(), 1, 1, 12).setBackground(colores[data.prioridad] || '#FFFFFF');
+    const asunto = '['+data.prioridad.toUpperCase()+'] Denuncia #'+nDenuncia+' — '+data.equipo+' ('+data.planta+')';
+    MailApp.sendEmail({ to: EMAIL_DEST, subject: asunto, body: 'Equipo: '+data.equipo+'\nPlanta: '+data.planta+'\nTipo: '+data.tipo+'\nPrioridad: '+data.prioridad+'\nDescripción: '+data.descripcion+'\nReportado por: '+data.persona });
+    const emailContacto = getEmailContacto(data.persona);
+    if (emailContacto) {
+      MailApp.sendEmail({ to: emailContacto, subject: '✓ Denuncia #'+nDenuncia+' recibida — '+data.equipo, body: 'Hola '+data.persona+', tu denuncia fue registrada. N° #'+nDenuncia+' — '+data.equipo+' ('+data.planta+') — '+data.prioridad+' — '+data.descripcion+' — ISUSA Mantenimiento' });
+    }
+    return ContentService.createTextOutput(JSON.stringify({ ok: true, nDenuncia })).setMimeType(ContentService.MimeType.JSON);
 
-  // Recargar del Sheet después de 3s para reflejar cambios reales
-  setTimeout(cargarDatos,3000);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ ok: false, error: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
-// ── REPROGRAMAR ───────────────────────────────────────────────────
-let reprogId=null;
-function abrirReprog(id){
-  reprogId=id;
-  const d=TODAS.find(x=>String(x.id)===String(id));
-  document.getElementById('modal-desc').textContent=d?(d.equipo+' — '+d.planta):id;
-  const manana=new Date();manana.setDate(manana.getDate()+1);manana.setHours(8,0,0,0);
-  document.getElementById('modal-fecha').value=manana.getFullYear()+'-'+pad(manana.getMonth()+1)+'-'+pad(manana.getDate())+'T08:00';
-  document.getElementById('modal-bg').classList.add('show');
-}
-function cerrarModal(){document.getElementById('modal-bg').classList.remove('show');reprogId=null;}
-function confirmarReprog(){
-  if(!reprogId)return;
-  const fecha=document.getElementById('modal-fecha').value;
-  if(!fecha){alert('Seleccioná una fecha');return;}
-  fetch(SCRIPT_URL_POST,{method:'POST',mode:'no-cors',body:JSON.stringify({accion:'reprogramar',id_denuncia:reprogId,fecha_prog:new Date(fecha).getTime()})}).catch(()=>{});
-  const d=TODAS.find(x=>String(x.id)===String(reprogId));
-  if(d){d.estado='Reprogramada';d.visible_taller='';}
-  cerrarModal();renderTabla();
-  setTimeout(cargarDatos,2000);
-}
-
-// ── TERCERIZAR ────────────────────────────────────────────────────
-let tercId=null;
-function abrirTerc(id){tercId=id;const d=TODAS.find(x=>String(x.id)===String(id));document.getElementById('modal-terc-desc').textContent=d?(d.equipo+' — '+d.planta):id;document.getElementById('modal-terc-empresa').value='';document.getElementById('modal-terc-bg').classList.add('show');}
-function cerrarModalTerc(){document.getElementById('modal-terc-bg').classList.remove('show');tercId=null;}
-function confirmarTerc(){
-  if(!tercId)return;const empresa=document.getElementById('modal-terc-empresa').value;if(!empresa){alert('Seleccioná una empresa');return;}
-  fetch(SCRIPT_URL_POST,{method:'POST',mode:'no-cors',body:JSON.stringify({accion:'tercerizar',id_denuncia:tercId,empresa:empresa})}).catch(()=>{});
-  const d=TODAS.find(x=>String(x.id)===String(tercId));if(d){d.tercerizada=empresa;d.visible_taller='';d.estado=d.estado==='Reprogramada'?'Pendiente':d.estado;}
-  cerrarModalTerc();renderTabla();setTimeout(cargarDatos,2000);
-}
-
-// ── UTILIDADES ────────────────────────────────────────────────────
-function cambiarVista(){
-  const v=document.getElementById('f-vista').value;
-  const esDen=v==='denuncias';
-  document.getElementById('vista-denuncias').style.display=esDen?'':'none';
-  document.getElementById('vista-ots').style.display=esDen?'none':'';
-  document.getElementById('filtros-den').style.display=esDen?'flex':'none';
-  document.getElementById('filtros-ot').style.display=esDen?'none':'flex';
-  document.getElementById('tabla-titulo').textContent=esDen?'Denuncias — Generar OT':'Órdenes de trabajo';
-  document.getElementById('tabla-hdr').className='panel-hdr'+(esDen?'':' panel-ot-hdr');
-  if(esDen) renderTabla(); else renderOTs();
-}
-
-function pad(n){return String(n).padStart(2,'0');}
-function fmtNow(){const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());}
-setInterval(()=>{const d=new Date();document.getElementById('clock').textContent=pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());},1000);
-setInterval(()=>{
-  Object.keys(tiemposInicio).forEach(id=>{const el=document.getElementById('tel'+id);if(el)el.textContent=fmtElapsed(tiemposInicio[id]);});
-  OTS.forEach(o=>{
-    if(o.estado==='En proceso'&&o.hora_inicio&&Number(o.hora_inicio)>0){
-      const el=document.getElementById('tot'+o.num_ot.replace(/[^a-z0-9]/gi,'-'));
-      if(el)el.textContent=fmtElapsed(new Date(Number(o.hora_inicio)));
+// ── TAREAS PROGRAMADAS ────────────────────────────────────────────
+function procesarTareasProgramadas() {
+  try {
+    const shD  = SpreadsheetApp.openById(SHEET_ID).getSheets()[0];
+    const rows = shD.getDataRange().getValues();
+    const ahora = new Date();
+    rows.slice(1).forEach((r, i) => {
+      if (r[10] === 'Reprogramada' && r[15]) {
+        const fechaProg = new Date(r[15]);
+        if (fechaProg <= ahora) {
+          shD.getRange(i + 2, 11).setValue('Pendiente');
+          shD.getRange(i + 2, 16).setValue('');
+        }
+      }
+    });
+  } catch(e) {}
+  const wb    = SpreadsheetApp.openById(SHEET_ID);
+  let shTareas = wb.getSheetByName('Tareas programadas');
+  if (!shTareas) return;
+  const rows   = shTareas.getDataRange().getValues();
+  const shDen  = wb.getSheets()[0];
+  const ahora  = new Date();
+  rows.slice(1).forEach((r, i) => {
+    if (r[8] === 'publicada') return;
+    const fechaProg = r[5] ? new Date(r[5]) : null;
+    if (!fechaProg || fechaProg > ahora) return;
+    const nDenuncia = Math.max(shDen.getLastRow(), 1);
+    const fecha = Utilities.formatDate(fechaProg, Session.getScriptTimeZone(), 'dd/MM/yyyy');
+    const hora  = Utilities.formatDate(fechaProg, Session.getScriptTimeZone(), 'HH:mm');
+    shDen.appendRow([nDenuncia, fecha, hora, r[0], r[1], r[2], r[3], r[4], '', r[6], 'Pendiente', '', '', '']);
+    shDen.getRange(shDen.getLastRow(), 1, 1, 14).setBackground('#EAF3DE');
+    shTareas.getRange(i + 2, 9).setValue('publicada');
+    if (r[7] === 'diaria') {
+      const proxima = new Date(fechaProg);
+      proxima.setDate(proxima.getDate() + 1);
+      shTareas.appendRow([r[0], r[1], r[2], r[3], r[4], proxima, r[6], 'diaria', 'pendiente']);
     }
   });
-},1000);
+}
 
-cargarDatos();
-setInterval(cargarDatos,5000);
-</script>
-</body>
-</html>
+function guardarTareaProgramada(data) {
+  const wb = SpreadsheetApp.openById(SHEET_ID);
+  let sh   = wb.getSheetByName('Tareas programadas');
+  if (!sh) {
+    sh = wb.insertSheet('Tareas programadas');
+    sh.appendRow(['Planta','Equipo','Tipo','Prioridad','Descripción','Fecha programada','Creado por','Repetición','Estado']);
+    sh.getRange(1, 1, 1, 9).setFontWeight('bold');
+  }
+  sh.appendRow([data.planta, data.equipo, data.tipo, data.prioridad, data.descripcion, new Date(data.fecha_programada), data.persona, data.repeticion || 'una_vez', 'pendiente']);
+}
+
+function crearHojaOTManual() {
+  getHojaOT();
+  Logger.log('OK - Hoja ORDENES_TRABAJO creada o verificada.');
+}
