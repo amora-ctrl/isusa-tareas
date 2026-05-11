@@ -594,20 +594,35 @@ function renderOTs(){
     }
     // Operario y tiempo en OT
     const opOT = o.operario || '—';
-    const iniOT = opOT !== '—' ? opOT.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase() : '?';
-    let tcOT;
-    if (o.estado === 'En proceso' && o.hora_inicio && Number(o.hora_inicio) > 0) {
-      tcOT = `<span class="tc-run" id="tot${o.num_ot.replace(/[^a-z0-9]/gi,'-')}">${fmtElapsed(new Date(Number(o.hora_inicio)))}</span>`;
+    const opLista = opOT !== '—' ? opOT.split(',').map(x=>x.trim()) : [];
+    const tsLista = Array.isArray(o.hora_inicio) ? o.hora_inicio : (o.hora_inicio ? [o.hora_inicio] : []);
+    const iniOT = opLista.length > 0 ? opLista.map(op=>op.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()).join('/') : '?';
+    let opCell, tcOT;
+    if (o.estado === 'En proceso' && tsLista.length > 0) {
+      opCell = opLista.map(op => {
+        const ini = op.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        return `<div class="op-cell" style="margin-bottom:4px">
+          <div class="av">${ini}</div>
+          <div>${op}</div>
+        </div>`;
+      }).join('');
+      tcOT = opLista.map((op, idx) => {
+        const ts = tsLista[idx] || tsLista[0];
+        const elId = `tot${o.num_ot.replace(/[^a-z0-9]/gi,'-')}-${idx}`;
+        return `<div style="margin-bottom:4px"><span class="tc-run" id="${elId}">${fmtElapsed(new Date(ts))}</span></div>`;
+      }).join('');
     } else if (o.estado === 'Finalizado' && o.hora_fin) {
+      opCell = `<div class="op-cell"><div class="av">${iniOT}</div>${opOT}</div>`;
       const durMin = o.duracion_min ? Number(o.duracion_min) : null;
       const durTxt = durMin !== null ? ` (${durMin} min)` : '';
-      const hiTxt  = o.hora_inicio && Number(o.hora_inicio) > 0
-        ? pad(new Date(Number(o.hora_inicio)).getHours())+':'+pad(new Date(Number(o.hora_inicio)).getMinutes())
-        : '—';
+      const ts0 = tsLista[0];
+      const hiTxt = ts0 ? pad(new Date(ts0).getHours())+':'+pad(new Date(ts0).getMinutes()) : '—';
       tcOT = `<span class="tc-stop">${hiTxt} → ${o.hora_fin}${durTxt}</span>`;
     } else if (o.estado === 'Pendiente') {
+      opCell = `<div class="op-cell"><div class="av">?</div>—</div>`;
       tcOT = '<span class="tc-pend">Sin tomar</span>';
     } else {
+      opCell = `<div class="op-cell"><div class="av">${iniOT}</div>${opOT}</div>`;
       tcOT = '<span class="tc-stop">—</span>';
     }
     return `<tr>
@@ -619,8 +634,8 @@ function renderOTs(){
       <td><span class="badge ${tallerColor}">${tallerVal}</span></td>
       <td><span class="${tagTipo}">${o.tipo_trabajo||'—'}</span></td>
       <td><span class="badge ${o.prioridad==='Máquina parada'?'b-mp':'b-baja'}">${o.prioridad}</span></td>
-      <td><div class="op-cell"><div class="av">${iniOT}</div>${opOT}</div></td>
-      <td>${tcOT}</td>
+      <td>${opCell}</td>
+      <td style="vertical-align:middle">${tcOT}</td>
       <td><span class="badge ${bE}">${o.estado}</span></td>
       <td><button class="btn-ot" onclick="toggleOTExpand('ot-${o.num_ot}')" style="padding:3px 8px;font-size:10px">▼ Detalle</button></td>
     </tr>
@@ -860,12 +875,12 @@ setInterval(()=>{const d=new Date();document.getElementById('clock').textContent
 setInterval(()=>{
   Object.keys(tiemposInicio).forEach(id=>{const el=document.getElementById('tel'+id);if(el)el.textContent=fmtElapsed(tiemposInicio[id]);});
   OTS.forEach(o=>{
-    if(o.estado==='En proceso' && o.hora_inicio){
-      const hiNum = Number(o.hora_inicio);
-      if(hiNum > 0){
-        const el=document.getElementById('tot'+o.num_ot.replace(/[^a-z0-9]/gi,'-'));
-        if(el)el.textContent=fmtElapsed(new Date(hiNum));
-      }
+    if(o.estado==='En proceso'){
+      const tsLista = Array.isArray(o.hora_inicio) ? o.hora_inicio : (o.hora_inicio ? [o.hora_inicio] : []);
+      tsLista.forEach((ts, idx) => {
+        const el = document.getElementById('tot'+o.num_ot.replace(/[^a-z0-9]/gi,'-')+'-'+idx);
+        if(el) el.textContent = fmtElapsed(new Date(ts));
+      });
     }
   });
 },1000);
