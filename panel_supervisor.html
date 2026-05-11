@@ -114,6 +114,12 @@ tr:hover td{background:#111827}
 .ot-label .req{color:#f87171}
 .ot-input{background:#060c16;border:1px solid #2a2f3e;border-radius:7px;color:#e5e7eb;font-size:13px;padding:8px 11px;font-family:inherit;outline:none;transition:border-color .15s}
 .ot-input:focus{border-color:#7c3aed}
+/* Sugerencias históricas */
+.sugerencias-wrap{margin-top:10px;display:none}
+.sug-titulo{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#6b7280;margin-bottom:6px}
+.sug-chips{display:flex;flex-wrap:wrap;gap:5px}
+.sug-chip{font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;border:1px solid #374151;background:#111827;color:#9ca3af;transition:all .15s}
+.sug-chip:hover{background:#1f2937;color:#e5e7eb;border-color:#6b7280}
 .ot-select{background:#060c16;border:1px solid #2a2f3e;border-radius:7px;color:#e5e7eb;font-size:13px;padding:8px 11px;font-family:inherit;outline:none}
 .ot-textarea{background:#060c16;border:1px solid #2a2f3e;border-radius:7px;color:#e5e7eb;font-size:13px;padding:8px 11px;font-family:inherit;outline:none;resize:vertical;min-height:72px;transition:border-color .15s}
 .ot-textarea:focus{border-color:#7c3aed}
@@ -368,6 +374,10 @@ tr:hover td{background:#111827}
         <div class="ot-label">Trabajo a realizar <span class="req">*</span></div>
         <!-- Input texto para plantas normales -->
         <input id="ot-trabajo" class="ot-input" type="text" placeholder="Describí el trabajo a realizar">
+        <div class="sugerencias-wrap" id="sug-trabajo-wrap">
+          <div class="sug-titulo">💡 Trabajos frecuentes en este equipo</div>
+          <div class="sug-chips" id="sug-trabajo-chips"></div>
+        </div>
         <!-- Selector para Mototransporte -->
         <select id="ot-trabajo-moto" class="ot-select" style="display:none">
           <option value="">— Seleccionar tipo de tarea —</option>
@@ -387,6 +397,10 @@ tr:hover td{background:#111827}
       <div class="ot-field">
         <div class="ot-label">Material utilizado</div>
         <input id="ot-material" class="ot-input" type="text" placeholder="Repuestos, materiales...">
+        <div class="sugerencias-wrap" id="sug-material-wrap">
+          <div class="sug-titulo">🔩 Repuestos frecuentes en este equipo</div>
+          <div class="sug-chips" id="sug-material-chips"></div>
+        </div>
       </div>
       <div class="ot-field full">
         <div class="ot-label">Observaciones</div>
@@ -727,6 +741,8 @@ function abrirModalOT(id){
   document.querySelectorAll('.ot-err').forEach(e=>e.style.display='none');
 
   document.getElementById('modal-ot-bg').classList.add('show');
+  console.log('EQUIPO:', JSON.stringify(d.equipo), 'bytes:', [...d.equipo].map(c=>c.codePointAt(0).toString(16)));
+  mostrarSugerencias(d.equipo);
 }
 
 function cerrarModalOT(){
@@ -884,6 +900,117 @@ setInterval(()=>{
     }
   });
 },1000);
+
+// ── BASE DE REPUESTOS Y TRABAJOS POR EQUIPO ──────────────────────
+const REPUESTOS_DB = {"AnalizadorSO2":{"nombre":"Analizador de SO2","repuestos":["Manguera de muestra","Electroválvula interna","Quemador"],"tipos_reparacion":["Reemplazo de manguera","Reparación electroválvula","Intercambio de quemadores","Revisión general"]},"BbaAcido-2.22":{"nombre":"Bomba de Ácido Sulfúrico 98.5%","repuestos":["Bomba de ácido Lewis size 6H","Motor WEG 40HP 1475rpm","Manchón estrella de goma","Sensor presión NuovaFima 0-6bar 4-20mA","Rodamientos motor (6312 x2)","Contactor GMC-125","Variador Telemecanique Altivar 58","Junta platina salida bomba"],"tipos_reparacion":["Cambio de bomba de ácido","Cambio de motor","Cambio de manchón de goma","Cambio de sensor de presión","Cambio de contactor","Reparación variador de velocidad"]},"BbaAcidoRetorno-2.57":{"nombre":"Bomba Descarga Ácido Retorno","repuestos":["Bomba Worthington","Válvula esclusa 2\" Victory CF8M","Válvula YONE 2\" 150","Empaquetadura Garlock 5000 5/16\"","Tramo de caño línea de descarga"],"tipos_reparacion":["Cambio de bomba","Cambio de válvulas de descarga","Reparación con poxilina","Cambio de empaquetadura"]},"BbaAguaD1-2.34":{"nombre":"Bomba de Agua Depósito D1","repuestos":["Bomba ERVO modelo 42V14","Bomba DAB 4HP 2850rpm K40/200T","Motobomba Speroni 2.2kW 3HP","Manchón de goma estrella diam.100mm","Rodamiento 6305","Filtro colador Genebre 3302 PN16","Válvula esclusa 2\" Genebre 3220 PN10"],"tipos_reparacion":["Cambio de bomba","Cambio de manchón de goma","Cambio de rodamiento","Limpieza de rotor y voluta"]},"BbaAguaD2-2.35":{"nombre":"Bomba de Agua Depósito D2","repuestos":["Bomba Worthington","Motor Beaumont 7.5HP 2800rpm","Manchón de goma estrella diam.100mm","Rodamientos motor (2x6207)"],"tipos_reparacion":["Cambio de bomba","Cambio de motor","Cambio de manchón de goma","Cambio de rodamientos"]},"BbaAzufreAlimentacion-2.1":{"nombre":"Bomba de Azufre","repuestos":["Bomba de azufre","Motor WEG 7.5HP 2930rpm 132M","Variador WEG CFW09 7.5HP","Manchón de goma estrella diam.65","Rodamientos motor (6308 y 6207)","Rodamiento bomba 3208 NTN"],"tipos_reparacion":["Cambio de bomba de azufre","Cambio de variador de frecuencia","Cambio de motor","Cambio de rodamientos","Limpieza de voluta y codo"]},"BbaCaldera1-2.11":{"nombre":"Bomba Caldera Oeste FMC","repuestos":["Bomba FMC mod.L1122 DAI 51.5HP 75GPM","Motor Leroy Somer 10HP 1450rpm","Correas A86 (x2)","Correas B81 (x2)","Gomas de pistones (x3)","Retenes vástago 19x32x7 (x6)","Rodamientos cigüeñal Timken 26881/26822","Rodamientos eje mando 6206 2RS","Retén eje motriz 38x60x12"],"tipos_reparacion":["Cambio de gomas de pistones","Cambio de correas","Cambio de rodamientos motor","Reparación bomba FMC","Cambio de válvulas","Limpieza filtro succión"]},"BbaCaldera2-2.12":{"nombre":"Bomba Caldera Este FMC","repuestos":["Bomba FMC mod.L1122 DAI 51.5HP","Motor Leroy Somer 10HP 1450rpm","Correas B81 (x2)","Gomas de pistones (x3)","Retén eje transmisión","Rodamientos motor (6308 y 6207)","Válvula de alivio"],"tipos_reparacion":["Cambio de gomas de pistones","Cambio de correas","Cambio de rodamientos motor","Cambio de válvula de alivio"]},"BbaCalderaEmerg-2.13":{"nombre":"Bomba Caldera Emergencia Bean Royal","repuestos":["Bomba FMC Bean Royal L0918D","Motor WEG 4HP 1420rpm 100L","Correas A86 (x2)","Pistones de goma 2\" (x3)","Retenes vástago 19x32x7 (x6)","Rodamientos cigüeñal Timken 26881/26822","Rodamientos eje mando 6206 NTN"],"tipos_reparacion":["Cambio de pistones de goma","Cambio de correas","Cambio de rodamientos","Reparación completa bomba"]},"BbaCargaT1o2o9-2.55":{"nombre":"Bomba Carga Ácido Tanques 1 2 y 9","repuestos":["Bomba ISUSA","Motor WEG 5.5HP 1450rpm 112M","Rodamientos motor (6207 y 6307)","Manchón de goma","Válvula succión 2\"","Correas B42 (x2)"],"tipos_reparacion":["Cambio de bomba","Cambio de motor","Cambio de manchón de goma","Cambio de válvulas","Cambio de rodamientos"]},"TorreOleum-2.20":{"nombre":"Torre de Oleum","repuestos":["Correas B50 (x2)","Rodamientos ventilador FAG 22210-E1-K manguito H310 caja SNV090","Motor WEG 5.5HP 1430rpm","Válvula neumática ácido Century 1.5\"","Empaquetadura QUIMGAX 2202 5/16\" TEADIT","Sensor concentración oleum","Manchón de goma bomba oleum"],"tipos_reparacion":["Cambio de rodamientos ventilador","Cambio de correas ventilador","Reparación carcasa ventilador","Cambio de motor ventilador","Cambio de válvula neumática ácido","Cambio de empaquetadura"]},"TorreSecado-2.19":{"nombre":"Torre de Secado","repuestos":["Demister Brink Mesh Pad MECS TG CACD Size 06059","Sifón de Alloy 20","Codo sifón torre","Filtros de niebla","Junta teflón adhesivo 20x7mm","Cordón amianto blando 1\"","Relleno Intalox antiácido"],"tipos_reparacion":["Varillado distribuidores y canaletas","Cambio de sifón / codo sifón","Cambio filtro de niebla (demister)","Cambio de juntas","Inspección soporte relleno","Limpieza ojos de vista"]},"TurbinaHorizontalCoppus-2.5":{"nombre":"Turbina de Vapor Coppus 220HP","repuestos":["Eje turbina SAE 4340 Ø70mm L=960mm","Rodamientos SKF 6312 J C3 (x2)","Carbones y portacarbones","Bujes de grafito control y corte","Sensor inductivo rpm IS-18-FO-S2","Trampa Spirax Sarco MST 30 AC 1/2\"","Manómetro 0-400psi Waaree AISI 316L","Resortes gatillo regulador","Junta tapa regulador"],"tipos_reparacion":["Cambio de aceite rodamientos y regulador","Cambio de eje turbina","Cambio de rodamientos turbina","Cambio de carbones","Cambio de bujes de grafito","Revisión válvulas entrada vapor","Cambio de sensor inductivo rpm","Ajuste regulador de velocidad"]},"7.1":{"nombre":"Tolva de Alimentación","repuestos":["Correas B42 B40 B37 (x2)","Vibrador Italvibras MVSI 3/500-SO2","Sensor de proximidad inductivo","Sensor de subvelocidad Crouzet","Contactor vibradores GMC-22","Reductor IMSA Serie 152 relación 60/1","Piñón manchón 18 dientes pase 1\"","Retén reductor 60x80x10","Rodamiento sin fin 30209JR","Rodamiento corona 30212"],"tipos_reparacion":["Cambio de correas rompeterrones","Cambio de vibrador","Cambio de sensor de proximidad","Soldadura de dientes rompeterrones","Reparación de eje rompeterrones","Cambio de cadena manchón"]},"7.2":{"nombre":"Cinta de Alimentación","repuestos":["Banda Dreghal SuperCarry 400/3 17.60mx50cm","Variador WEG 2HP","Motor WEG 2HP 1420rpm 90L","Reductor Motovario NMRV 110 relación 30/1","Rodamientos rodillo caja P209"],"tipos_reparacion":["Cambio de banda transportadora","Cambio de variador","Cambio de motor","Cambio de rodamientos","Reparación costura de banda"]},"7.3":{"nombre":"Elevador 1","repuestos":["Cadena de cangilones","Cadena motriz 1\"","Cangilones de plástico","Rodamiento superior SY 2-15/16\" P215","Rodamiento inferior SY 2\" P213","Eje superior","Rueda superior 16 dientes","Retén reductor 50x65x8","Motor WEG 10HP 1465rpm 132M N°434"],"tipos_reparacion":["Cambio de cadena de cangilones","Cambio de rodamientos eje superior inferior","Cambio de eje superior","Cambio de rueda superior","Levantamiento de elevador","Reposición de cangilones"]},"7.4":{"nombre":"Granulador","repuestos":["Rodillo horizontal soporte o tope","Goma recubrimiento interior","Acople Falk 1025G","Acople fluido Transfluid KCG tamaño 17","Motor Westinghouse 40HP rodamientos 6311 C3 2Z","Válvula globo vapor 4\" 150 WCB","Válvula actuada Genebre 3/4\" DN20 inox","Actuador eléctrico Genebre H20 J3","Caño vapor 6\" Sch80"],"tipos_reparacion":["Cambio de goma interior","Cambio de rodillo tope soporte horizontal","Reparación acople hidráulico Falk","Cambio de válvula de vapor","Cambio de actuador válvula agua","Reparación pata de vapor","Cambio de rodamientos motor"]},"7.5":{"nombre":"Secador","repuestos":["Rodillo tope horizontal","Rodillo soporte","Acople Falk 1025G","Acople fluido Transfluid KCG tamaño 17","Motor Teco-Westinghouse 75HP 365T rodamientos 6313 y 6213","Termocupla platina 1\" clase 150","Pista de rodamiento"],"tipos_reparacion":["Cambio de rodillo tope","Cambio de rodillo soporte","Acuñado de pista","Reparación acople Falk","Soldadura de corona","Limpieza interior completa","Cambio de motor"]},"7.6":{"nombre":"Elevador 2","repuestos":["Cadena de cangilones","Cadena transmisión ASA 120 pitch 1\"","Plato 54 dientes","Piñón 17 dientes pase 1\"","Rodamiento superior P215","Rodamiento inferior","Eje de salida reductor rodamientos 6310 x2","Retén reductor 40x55x8","Manchón de goma","Motor WEG 10HP 1465rpm 132M N°435"],"tipos_reparacion":["Cambio de cadena de cangilones","Cambio de piñón y plato","Cambio de eje de salida reductor","Cambio de rodamientos","Cambio de retenes reductor","Levantamiento de cadena"]},"7.7":{"nombre":"Enfriador","repuestos":["Cadena motriz","Piñón 10 o 11 dientes","Rodillo tope","Rodillo soporte","Acople fluido Transfluid KCG tamaño 15","Rodamientos eje entrada cono H715332 cubeta H715310","Retén 56x92x13","Motor Teco-Westinghouse 50HP 326T"],"tipos_reparacion":["Cambio de cadena motriz","Cambio de piñón","Cambio de rodillo tope soporte","Acuñado de pista","Soldadura paletas","Cambio de rodamientos eje entrada"]},"7.12":{"nombre":"Balanza","repuestos":["Celda de carga","Display","Plaqueta de control","Controlador"],"tipos_reparacion":["Cambio de celda de carga","Cambio de display","Cambio de plaqueta controlador"]}};
+
+function buscarSugerencias(equipoNombre) {
+  if (!equipoNombre) return null;
+  // Mapa exacto: nombre del equipo en la denuncia → clave en REPUESTOS_DB
+  const MAPA = {
+    // PA2
+    'Bba FMC 1 aliment. Caldera':          'BbaCaldera1-2.11',
+    'Bomba FCM 2 alim. caldera':            'BbaCaldera2-2.12',
+    'Bomba de azufre':                      'BbaAzufreAlimentacion-2.1',
+    'Bomba de oleum':                       'TorreOleum-2.20',
+    'Bomba de enfriamiento Nº3 KSB':        'BombaEnfriamientoKSB1-2.26',
+    'Bomba recirculación de ácido':         'BbaAcidoRetorno-2.57',
+    'Ventilador de gases (óleum)':          'TorreOleum-2.20',
+    'Ventilador de gases del óleum':        'TorreOleum-2.20',
+    'Agua lavado canal refriger.':          'BbaAguaD1-2.34',
+    'Soplador del Fuller eléctrico':        'SopladorFullerElectrico-2.8',
+    // PA1
+    'Bomba alimentación caldera Nº1':       'BbaCaldera1-2.11',
+    'Bomba alimentación caldera Nº2':       'BbaCaldera2-2.12',
+    'Bba FMC 1 aliment. Caldera (Emegencia)': 'BbaCalderaEmerg-2.13',
+    'Bomba carga de acido tks 1,2':         'BbaCargaT1o2o9-2.55',
+    'Bomba de ácido':                       'BbaAcido-2.22',
+    'Bomba de óleum':                       'TorreOleum-2.20',
+    'Ventilador Oleum':                     'TorreOleum-2.20',
+    'Soplador fuller':                      'SopladorFullerElectrico-2.8',
+    'Bomba de agua 1':                      'BbaAguaD1-2.34',
+    'Motobba ECP 1 piletas flocul.':        'BbaPileFloc1-2.43',
+    'Motobba ECP 2 piletas floculaci.':     'BbaPileFloc2-2.44',
+    'Ósmosis inv. Bba Triplex Cat':         'TurbinaHorizontalCoppus-2.5',
+    // PA1 y PA2
+    'Bomba desgasificador':                 'BbaDesgasif1-2.51',
+    'Piletas de floculación':               'PiletasFloc-2.42',
+    'Molino de escoria de azufre':          'MolinoEscoria-2.72',
+    // PG1
+    'Cinta de alimentación':                '7.2',
+    'Elevador 1 (alimentación)':            '7.3',
+    'Elevador Nº1(aliment.granulador)':     '7.3',
+    'Elevador 2':                           '7.6',
+    'Elevador Nº2(aliment. enfriador)':     '7.6',
+    'Elevador Nº3(aliment. zaranda)':       '7.8',
+    'Enfriador':                            '7.7',
+    'Granulador':                           '7.4',
+    'Secador':                              '7.5',
+    'Rompeterrones tolva alimentacion':     '7.1',
+    'Vibrador de tolva de alimentación':    '7.1',
+    'Bomba 2 del venturi':                  '7.19-venturi',
+    'Bomba Scruber':                        '7.23',
+    'Bomba del scrubber':                   '7.23',
+    'Bomba de agua scrubber':               '7.23',
+    'Filtro prensa':                        '7.25',
+    'Puente de grua':                       '7.27',
+    'Zaranda 1':                            '7.9',
+    'Zaranda 2':                            '7.9',
+    'Zaranda 3':                            '7.9',
+    'Ventilador horno':                     '7.13',
+    'Ventilador centrífugo enfriador':      '7.14',
+    'Ventil.centrífugo filtros de manga':   '7.17',
+    'Ventilador centrífugo chimenea':       '7.24',
+    'Válvula rotativa - filtros manga':     '7.16',
+    'Molino con rotor de cadenas':          '7.10',
+    'Molino con rotor de jaula':            '7.10',
+    'Molino de gruesos':                    '7.10',
+    // PG2
+    'Rompeterrones tolva 1':                '7.1',
+    'Rompeterrones tolva 2':                '7.1',
+    'Bomba de condensado':                  'BbaCondensado1-2.29',
+    'Bomba del venturi':                    '7.19-venturi',
+  };
+  const key = MAPA[equipoNombre] || MAPA[equipoNombre.trim()] || 
+    Object.keys(MAPA).find(k => k.trim().toLowerCase() === equipoNombre.trim().toLowerCase());
+  return key ? REPUESTOS_DB[key] : null;
+}
+
+function mostrarSugerencias(equipoNombre) {
+  const data = buscarSugerencias(equipoNombre);
+  const wrapTrab  = document.getElementById('sug-trabajo-wrap');
+  const wrapMat   = document.getElementById('sug-material-wrap');
+  const chipsTrab = document.getElementById('sug-trabajo-chips');
+  const chipsMat  = document.getElementById('sug-material-chips');
+  if (!data) { wrapTrab.style.display='none'; wrapMat.style.display='none'; return; }
+  chipsTrab.innerHTML = data.tipos_reparacion.map(t =>
+    `<span class="sug-chip" onclick="seleccionarTrabajo(this,'${t.replace(/'/g,"\\'")}')">${t}</span>`
+  ).join('');
+  chipsMat.innerHTML = data.repuestos.map(r =>
+    `<span class="sug-chip" onclick="agregarMaterial(this,'${r.replace(/'/g,"\\'")}')">${r}</span>`
+  ).join('');
+  wrapTrab.style.display='block';
+  wrapMat.style.display='block';
+}
+
+function seleccionarTrabajo(el, val) {
+  document.getElementById('ot-trabajo').value = val;
+  document.querySelectorAll('#sug-trabajo-chips .sug-chip').forEach(c => c.style.cssText='');
+  el.style.background='#1e1b4b'; el.style.color='#a78bfa'; el.style.borderColor='#4c1d95';
+}
+
+function agregarMaterial(el, val) {
+  const input = document.getElementById('ot-material');
+  const actual = input.value.trim();
+  // toggle: si ya está, lo quita
+  if (actual.includes(val)) {
+    input.value = actual.replace(', '+val,'').replace(val+', ','').replace(val,'').trim();
+    el.style.cssText='';
+  } else {
+    input.value = actual ? actual + ', ' + val : val;
+    el.style.background='#1e1b4b'; el.style.color='#a78bfa'; el.style.borderColor='#4c1d95';
+  }
+}
 
 cargarDatos();
 setInterval(cargarDatos,5000);
