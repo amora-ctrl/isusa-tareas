@@ -854,7 +854,9 @@ function buscarSugOp(equipoNombre) {
 }
 
 function mostrarSugerenciasOperario(equipoNombre) {
+  console.log('SUG OPERARIO - equipo:', JSON.stringify(equipoNombre));
   const data = buscarSugOp(equipoNombre);
+  console.log('SUG OPERARIO - data encontrada:', data ? data.nombre || 'OK' : 'NULL');
   const wrapT = document.getElementById('sug-tarea-wrap');
   const wrapM = document.getElementById('sug-material-wrap');
   const chipsT = document.getElementById('sug-tarea-chips');
