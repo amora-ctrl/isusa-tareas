@@ -48,10 +48,10 @@ function finalizar() {
   imgParte.src = SCRIPT_PARTES + '?payload=' + encodeURIComponent(JSON.stringify(parte));
 
   document.getElementById('ok-txt').innerHTML =
-    `<strong>${trabajo.equipo}</strong> — ${trabajo.planta}<br>` +
-    `Operario: ${sesion.operario} (${sesion.taller})<br>` +
-    `Inicio: ${fmtH(trabajo.horaInicio)} &nbsp;→&nbsp; Fin: ${fmtH(fin)}<br>` +
-    `<strong>Duración: ${fmtTimer(timerSec)}</strong>`;
+    '<strong>' + trabajo.equipo + '</strong> — ' + trabajo.planta + '<br>' +
+    'Operario: ' + sesion.operario + ' (' + sesion.taller + ')<br>' +
+    'Inicio: ' + fmtH(trabajo.horaInicio) + ' &nbsp;→&nbsp; Fin: ' + fmtH(fin) + '<br>' +
+    '<strong>Duración: ' + fmtTimer(timerSec) + '</strong>';
 
   showScreen('s-ok');
 }
