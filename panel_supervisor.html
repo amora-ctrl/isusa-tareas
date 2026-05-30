@@ -477,14 +477,24 @@ function cargarDatos(){
       if(!primeraVez){
         activas.forEach(d=>{
           if(!ultimosIds.has(String(d.id))){sonar(d.prioridad==='Máquina parada');mostrarAlerta(d);}
-          if(d.estado==='En proceso'&&d.hora_inicio&&Number(d.hora_inicio)>0){
-            tiemposInicio[String(d.id)]=new Date(Number(d.hora_inicio));
+          if(d.estado==='En proceso'&&d.hora_inicio){
+            const tsArr=Array.isArray(d.hora_inicio)?d.hora_inicio:[d.hora_inicio];
+            tsArr.forEach((ts,idx)=>{const n=Number(ts);if(n>0)tiemposInicio[String(d.id)+'-'+idx]=new Date(n);});
+          }
+        });
+        // También indexar OTs por num_ot para el render de OTs
+        data.ots.forEach(o=>{
+          if(o.estado==='En proceso'&&o.hora_inicio){
+            const tsArr=Array.isArray(o.hora_inicio)?o.hora_inicio:[o.hora_inicio];
+            tsArr.forEach((ts,idx)=>{const n=Number(ts);if(n>0)tiemposInicio[String(o.num_ot)+'-'+idx]=new Date(n);});
           }
         });
       } else {
-        activas.forEach(d=>{
-          if(d.estado==='En proceso'&&d.hora_inicio&&Number(d.hora_inicio)>0){
-            tiemposInicio[String(d.id)]=new Date(Number(d.hora_inicio));
+        // En cada refresh actualizar tiemposInicio para OTs (igual que mototransporte)
+        data.ots.forEach(o=>{
+          if(o.estado==='En proceso'&&o.hora_inicio){
+            const tsArr=Array.isArray(o.hora_inicio)?o.hora_inicio:[o.hora_inicio];
+            tsArr.forEach((ts,idx)=>{const n=Number(ts);if(n>0)tiemposInicio[String(o.num_ot)+'-'+idx]=new Date(n);});
           }
         });
       }
@@ -608,22 +618,31 @@ function renderOTs(){
     }
     // Operario y tiempo en OT
     const opOT = o.operario || '—';
-    const opLista = opOT !== '—' ? opOT.split(',').map(x=>x.trim()) : [];
+    const opLista = opOT !== '—' ? opOT.split(/[,\/]/).map(x=>x.trim()).filter(Boolean) : [];
     const tsLista = Array.isArray(o.hora_inicio) ? o.hora_inicio : (o.hora_inicio ? [o.hora_inicio] : []);
+    const finesLista = o.hora_fin ? String(o.hora_fin).split('/').map(x=>x.trim()) : [];
+    // Solo mostrar operarios activos (sin hora fin)
+    const opActivos = opLista.filter((op,idx) => !finesLista[idx] || finesLista[idx] === '');
+    const tsActivos = opLista.map((op,idx) => tsLista[idx]).filter((ts,idx) => !finesLista[idx] || finesLista[idx] === '');
+    const idxActivos = opLista.map((op,idx) => idx).filter(idx => !finesLista[idx] || finesLista[idx] === '');
     const iniOT = opLista.length > 0 ? opLista.map(op=>op.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()).join('/') : '?';
     let opCell, tcOT;
-    if (o.estado === 'En proceso' && tsLista.length > 0) {
-      opCell = opLista.map(op => {
+    if (o.estado === 'En proceso' && opActivos.length > 0) {
+      opCell = opActivos.map(op => {
         const ini = op.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
         return `<div class="op-cell" style="margin-bottom:4px">
           <div class="av">${ini}</div>
           <div>${op}</div>
         </div>`;
       }).join('');
-      tcOT = opLista.map((op, idx) => {
-        const ts = tsLista[idx] || tsLista[0];
-        const elId = `tot${o.num_ot.replace(/[^a-z0-9]/gi,'-')}-${idx}`;
-        return `<div style="margin-bottom:4px"><span class="tc-run" id="${elId}">${fmtElapsed(new Date(ts))}</span></div>`;
+      tcOT = opActivos.map((op, i2) => {
+        const origIdx = idxActivos[i2];
+        const ts = tsActivos[i2];
+        const n = Number(ts);
+        const elId = 'tel'+(o.num_ot+'-'+origIdx).replace(/[^a-z0-9]/gi,'-');
+        const key = String(o.num_ot)+'-'+origIdx;
+        const ini = tiemposInicio[key] || (n>0 ? new Date(n) : null);
+        return `<div style="margin-bottom:4px"><span class="tc-run" id="${elId}">${ini?fmtElapsed(ini):'—'}</span></div>`;
       }).join('');
     } else if (o.estado === 'Finalizado' && o.hora_fin) {
       opCell = `<div class="op-cell"><div class="av">${iniOT}</div>${opOT}</div>`;
@@ -892,10 +911,16 @@ setInterval(()=>{
   Object.keys(tiemposInicio).forEach(id=>{const el=document.getElementById('tel'+id);if(el)el.textContent=fmtElapsed(tiemposInicio[id]);});
   OTS.forEach(o=>{
     if(o.estado==='En proceso'){
-      const tsLista = Array.isArray(o.hora_inicio) ? o.hora_inicio : (o.hora_inicio ? [o.hora_inicio] : []);
-      tsLista.forEach((ts, idx) => {
-        const el = document.getElementById('tot'+o.num_ot.replace(/[^a-z0-9]/gi,'-')+'-'+idx);
-        if(el) el.textContent = fmtElapsed(new Date(ts));
+      const tsListaT = Array.isArray(o.hora_inicio) ? o.hora_inicio : (o.hora_inicio ? [o.hora_inicio] : []);
+      const finesListaT = o.hora_fin ? String(o.hora_fin).split('/').map(x=>x.trim()) : [];
+      tsListaT.forEach((ts, idx) => {
+        if(finesListaT[idx] && finesListaT[idx] !== '') return;
+        const key = String(o.num_ot)+'-'+idx;
+        const ini = tiemposInicio[key] || (Number(ts)>0 ? new Date(Number(ts)) : null);
+        if(!ini) return;
+        const elId = 'tel'+(o.num_ot+'-'+idx).replace(/[^a-z0-9]/gi,'-');
+        const el = document.getElementById(elId);
+        if(el) el.textContent = fmtElapsed(ini);
       });
     }
   });

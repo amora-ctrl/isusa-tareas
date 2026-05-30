@@ -295,11 +295,35 @@ function cargarDenuncias(callback) {
         if (local.estado === 'En proceso') {
           const idx = nuevas.findIndex(n => String(n.id) === String(local.id));
           if (idx >= 0) {
-            nuevas[idx].estado  = local.estado;
+            nuevas[idx].estado   = local.estado;
             nuevas[idx].operario = local.operario;
+            // Preservar hora_inicio local para no resetear el timer
+            if (local.hora_inicio && local.hora_inicio.length > 0) {
+              nuevas[idx].hora_inicio = local.hora_inicio;
+            }
           }
         }
       });
+      // Preservar hora_inicio del trabajo activo — siempre usar localStorage como fuente de verdad
+      if (trabajo && trabajo.horaInicio) {
+        const idxActivo = nuevas.findIndex(n => String(n.id) === String(trabajo.id));
+        if (idxActivo >= 0) {
+          const opsActivo = String(nuevas[idxActivo].operario || '').split(/[,\/]/).map(x => x.trim());
+          const miIdxActivo = opsActivo.indexOf(sesion.operario);
+          const tsActivo = Array.isArray(nuevas[idxActivo].hora_inicio) ? [...nuevas[idxActivo].hora_inicio] : [];
+          const miTs = trabajo.horaInicio instanceof Date ? trabajo.horaInicio.getTime() : Number(trabajo.horaInicio);
+          if (miIdxActivo >= 0) {
+            // Solo sobrescribir si el Sheet tiene vacío o un valor diferente
+            if (!tsActivo[miIdxActivo] || Number(tsActivo[miIdxActivo]) <= 0) {
+              tsActivo[miIdxActivo] = miTs;
+            }
+          } else {
+            // No estoy en la lista aún — agregar mi timestamp
+            tsActivo.push(miTs);
+          }
+          nuevas[idxActivo].hora_inicio = tsActivo;
+        }
+      }
 
       DENUNCIAS = nuevas;
 
@@ -443,26 +467,47 @@ function tomarDenuncia(id) {
   const d = DENUNCIAS.find(x => String(x.id) === String(id));
   if (!d || d.estado === 'Finalizado') return;
 
-  // Recuperar hora de inicio original si este operario ya tenía esta OT en proceso
+  // Recuperar hora de inicio: localStorage > Sheet > nueva
   let horaInicio;
   try {
-    const saved = localStorage.getItem('isusa_trabajo');
-    if (saved) {
-      const t = JSON.parse(saved);
-      if (String(t.id) === String(id) && t.operario === sesion.operario && t.horaInicio) {
+    // Buscar localStorage por clave del operario actual, con fallback a clave genérica
+    const _lsKey = 'isusa_trabajo_' + sesion.operario;
+    const _saved = localStorage.getItem(_lsKey) || localStorage.getItem('isusa_trabajo');
+    if (_saved) {
+      const t = JSON.parse(_saved);
+      const mismaOT = String(t.id) === String(id) || String(t.num_ot) === String(id);
+      if (mismaOT && t.operario === sesion.operario && t.horaInicio) {
         horaInicio = new Date(t.horaInicio);
       }
     }
   } catch(e) {}
-  if (!horaInicio && d.operario === sesion.operario && d.hora_inicio && Number(d.hora_inicio) > 0) {
-    horaInicio = new Date(Number(d.hora_inicio));
+  if (!horaInicio && d.hora_inicio) {
+    const tsArr = Array.isArray(d.hora_inicio) ? d.hora_inicio : [d.hora_inicio];
+    const ops = String(d.operario || '').split(/[\/,]/).map(function(x){ return x.trim(); });
+    const miIdx = ops.indexOf(sesion.operario);
+    // Solo usar timestamp propio — si soy nuevo arrancar desde cero
+    // Solo usar MI timestamp — si soy nuevo arrancar desde cero
+    const miVal = (miIdx >= 0 && tsArr[miIdx]) ? tsArr[miIdx] : null;
+    if (miVal) {
+      if (String(miVal).indexOf('ts:') === 0) {
+        const n = Number(String(miVal).replace('ts:', ''));
+        if (n > 0) horaInicio = new Date(n);
+      } else if (Number(miVal) > 0) {
+        horaInicio = new Date(Number(miVal));
+      } else if (/^\d{2}:\d{2}$/.test(String(miVal))) {
+        const parts = String(miVal).split(':');
+        const d2 = new Date();
+        d2.setHours(Number(parts[0]), Number(parts[1]), 0, 0);
+        horaInicio = d2;
+      }
+    }
   }
   const esNueva = !horaInicio;
   if (!horaInicio) horaInicio = new Date();
   trabajo = {...d, operario: sesion.operario, taller: sesion.taller, horaInicio: horaInicio};
 
   // Guardar en localStorage para sobrevivir recargas
-  localStorage.setItem('isusa_trabajo', JSON.stringify({
+  localStorage.setItem('isusa_trabajo_' + sesion.operario, JSON.stringify({
     ...trabajo,
     horaInicio: horaInicio.getTime()
   }));
@@ -488,7 +533,7 @@ function tomarDenuncia(id) {
       num_ot:      d.num_ot,
       estado:      'En proceso',
       operario:    sesion.operario,
-      hora_inicio: esNueva ? horaInicio.getTime() : (Number(d.hora_inicio) || horaInicio.getTime()),
+      hora_inicio: horaInicio.getTime(), // siempre el timestamp propio de este operario
       pausado_en:  0
     })
   }).catch(() => {});
@@ -561,19 +606,26 @@ function mostrarTrabajo() {
 
 function finalizar() {
   const obs = document.getElementById('obs').value.trim();
-  if (!obs && materialesSeleccionados.length === 0) { alert('Agrega una observacion o selecciona tareas antes de finalizar.'); return; }
+  if (!obs && materialesSeleccionados.length === 0) { alert('Agregá una observación o seleccioná tareas antes de finalizar.'); return; }
   const obsFinal = obs || '(sin observaciones adicionales)';
   const materialFinal = materialesSeleccionados.join(', ');
 
   clearInterval(timerIv);
-  localStorage.removeItem('isusa_trabajo');
+  localStorage.removeItem('isusa_trabajo_' + sesion.operario);
   const fin = new Date();
   const min = Math.round(timerSec / 60);
 
-  const idx = DENUNCIAS.findIndex(function(x){ return String(x.id) === String(trabajo.id); });
+  console.log('🔧 FINALIZAR — num_ot:', trabajo.num_ot, '| trabajo.id:', trabajo.id);
+
+  const idx = DENUNCIAS.findIndex(x => String(x.id) === String(trabajo.id));
+  // Solo actualizar si yo era el último trabajando
   if (idx >= 0) {
     const key = String(trabajo.id);
-    operariosActivos[key] = (operariosActivos[key] || []).filter(function(o){ return o !== sesion.operario; });
+    operariosActivos[key] = (operariosActivos[key] || []).filter(o => o !== sesion.operario);
+    // Finalizar en Sheet solo si no hay otros trabajando
+    if (operariosActivos[key].length === 0) {
+      DENUNCIAS[idx].estado = 'Finalizado';
+    }
   }
 
   const payload = {
@@ -605,14 +657,15 @@ function finalizar() {
     observaciones: obsFinal,
     material:      materialFinal
   };
+
   const imgParte = new Image();
   imgParte.src = SCRIPT_PARTES + '?payload=' + encodeURIComponent(JSON.stringify(parte));
 
-  const okEl = document.getElementById('ok-txt');
-  okEl.innerHTML = '<strong>' + trabajo.equipo + '</strong> &mdash; ' + trabajo.planta + '<br>'
-    + 'Operario: ' + sesion.operario + ' (' + sesion.taller + ')<br>'
-    + 'Inicio: ' + fmtH(trabajo.horaInicio) + ' &rarr; Fin: ' + fmtH(fin) + '<br>'
-    + '<strong>Duracion: ' + fmtTimer(timerSec) + '</strong>';
+  document.getElementById('ok-txt').innerHTML =
+    `<strong>${trabajo.equipo}</strong> — ${trabajo.planta}<br>` +
+    `Operario: ${sesion.operario} (${sesion.taller})<br>` +
+    `Inicio: ${fmtH(trabajo.horaInicio)} &nbsp;→&nbsp; Fin: ${fmtH(fin)}<br>` +
+    `<strong>Duración: ${fmtTimer(timerSec)}</strong>`;
 
   showScreen('s-ok');
 }
@@ -646,22 +699,20 @@ function guardarParcial() {
   const img = new Image();
   img.src = url;
 
-  // 2. Resetear denuncia a Pendiente con tiempo en cero
-  // Guardamos el operario en observaciones para el historial
-  const obsConOperario = '[' + sesion.operario + '] ' + obsParc;
-  fetch(SCRIPT_DENUNCIAS, {
-    method: 'POST',
-    mode: 'no-cors',
-    body: JSON.stringify({
-      accion:        'actualizar_estado_ot',
-      num_ot:        trabajo.num_ot,
-      estado:        'Pendiente',
-      operario:      '',
-      hora_inicio:   '',
-      pausado_en:    0,
-      observaciones: obsConOperario
-    })
-  }).catch(() => {});
+  // 2. Mantener OT En proceso — solo guardar observacion parcial
+  // NO resetear operario ni hora_inicio para que el timer se recupere al volver
+  const obsConOperario = '[' + sesion.operario + '] ' + obsParc + ' [PARCIAL]';
+  const payloadParcial = {
+    accion:        'actualizar_estado_ot',
+    num_ot:        trabajo.num_ot,
+    estado:        'En proceso',
+    operario:      sesion.operario,
+    hora_inicio:   trabajo.horaInicio.getTime(),
+    pausado_en:    0,
+    observaciones: obsConOperario
+  };
+  const imgParcial = new Image();
+  imgParcial.src = SCRIPT_DENUNCIAS + '?payload=' + encodeURIComponent(JSON.stringify(payloadParcial));
 
   // 3. Actualizar lista local
   const idx = DENUNCIAS.findIndex(x => String(x.id) === String(trabajo.id));
@@ -673,12 +724,15 @@ function guardarParcial() {
     DENUNCIAS[idx].observaciones = obsConOperario;
     // Remover de activos (ya no está trabajando activamente)
     operariosActivos[key] = (operariosActivos[key] || []).filter(o => o !== sesion.operario);
-    // Si no hay otros activos, pasar a Pendiente
-    if (operariosActivos[key].length === 0) {
-      DENUNCIAS[idx].estado   = 'Pendiente';
-      DENUNCIAS[idx].operario = '';
-    }
+    // Mantener En proceso aunque no haya otros activos
+    // El Sheet mantiene el estado y hora_inicio para recuperar el timer
+    DENUNCIAS[idx].estado = 'En proceso';
   }
+  // Guardar hora_inicio en localStorage para recuperar el timer al volver
+  localStorage.setItem('isusa_trabajo_' + sesion.operario, JSON.stringify({
+    ...trabajo,
+    horaInicio: trabajo.horaInicio.getTime()
+  }));
   volverLista();
 }
 

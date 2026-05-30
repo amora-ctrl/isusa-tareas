@@ -75,7 +75,7 @@ tr:hover td{background:#111d33}
 </div>
 
 <div class="alerta" id="alerta">
-  <div class="alerta-titulo">Nueva denuncia — Taller Eléctrico</div>
+  <div class="alerta-titulo">Nueva OT — Taller Eléctrico</div>
   <div class="alerta-eq" id="alerta-eq">—</div>
   <div class="alerta-pl" id="alerta-pl">—</div>
 </div>
@@ -86,7 +86,7 @@ tr:hover td{background:#111d33}
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1.5" y="3" width="15" height="12" rx="2" stroke="white" stroke-width="1.5" fill="none"/><path d="M5 8h8M5 11h5" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
     </div>
     <div>
-      <div class="top-title">Panel de Control — Denuncias de Equipos</div>
+      <div class="top-title">Panel de Control — Órdenes de Trabajo</div>
       <div class="top-taller">Taller Eléctrico &nbsp;·&nbsp; Luis Brun · Carlos Palermo · Lautaro Bigolin · Jhon Cooper</div>
     </div>
   </div>
@@ -100,7 +100,7 @@ tr:hover td{background:#111d33}
 <div class="main">
   <div class="metrics">
     <div class="metric mb">
-      <div class="metric-lbl"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><rect x="0.5" y="1.5" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.1" fill="none"/><path d="M2 4.5h7M2 6.5h5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>Denuncias totales</div>
+      <div class="metric-lbl"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><rect x="0.5" y="1.5" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.1" fill="none"/><path d="M2 4.5h7M2 6.5h5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>OTs totales</div>
       <div class="metric-val" id="m-total">—</div>
       <div class="metric-sub" id="m-tsub">Cargando...</div>
     </div>
@@ -123,20 +123,21 @@ tr:hover td{background:#111d33}
 
   <div class="panel">
     <div class="panel-hdr">
-      <div class="panel-title">Lista de control — <span class="acento">Taller Eléctrico</span></div>
+      <div class="panel-title">Órdenes de trabajo — <span class="acento">Taller Eléctrico</span></div>
       <div class="footer-txt" id="f-fecha">Cargando datos...</div>
     </div>
     <div style="overflow-x:auto">
       <table>
         <thead>
           <tr>
+            <th>N° OT</th>
             <th>Fecha</th>
             <th>Planta</th>
             <th>Equipo</th>
-            <th>Tipo</th>
+            <th>Tipo trabajo</th>
             <th>Prioridad</th>
             <th>Operario</th>
-            <th>Tiempo transcurrido</th>
+            <th>Tiempo</th>
             <th>Estado</th>
           </tr>
         </thead>
@@ -198,27 +199,27 @@ function cargarDatos(){
   fetch(url)
     .then(r=>r.json())
     .then(data=>{
-      const todas=data.denuncias||[];
-      const vis=todas.filter(d=>{
-        if(d.estado==='Finalizado'||d.estado==='Reprogramada') return false;
-        if(!(d.tipo==='Eléctrica'||d.tipo==='Indefinida')) return false;
-        // Todas las prioridades van al taller por defecto, excepto si fue reprogramada
-        if(d.estado==='Reprogramada') return false;
-        return true;
-      });
+      const ots=data.ots||[];
+      const vis=ots.filter(o=>o.taller==='Eléctrico'&&o.estado!=='Finalizado');
       if(!primeraVez){
-        vis.forEach(d=>{
-          if(!ultimosIds.has(String(d.id))){sonar(d.prioridad==='Máquina parada');mostrarAlerta(d);}
-          // Usar hora_inicio del Sheet para cronómetro consistente en todos los dispositivos
-          // Usar hora_inicio del Sheet — igual en todos los dispositivos
-          if(d.estado==='En proceso'&&d.hora_inicio&&Number(d.hora_inicio)>0){
-            tiemposInicio[String(d.id)]=new Date(Number(d.hora_inicio));
+        vis.forEach(o=>{
+          if(!ultimosIds.has(String(o.num_ot))){sonar(o.prioridad==='Máquina parada');mostrarAlerta(o);}
+          if(o.estado==='En proceso'&&o.hora_inicio){
+            const tsArr=Array.isArray(o.hora_inicio)?o.hora_inicio:[o.hora_inicio];
+            tsArr.forEach((ts,idx)=>{const n=Number(ts);if(n>0)tiemposInicio[String(o.num_ot)+'-'+idx]=new Date(n);});
+          }
+        });
+      } else {
+        vis.forEach(o=>{
+          if(o.estado==='En proceso'&&o.hora_inicio){
+            const tsArr=Array.isArray(o.hora_inicio)?o.hora_inicio:[o.hora_inicio];
+            tsArr.forEach((ts,idx)=>{const n=Number(ts);if(n>0)tiemposInicio[String(o.num_ot)+'-'+idx]=new Date(n);});
           }
         });
       }
-      ultimosIds=new Set(vis.map(d=>String(d.id)));
+      ultimosIds=new Set(vis.map(o=>String(o.num_ot)));
       primeraVez=false;
-      renderMetrics(todas,data.promedio_min);
+      renderMetrics(ots,data.promedio_min);
       renderTabla(vis);
       document.getElementById('sync-status').textContent='OK '+fmtNow();
       document.getElementById('f-fecha').textContent='Actualizado: '+fmtNow();
@@ -226,10 +227,9 @@ function cargarDatos(){
     .catch(err=>{document.getElementById('sync-status').textContent='Error: '+err.message;});
 }
 
-function renderMetrics(todas,promedio){
-  const base=todas.filter(d=>d.tipo==='Eléctrica'||d.tipo==='Indefinida');
-  const total=base.length,abier=base.filter(d=>d.estado!=='Finalizado').length,fin=base.filter(d=>d.estado==='Finalizado').length;
-  const cd=base.filter(d=>d.duracion_min);
+function renderMetrics(ots,promedio){
+  const base=ots.filter(o=>o.taller==='Eléctrico');
+  const total=base.length,abier=base.filter(o=>o.estado!=='Finalizado').length,fin=base.filter(o=>o.estado==='Finalizado').length;
   const prom=promedio?(promedio>=60?(promedio/60).toFixed(1)+' hs':promedio+' min'):'—';
   document.getElementById('m-total').textContent=total;
   document.getElementById('m-abier').textContent=abier;
@@ -244,39 +244,65 @@ function fmtElapsed(ini){const s=Math.max(0,Math.floor((Date.now()-ini.getTime()
 
 function renderTabla(list){
   const tb=document.getElementById('tbody');
-  if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="8">No hay denuncias activas</td></tr>';document.getElementById('f-count').textContent='0 denuncias';return;}
+  if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="9">No hay órdenes de trabajo activas</td></tr>';document.getElementById('f-count').textContent='0 OTs';return;}
   const eo={'En proceso':0,'Pendiente':1,'Finalizado':2},po={'Máquina parada':0,'Baja':1};
   list.sort((a,b)=>(eo[a.estado]||0)-(eo[b.estado]||0)||(po[a.prioridad]||1)-(po[b.prioridad]||1));
-  tb.innerHTML=list.map(d=>{
-    const esMP=d.prioridad==='Máquina parada'&&d.estado==='Pendiente';
-    const bT=d.tipo==='Eléctrica'?'b-elec':d.tipo==='Mecánica'?'b-mec':'b-indef';
+  tb.innerHTML=list.map(o=>{
+    const esMP=o.prioridad==='Máquina parada'&&o.estado==='Pendiente';
+    const tagTipo=o.tipo_trabajo==='Preventivo'?'b-proc':'b-mp';
     const bP=esMP?'b-mp':'b-baja';
-    const bE=d.estado==='Finalizado'?'b-fin':d.estado==='En proceso'?'b-proc':'b-pend';
-    const op=d.operario||'—';
+    const bE=o.estado==='Finalizado'?'b-fin':o.estado==='En proceso'?'b-proc':'b-pend';
+    const op=o.operario||'—';
     const ini=op!=='—'?op.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase():'?';
-    const tc=d.estado==='En proceso'&&tiemposInicio[String(d.id)]
-      ?`<span class="tc-run" id="tel${d.id}">${fmtElapsed(tiemposInicio[String(d.id)])}</span>`
-      :d.estado==='Pendiente'
-      ?'<span class="tc-pend">Sin tomar</span>'
-      :'<span class="tc-stop">—</span>';
+    // Fecha: normalizar ISO
+    let fechaFmt=o.fecha||'—';
+    if(fechaFmt.includes('T')){const fd=new Date(fechaFmt);if(!isNaN(fd)){fechaFmt=pad(fd.getDate())+'/'+pad(fd.getMonth()+1)+'/'+fd.getFullYear();}}
+    const tsListaE = Array.isArray(o.hora_inicio) ? o.hora_inicio : (o.hora_inicio ? [o.hora_inicio] : []);
+    const finesListaE = o.hora_fin ? String(o.hora_fin).split('/').map(x=>x.trim()) : [];
+    const opListaE = o.operario && o.operario !== '—' ? o.operario.split(/[,\/]/).map(x=>x.trim()).filter(Boolean) : [];
+    // Solo mostrar operarios que siguen activos (sin hora fin)
+    const opActivosE = opListaE.filter((op,idx) => !finesListaE[idx] || finesListaE[idx] === '');
+    const tsActivosE = opListaE.map((op,idx) => tsListaE[idx]).filter((ts,idx) => !finesListaE[idx] || finesListaE[idx] === '');
+    const idxActivosE = opListaE.map((op,idx) => idx).filter(idx => !finesListaE[idx] || finesListaE[idx] === '');
+    let opCell, tc;
+    if(o.estado==='En proceso'&&opActivosE.length>0){
+      opCell = opActivosE.map(op=>{
+        const ini=op.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        return `<div class="op-cell" style="margin-bottom:6px"><div class="av">${ini}</div><div>${op}</div></div>`;
+      }).join('');
+      tc = opActivosE.map((op,i2)=>{
+        const origIdx=idxActivosE[i2];
+        const ts=tsActivosE[i2];
+        const n=Number(ts);
+        const elId='tel'+(o.num_ot+'-'+origIdx).replace(/[^a-z0-9]/gi,'-');
+        const tsKey=o.num_ot+'-'+origIdx;
+        const tDisplay=tiemposInicio[tsKey]?fmtElapsed(tiemposInicio[tsKey]):(n>0?fmtElapsed(new Date(n)):'—');
+        return `<div style="margin-bottom:6px"><span class="tc-run" id="${elId}">${tDisplay}</span></div>`;
+      }).join('');
+    } else {
+      const ini2=op!=='—'?op.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase():'?';
+      opCell=`<div class="op-cell"><div class="av">${ini2}</div><div>${op}</div></div>`;
+      tc=o.estado==='Pendiente'?'<span class="tc-pend">Sin tomar</span>':'<span class="tc-stop">—</span>';
+    }
     return `<tr class="${esMP?'tr-mp':''}">
-      <td class="td-fecha">${d.fecha} ${d.hora}</td>
-      <td class="td-pl">${d.planta}</td>
-      <td class="td-eq">${d.equipo}</td>
-      <td><span class="badge ${bT}">${d.tipo}</span></td>
-      <td><span class="badge ${bP}">${d.prioridad}</span></td>
-      <td><div class="op-cell"><div class="av">${ini}</div>${op}</div></td>
+      <td style="font-family:'Courier New',monospace;font-size:12px;color:#a78bfa;font-weight:700">${o.num_ot}</td>
+      <td class="td-fecha">${fechaFmt}${o.hora?' '+o.hora:''}</td>
+      <td class="td-pl">${o.planta}</td>
+      <td class="td-eq">${o.equipo}</td>
+      <td><span class="badge b-elec">${o.tipo_trabajo||'—'}</span></td>
+      <td><span class="badge ${bP}">${o.prioridad}</span></td>
+      <td>${opCell}</td>
       <td>${tc}</td>
-      <td><span class="badge ${bE}">${d.estado}</span></td>
+      <td><span class="badge ${bE}">${o.estado}</span></td>
     </tr>`;
   }).join('');
-  document.getElementById('f-count').textContent=list.length+' denuncias activas';
+  document.getElementById('f-count').textContent=list.length+' OTs activas';
 }
 
 function pad(n){return String(n).padStart(2,'0');}
 function fmtNow(){const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());}
 setInterval(()=>{const d=new Date();document.getElementById('clock').textContent=pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());},1000);
-setInterval(()=>{Object.keys(tiemposInicio).forEach(id=>{const el=document.getElementById('tel'+id);if(el)el.textContent=fmtElapsed(tiemposInicio[id]);});},1000);
+setInterval(()=>{Object.keys(tiemposInicio).forEach(key=>{const el=document.getElementById('tel'+key.replace(/[^a-z0-9]/gi,'-'));if(el)el.textContent=fmtElapsed(tiemposInicio[key]);});},1000);
 cargarDatos();
 setInterval(cargarDatos,5000);
 // Iniciar AudioContext automáticamente
