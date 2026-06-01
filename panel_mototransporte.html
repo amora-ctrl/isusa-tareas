@@ -66,6 +66,15 @@ tr:hover td{background:#1a1000}
 .alerta-titulo{font-size:11px;color:#fcd34d;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px}
 .alerta-eq{font-size:15px;font-weight:700;color:#fff;margin-bottom:2px}
 .alerta-pl{font-size:12px;color:#fcd34d}
+
+.btn-tomar{background:#b45309;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.3px;transition:background .2s}
+.btn-tomar:hover{background:#92400e}
+.modal-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal-frame{width:420px;height:680px;border:none;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.6)}
+.modal-close-bar{position:fixed;top:calc(50% - 340px - 32px);left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;z-index:10000}
+.modal-close-btn{background:#1a1a2e;color:#fff;border:1px solid #444;border-radius:8px;padding:5px 14px;font-size:12px;cursor:pointer}
+.modal-timer{color:#fbbf24;font-size:12px;font-weight:600}
 </style>
 </head>
 <body>
@@ -103,6 +112,7 @@ tr:hover td{background:#1a1000}
     <div class="sync-status" id="sync-status">Conectando...</div>
     <div class="top-clock" id="clock">—</div>
     <div class="dot-live"></div>
+    <button class="btn-tomar" onclick="abrirOperarios()">Tomar tarea</button>
   </div>
 </div>
 
@@ -344,6 +354,48 @@ setInterval(cargarDatos,5000);
 function unlockAudio(){
   try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();audioCtx.resume();}catch(e){}
   document.getElementById('audio-unlock').style.display='none';
+}
+</script>
+
+<!-- Modal operarios -->
+<div class="modal-overlay" id="modal-operarios">
+  <div class="modal-close-bar">
+    <button class="modal-close-btn" onclick="cerrarOperarios()">✕ Cerrar</button>
+    <span class="modal-timer" id="modal-timer"></span>
+  </div>
+  <iframe class="modal-frame" id="modal-iframe" src="" allow="camera"></iframe>
+</div>
+
+<script>
+var _modalTimer = null;
+var _modalSecs = 60;
+
+function abrirOperarios() {
+  var modal = document.getElementById('modal-operarios');
+  var iframe = document.getElementById('modal-iframe');
+  iframe.src = 'https://amora-ctrl.github.io/isusa-tareas/operarios.html';
+  modal.classList.add('show');
+  _modalSecs = 60;
+  actualizarTimerModal();
+  _modalTimer = setInterval(function() {
+    _modalSecs--;
+    actualizarTimerModal();
+    if (_modalSecs <= 0) cerrarOperarios();
+  }, 1000);
+}
+
+function cerrarOperarios() {
+  var modal = document.getElementById('modal-operarios');
+  var iframe = document.getElementById('modal-iframe');
+  modal.classList.remove('show');
+  iframe.src = '';
+  clearInterval(_modalTimer);
+  _modalTimer = null;
+  document.getElementById('modal-timer').textContent = '';
+}
+
+function actualizarTimerModal() {
+  document.getElementById('modal-timer').textContent = 'Cierra en ' + _modalSecs + 's';
 }
 </script>
 </body>
