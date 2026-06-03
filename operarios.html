@@ -184,6 +184,8 @@ textarea{resize:vertical;line-height:1.5}
       <div class="info-row"><span class="info-lbl">Tipo trabajo</span><span class="info-val" id="t-ti">—</span></div>
       <div class="info-row"><span class="info-lbl">Prioridad</span><span class="info-val" id="t-pr">—</span></div>
       <div class="info-row"><span class="info-lbl">Hora inicio</span><span class="info-val" id="t-hi">—</span></div>
+      <div class="info-row" style="background:#fef3c7;border-radius:8px;padding:8px 10px;margin:4px 0"><span class="info-lbl" style="color:#92400e;font-weight:700">Tarea a realizar</span><span class="info-val" id="t-tarea" style="font-size:13px;color:#92400e;font-weight:600">—</span></div>
+      <div class="info-row" style="background:#ede9fe;border-radius:8px;padding:8px 10px;margin:4px 0"><span class="info-lbl" style="color:#5b21b6;font-weight:700">Observaciones</span><span class="info-val" id="t-obs-ot" style="font-size:13px;color:#5b21b6;white-space:pre-line">—</span></div>
       <div id="foto-wrap" style="display:none;margin-top:12px">
         <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Foto adjunta</div>
         <a id="foto-link" href="#" target="_blank">
@@ -544,6 +546,8 @@ function tomarDenuncia(id) {
   document.getElementById('t-pl').textContent = trabajo.planta;
   document.getElementById('t-ti').textContent = trabajo.tipo;
   document.getElementById('t-pr').textContent = trabajo.prioridad;
+  document.getElementById('t-tarea').textContent = trabajo.trabajo || '—';
+  document.getElementById('t-obs-ot').textContent = trabajo.observaciones || '—';
   document.getElementById('t-hi').textContent = fmtH(hiDate);
   document.getElementById('obs').value = '';
 
@@ -579,6 +583,8 @@ function mostrarTrabajo() {
   document.getElementById('t-pl').textContent = trabajo.planta;
   document.getElementById('t-ti').textContent = trabajo.tipo;
   document.getElementById('t-pr').textContent = trabajo.prioridad;
+  document.getElementById('t-tarea').textContent = trabajo.trabajo || '—';
+  document.getElementById('t-obs-ot').textContent = trabajo.observaciones || '—';
   document.getElementById('t-hi').textContent = fmtH(hiDate);
   document.getElementById('obs').value = '';
   document.getElementById('foto-wrap').style.display = 'none';
