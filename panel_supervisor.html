@@ -180,6 +180,7 @@ tr:hover td{background:#111827}
     <div class="sync-status" id="sync-status">Conectando...</div>
     <div class="top-clock" id="clock">—</div>
     <div class="dot-live"></div>
+    <button style="background:#7c3aed;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.3px" onclick="abrirModalOTDirecta()">+ Generar OT</button>
   </div>
 </div>
 
@@ -347,6 +348,23 @@ tr:hover td{background:#111827}
 
     <!-- Card con datos de la denuncia origen -->
     <div class="ot-den-card" id="ot-den-card"></div>
+    <div id="ot-directa-campos" style="display:none;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Datos de la OT</div>
+      <select id="ot-dir-planta" class="ot-select" style="width:100%;margin-bottom:8px" onchange="cargarEquiposDirecta()">
+        <option value="">— Seleccioná planta —</option>
+      </select>
+      <select id="ot-dir-equipo" class="ot-select" style="width:100%;margin-bottom:8px">
+        <option value="">— Seleccioná equipo —</option>
+      </select>
+      <select id="ot-dir-tipo" class="ot-select" style="width:100%;margin-bottom:4px">
+        <option value="Eléctrica">Eléctrica</option>
+        <option value="Mecánica">Mecánica</option>
+        <option value="Soldadura">Soldadura</option>
+        <option value="Indefinida">Indefinida</option>
+        <option value="Correctivo">Correctivo</option>
+        <option value="Preventivo">Preventivo</option>
+      </select>
+    </div>
 
     <div class="ot-section">Tipo de trabajo</div>
     <div class="ot-tipo-group">
@@ -477,24 +495,14 @@ function cargarDatos(){
       if(!primeraVez){
         activas.forEach(d=>{
           if(!ultimosIds.has(String(d.id))){sonar(d.prioridad==='Máquina parada');mostrarAlerta(d);}
-          if(d.estado==='En proceso'&&d.hora_inicio){
-            const tsArr=Array.isArray(d.hora_inicio)?d.hora_inicio:[d.hora_inicio];
-            tsArr.forEach((ts,idx)=>{const n=Number(ts);if(n>0)tiemposInicio[String(d.id)+'-'+idx]=new Date(n);});
-          }
-        });
-        // También indexar OTs por num_ot para el render de OTs
-        data.ots.forEach(o=>{
-          if(o.estado==='En proceso'&&o.hora_inicio){
-            const tsArr=Array.isArray(o.hora_inicio)?o.hora_inicio:[o.hora_inicio];
-            tsArr.forEach((ts,idx)=>{const n=Number(ts);if(n>0)tiemposInicio[String(o.num_ot)+'-'+idx]=new Date(n);});
+          if(d.estado==='En proceso'&&d.hora_inicio&&Number(d.hora_inicio)>0){
+            tiemposInicio[String(d.id)]=new Date(Number(d.hora_inicio));
           }
         });
       } else {
-        // En cada refresh actualizar tiemposInicio para OTs (igual que mototransporte)
-        data.ots.forEach(o=>{
-          if(o.estado==='En proceso'&&o.hora_inicio){
-            const tsArr=Array.isArray(o.hora_inicio)?o.hora_inicio:[o.hora_inicio];
-            tsArr.forEach((ts,idx)=>{const n=Number(ts);if(n>0)tiemposInicio[String(o.num_ot)+'-'+idx]=new Date(n);});
+        activas.forEach(d=>{
+          if(d.estado==='En proceso'&&d.hora_inicio&&Number(d.hora_inicio)>0){
+            tiemposInicio[String(d.id)]=new Date(Number(d.hora_inicio));
           }
         });
       }
@@ -618,31 +626,22 @@ function renderOTs(){
     }
     // Operario y tiempo en OT
     const opOT = o.operario || '—';
-    const opLista = opOT !== '—' ? opOT.split(/[,\/]/).map(x=>x.trim()).filter(Boolean) : [];
+    const opLista = opOT !== '—' ? opOT.split(',').map(x=>x.trim()) : [];
     const tsLista = Array.isArray(o.hora_inicio) ? o.hora_inicio : (o.hora_inicio ? [o.hora_inicio] : []);
-    const finesLista = o.hora_fin ? String(o.hora_fin).split('/').map(x=>x.trim()) : [];
-    // Solo mostrar operarios activos (sin hora fin)
-    const opActivos = opLista.filter((op,idx) => !finesLista[idx] || finesLista[idx] === '');
-    const tsActivos = opLista.map((op,idx) => tsLista[idx]).filter((ts,idx) => !finesLista[idx] || finesLista[idx] === '');
-    const idxActivos = opLista.map((op,idx) => idx).filter(idx => !finesLista[idx] || finesLista[idx] === '');
     const iniOT = opLista.length > 0 ? opLista.map(op=>op.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()).join('/') : '?';
     let opCell, tcOT;
-    if (o.estado === 'En proceso' && opActivos.length > 0) {
-      opCell = opActivos.map(op => {
+    if (o.estado === 'En proceso' && tsLista.length > 0) {
+      opCell = opLista.map(op => {
         const ini = op.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
         return `<div class="op-cell" style="margin-bottom:4px">
           <div class="av">${ini}</div>
           <div>${op}</div>
         </div>`;
       }).join('');
-      tcOT = opActivos.map((op, i2) => {
-        const origIdx = idxActivos[i2];
-        const ts = tsActivos[i2];
-        const n = Number(ts);
-        const elId = 'tel'+(o.num_ot+'-'+origIdx).replace(/[^a-z0-9]/gi,'-');
-        const key = String(o.num_ot)+'-'+origIdx;
-        const ini = tiemposInicio[key] || (n>0 ? new Date(n) : null);
-        return `<div style="margin-bottom:4px"><span class="tc-run" id="${elId}">${ini?fmtElapsed(ini):'—'}</span></div>`;
+      tcOT = opLista.map((op, idx) => {
+        const ts = tsLista[idx] || tsLista[0];
+        const elId = `tot${o.num_ot.replace(/[^a-z0-9]/gi,'-')}-${idx}`;
+        return `<div style="margin-bottom:4px"><span class="tc-run" id="${elId}">${fmtElapsed(new Date(ts))}</span></div>`;
       }).join('');
     } else if (o.estado === 'Finalizado' && o.hora_fin) {
       opCell = `<div class="op-cell"><div class="av">${iniOT}</div>${opOT}</div>`;
@@ -696,9 +695,49 @@ function toggleOTExpand(id){
 }
 
 // ── MODAL OT ─────────────────────────────────────────────────────
+const EQ = {"Almacen":["B. carga de acido t1,2 y 9 rep..","Bba recirc. Ácido PA2","Bomba pileta de recuperacion P.G","Bomba recirculación de ácido","Cinta transp. movil - repuesto","Dilución del super Nº2","Elevador Super 1 - motor viejo","Mezclador superfosfato","Motobomba IVET Lag. Dulce","Quemador de caldera- P.G1","Repuesto elevador 2 granulado","Soplador Super 1 - repuesto","Ventilador portátil ex PG1","Vibrador"],"Alúmina":["Autoclave 1 - Pfaudler","Autoclave 2 - Pfaudler (1989)","Autoclave Nº3","Bba elevador ácido alúmina","Bba recirculación alúmina líquida","Bomba Argal","Bomba de acido","Bomba de elevar agua","Bomba de recirc. Ácido dilución","Bomba elevadora de agua","Cinta transportadora de bolsas","Elevador de sulfato","Sin fin grueso","Soplador","Ventilador"],"C.Granel":["Bomba Agrotain","Cinta chica Bolsones","Cinta de Descarga","Cinta de alimentación","Cinta transportadora","Elevador","Mezclador","Rompeterrones","Vibrador-Zaranda","Zaranda"],"EMB 1":["Banda Cinta Movil","Cinta de alimentación","Cinta de bolsa chica","Cinta de carro - motor de banda","Cinta inclinada oblicua (nueva)","Cinta transportadora de bolsas","Compresor","Elevador","Elevador grande","Extractor de polvo","Vibrador de zaranda","sin fin"],"EMB 2":["Cinta alimentación - motoreductor","Cinta de carro - motor de banda","Cinta movil","Compresor","Elevador de cangilones","Transportador de bolsones corto","Transportador de bolsones largo","Zaranda"],"EMB 3":["Cinta Movil","Cinta de carga del mezclador","Cinta de descarga mezclador","Elevador","Mezclador","Rompeterrones cinta aliment.","Rompeterrones mezclador","Vibrador inferior de zaranda","Vibrador superior de zaranda"],"Equipo Descarga":["Cinta de descarga a granel Nº1","Cinta de descarga a granel Nº3","Cinta de descarga portátil Nº2","Cinta fija","Cinta transp. Móvil","Elevador de cangilones"],"Laguna dulce":["Bomba Nº2","Bomba de Agua.","Bomba de agua"],"Molino Nº3":["Aliment molino 4,6 ráp y 5,1 lento","Elevador de fosforita","Inyector de aire","Molino Raymond","Separador (Whizzer)","Sin fin hacia el brete","Ventilador Molino"],"N30":["Agitador Nº2","Agitador del tacho microelemento","Agitador reactor UAN 30","Bba de agua de OSE","Bomba de condensado","Motobba de traspase de liquidos"],"N30 Nuevo":["Bba de filtrado Nº1","Bba. Stock Nº2","Bba. Tiosulfato","Bomba de condensado","Cinta de Descarga Tolva","Elevador","Extractor de aire pared sur","Extractor pared norte","Filtro de prensa","Reactor Nº1","Reactor Nº2","Rompeterrones"],"PA1":["Agitador azufre","Agitador pil. flocul D9","Bba FMC 1 aliment. Caldera (Emegencia)","Bba. Desgasificador","Bomba KSB Nº1","Bomba agua KSB refriger. ácido","Bomba alimentación caldera Nº1","Bomba alimentación caldera Nº2","Bomba carga de acido tks 1,2","Bomba cisterna","Bomba condensador Nº1","Bomba condensador Nº2","Bomba de agua 1","Bomba de azufre","Bomba de condensado","Bomba de ácido","Bomba de óleum","Cinta alimentación","Compresor","Desgasificador","Laguna Efluentes.","Motobba ECP 1 piletas flocul.","Motobba ECP 2 piletas floculaci.","Soplador fuller","Soplador roots","Ventilador Oleum","Ventilador de foza de azufre","Ventilador lavado de azufre","Ventilador torre alpina","Ósmosis inv. Bba Triplex Cat","Ósmosis inversa-motobba ECP1","Ósmosis inversa-motobba ECP2"],"PA1 y PA2":["Bomba desgasificador","Carga de acido","Molino de escoria de azufre","Piletas de floculación"],"PA2":["Agua lavado canal refriger.","Bba FMC 1 aliment. Caldera","Bomba FCM 2 alim. caldera","Bomba de azufre","Bomba de enfriamiento Nº3 KSB","Bomba de oleum","Bomba recirculación de ácido","Soplador del Fuller eléctrico","Ventilador de gases (óleum)","Ventilador de gases del óleum"],"PG1":["Alimentador de zaranda 1","Alimentador de zaranda 2","Bomba 2 del venturi","Bomba Scruber","Bomba condensado(motobomba ivet)","Bomba de agua scrubber","Bomba de fuel oil","Bomba de ácido","Bomba del scrubber","Cinta de alimentación","Compresor Atlas Copco","Elevador 1 (alimentación)","Elevador 2","Elevador Nº1(aliment.granulador)","Elevador Nº2(aliment. enfriador)","Elevador Nº3(aliment. zaranda)","Enfriador","Filtro prensa","Molino con rotor de cadenas","Molino con rotor de jaula","Molino de gruesos","Puente de grua","Rompeterrones tolva alimentacion","Secador","Ventil.centrífugo filtros de manga","Ventilador 1","Ventilador 2 scrubber","Ventilador centrífugo chimenea","Ventilador centrífugo enfriador","Ventilador de sala de control","Ventilador horno","Vibrador de tolva de alimentación","Válvula rotativa - filtros manga","Zaranda 1","Zaranda 2","Zaranda 3"],"PG1,PG2":["L. de Efluentes (Balza)"],"PG2":["Agitador reactor Nº2","Bomba de acido","Bomba de condensado","Bomba del venturi","Cinta de alimentación","Elevador 1 (alimentación)","Elevador premolienda","Enfriador","Granulador","Molino de martillos","Rompeterrones tolva 1","Rompeterrones tolva 2","Secador","Ventilador 1 (horno)","Ventilador 2","Ventilador 3","Ventilador del granulador.","Ventilador sala de control","Vibrador zaranda (inferior)","Vibrador zaranda (del medio)"],"PS1":["Agitador derecho mezclador","Agitador izquierdo mezclador","Alimentador del molino","Bba agua lavado de gases","Bomba Argal de ácido","Bomba Scruber","Bomba agua torre alpina","Bomba de desc  ácido sucio","Bomba torre enfriamiento alpina","Cinta movil","Cinta transportadora fija","Cortador","Dilución Nº2","Elevador de super","Mezclador","Molino Raymond","Sin fin fosforita molida Nº2","Ventilador","Ventilador 1 pared sur (abajo)","Ventilador 2 pared sur (abajo)","Ventilador 3 pared sur( arriba)","Ventilador de  gases de lavado","Ventilador molino Raymond","Ventilador torre alpina"],"PS2":["Agitador pileta 4","Alpina","Balanza de polvo","Bba lavado Nº4 (aliment. Venturi)","Bba lavado Nº6 (aliment. Venturi)","Bba. Lavado Nº7","Bomba 2 torre 3","Bomba Nº8","Bomba agua torre enfriami","Bomba de acido","Bomba de condensado","Bomba de sellos","Bomba de ácido 1","Bomba de ácido 2","Bomba lavado Nº5","C.Movil","Cinta inclinada","Cinta solidificadora","Compresor","Cortador","Elevador de fosforita molida","Extractor de aire pared norte","Extractor de aire pared sur","Extractor de polvo","Filtro de prensa","Molino Nº3","Reactor","Ventilador Bernauer","Ventilador este","Ventilador filtro de mangas","Ventilador molino 3","Ventilador sala de control"],"Suministro agua":["Bomba de incendio","Bomba de laguna dulce","Bomba laguna de efluentes","Lag. Dulce, motobba IVET 3"],"Taller":["Banco de prueba de bombas","Compresor Compair","Extractor de aire taller soldadura","Piedra esmeril taller electricid.","Piedra esmeril taller mecánico"],"U.T.A":["Agitador","Bomba salida de agua."],"UTA":["Agitador Grande"],"Varios":["Barredora","Bomba  agua vacia balanza","Bomba OSE","Bomba de descarga de fuel oil","Cinta Nº2","Limpieza de taller","Motobomba Electroconforto","Ventilador almacen","Ventilador alta tensión 1"],"UCB1":["Zaranda","Elevador","Cinta alimentación","Rompeterrones","Vibrador tolva","Cinta carga","Cinta descarga","Mezclador","Acondicionador","Bomba Agrotain","Cinta pesadora","Cinta acumuladora","Sensores de nivel","Balanza tolva","Balanza cinta","Sensores cintas","Luces"],"UCB2":["Zaranda","Elevador","Cinta alimentación","Rompeterrones","Vibrador tolva","Cinta carga","Cinta descarga","Mezclador","Acondicionador","Bomba Agrotain","Cinta pesadora","Cinta acumuladora","Sensores de nivel","Balanza tolva","Balanza cinta","Sensores cintas","Luces"],"UCB3":["Zaranda","Elevador","Cinta alimentación","Rompeterrones","Vibrador tolva","Cinta carga","Cinta descarga","Mezclador","Acondicionador","Bomba Agrotain","Cinta pesadora","Cinta acumuladora","Sensores de nivel","Balanza tolva","Balanza cinta","Sensores cintas","Luces"],"Mototransporte":["Michigan 16","SDLG 51","SDLG 52","SDLG 54","SDLG 56","LGCE 60","SDLG 61","SDLG 62","SDLG 64","SDLG 65","SDLG 66","SDLG 67","SDLG 68","SDLG 73","LiuGong 70","LiuGong 71","LiuGong 72","Hangcha 26","Hangcha 63","Hangcha 69","Generador Principal","Generador Oficinas"]};
+
+function poblarPlantasDirecta(){
+  const sel = document.getElementById('ot-dir-planta');
+  const plantas = Object.keys(EQ).sort();
+  sel.innerHTML = '<option value="">— Seleccioná planta —</option>' +
+    plantas.map(p=>`<option value="${p}">${p}</option>`).join('');
+  document.getElementById('ot-dir-equipo').innerHTML = '<option value="">— Seleccioná equipo —</option>';
+  document.getElementById('ot-dir-equipo').disabled = true;
+}
+
+function cargarEquiposDirecta(){
+  const planta = document.getElementById('ot-dir-planta').value;
+  const sel = document.getElementById('ot-dir-equipo');
+  if(!planta){ sel.innerHTML='<option value="">— Seleccioná equipo —</option>'; sel.disabled=true; return; }
+  const equipos = (EQ[planta]||[]).slice().sort();
+  sel.innerHTML = '<option value="">— Seleccioná equipo —</option>' +
+    equipos.map(e=>`<option value="${e}">${e}</option>`).join('');
+  sel.disabled = false;
+}
+
+function abrirModalOTDirecta(){
+  otDenId='DIRECTO';
+  otTipo=''; otPrio='Baja'; otTaller='Mecánico';
+  document.getElementById('ot-btn-baja').className='ot-prio-btn on-baja';
+  document.getElementById('ot-btn-mp').className='ot-prio-btn';
+  document.getElementById('ot-den-card').innerHTML=`
+    <div style="font-size:11px;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">OT sin denuncia asociada</div>
+    <div style="font-size:13px;color:#a78bfa">Completá los datos de la orden directamente.</div>`;
+  // Limpiar campos
+  ['ot-trabajo','ot-material','ot-obs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const elEq=document.getElementById('ot-equipo'); if(elEq)elEq.value='';
+  const elPl=document.getElementById('ot-planta'); if(elPl)elPl.value='';
+  // Mostrar modal
+  document.getElementById('modal-ot-bg').classList.add('show');
+  document.getElementById('ot-directa-campos').style.display='block';
+  poblarPlantasDirecta();
+}
+
 function abrirModalOT(id){
   otDenId=id;
   otTipo='';otPrio='';
+  document.getElementById('ot-directa-campos').style.display='none';
   const d=TODAS.find(x=>String(x.id)===String(id));
   if(!d)return;
 
@@ -784,13 +823,24 @@ function setOTPrio(p){
 }
 
 function confirmarOT(){
-  const d=TODAS.find(x=>String(x.id)===String(otDenId));
-  if(!d)return;
+  const esDirecta = otDenId === 'DIRECTO';
+  const d = esDirecta ? null : TODAS.find(x=>String(x.id)===String(otDenId));
+  if(!esDirecta && !d) return;
 
   let ok=true;
   if(!otTipo){document.getElementById('err-ot-tipo').style.display='block';ok=false;}
   if(!otPrio){document.getElementById('err-ot-prio').style.display='block';ok=false;}
-  const esMoto = d.planta === 'Mototransporte';
+
+  // Campos directa
+  let dirPlanta='', dirEquipo='', dirTipo='';
+  if(esDirecta){
+    dirPlanta = document.getElementById('ot-dir-planta').value;
+    dirEquipo = document.getElementById('ot-dir-equipo').value;
+    dirTipo   = document.getElementById('ot-dir-tipo').value || 'General';
+    if(!dirPlanta || !dirEquipo){alert('Completá Planta y Equipo.');return;}
+  }
+
+  const esMoto = esDirecta ? dirPlanta==='Mototransporte' : d.planta === 'Mototransporte';
   const trab = esMoto
     ? document.getElementById('ot-trabajo-moto').value.trim()
     : document.getElementById('ot-trabajo').value.trim();
@@ -806,16 +856,16 @@ function confirmarOT(){
   const payload={
     accion:'crear_ot',
     num_ot:numOT,
-    id_denuncia:otDenId,
+    id_denuncia:esDirecta?'—':otDenId,
     fecha:fecha,
     hora:hora,
-    planta:d.planta,
-    equipo:d.equipo,
-    tipo:d.tipo,
+    planta:esDirecta?dirPlanta:d.planta,
+    equipo:esDirecta?dirEquipo:d.equipo,
+    tipo:esDirecta?dirTipo:d.tipo,
     taller:otTaller,
     tipo_trabajo:otTipo,
     prioridad:otPrio,
-    descripcion:d.descripcion,
+    descripcion:esDirecta?'OT generada directamente':d.descripcion,
     trabajo:trab,
     material:document.getElementById('ot-material').value.trim(),
     observaciones:document.getElementById('ot-obs').value.trim()
@@ -830,19 +880,19 @@ function confirmarOT(){
   }).catch(()=>{});
 
   // Actualización local inmediata
-  d.estado='OT generada';
+  if(!esDirecta && d) d.estado='OT generada';
   OTS.push({
     num_ot:numOT,
-    id_denuncia:otDenId,
+    id_denuncia:payload.id_denuncia,
     fecha:fecha,
     hora:hora,
-    planta:d.planta,
-    equipo:d.equipo,
-    tipo:d.tipo,
+    planta:payload.planta,
+    equipo:payload.equipo,
+    tipo:payload.tipo,
     taller:otTaller,
     tipo_trabajo:otTipo,
     prioridad:otPrio,
-    descripcion:d.descripcion,
+    descripcion:payload.descripcion,
     trabajo:trab,
     material:payload.material,
     observaciones:payload.observaciones,
@@ -911,16 +961,10 @@ setInterval(()=>{
   Object.keys(tiemposInicio).forEach(id=>{const el=document.getElementById('tel'+id);if(el)el.textContent=fmtElapsed(tiemposInicio[id]);});
   OTS.forEach(o=>{
     if(o.estado==='En proceso'){
-      const tsListaT = Array.isArray(o.hora_inicio) ? o.hora_inicio : (o.hora_inicio ? [o.hora_inicio] : []);
-      const finesListaT = o.hora_fin ? String(o.hora_fin).split('/').map(x=>x.trim()) : [];
-      tsListaT.forEach((ts, idx) => {
-        if(finesListaT[idx] && finesListaT[idx] !== '') return;
-        const key = String(o.num_ot)+'-'+idx;
-        const ini = tiemposInicio[key] || (Number(ts)>0 ? new Date(Number(ts)) : null);
-        if(!ini) return;
-        const elId = 'tel'+(o.num_ot+'-'+idx).replace(/[^a-z0-9]/gi,'-');
-        const el = document.getElementById(elId);
-        if(el) el.textContent = fmtElapsed(ini);
+      const tsLista = Array.isArray(o.hora_inicio) ? o.hora_inicio : (o.hora_inicio ? [o.hora_inicio] : []);
+      tsLista.forEach((ts, idx) => {
+        const el = document.getElementById('tot'+o.num_ot.replace(/[^a-z0-9]/gi,'-')+'-'+idx);
+        if(el) el.textContent = fmtElapsed(new Date(ts));
       });
     }
   });
