@@ -350,7 +350,7 @@ tr:hover td{background:#111827}
     <div class="ot-den-card" id="ot-den-card"></div>
     <div id="ot-directa-campos" style="display:none;margin-bottom:14px">
       <div style="font-size:11px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Datos de la OT</div>
-      <select id="ot-dir-planta" class="ot-select" style="width:100%;margin-bottom:8px" onchange="cargarEquiposDirecta()">
+      <select id="ot-dir-planta" class="ot-select" style="width:100%;margin-bottom:8px" onchange="cargarEquiposDirecta();actualizarTrabajoDirecta()">
         <option value="">— Seleccioná planta —</option>
       </select>
       <select id="ot-dir-equipo" class="ot-select" style="width:100%;margin-bottom:8px">
@@ -361,8 +361,6 @@ tr:hover td{background:#111827}
         <option value="Mecánica">Mecánica</option>
         <option value="Soldadura">Soldadura</option>
         <option value="Indefinida">Indefinida</option>
-        <option value="Correctivo">Correctivo</option>
-        <option value="Preventivo">Preventivo</option>
       </select>
     </div>
 
@@ -399,16 +397,13 @@ tr:hover td{background:#111827}
         <!-- Selector para Mototransporte -->
         <select id="ot-trabajo-moto" class="ot-select" style="display:none">
           <option value="">— Seleccionar tipo de tarea —</option>
-          <option>Service Motor</option>
-          <option>Service Caja</option>
-          <option>Service Diferencial</option>
           <option>Sist. frenos</option>
+          <option>Motor</option>
+          <option>Aire acondicionado</option>
+          <option>Transmisión</option>
           <option>Carrocería</option>
           <option>Sist. Eléctrico</option>
-          <option>Aire acondicionado</option>
-          <option>Ejes</option>
-          <option>Chasis/Equipo de trabajo</option>
-          <option>Transmisión</option>
+          <option>Diferencial/Ejes</option>
         </select>
         <div class="ot-err" id="err-ot-trabajo">Campo obligatorio</div>
       </div>
@@ -706,6 +701,15 @@ function poblarPlantasDirecta(){
   document.getElementById('ot-dir-equipo').disabled = true;
 }
 
+function actualizarTrabajoDirecta(){
+  const planta = document.getElementById('ot-dir-planta').value;
+  const esMoto = planta === 'Mototransporte';
+  document.getElementById('ot-trabajo').style.display      = esMoto ? 'none' : '';
+  document.getElementById('ot-trabajo-moto').style.display = esMoto ? '' : 'none';
+  document.getElementById('ot-trabajo').value = '';
+  document.getElementById('ot-trabajo-moto').value = '';
+}
+
 function cargarEquiposDirecta(){
   const planta = document.getElementById('ot-dir-planta').value;
   const sel = document.getElementById('ot-dir-equipo');
@@ -731,6 +735,8 @@ function abrirModalOTDirecta(){
   // Mostrar modal
   document.getElementById('modal-ot-bg').classList.add('show');
   document.getElementById('ot-directa-campos').style.display='block';
+  document.getElementById('ot-trabajo').style.display = '';
+  document.getElementById('ot-trabajo-moto').style.display = 'none';
   poblarPlantasDirecta();
 }
 
