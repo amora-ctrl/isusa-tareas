@@ -475,14 +475,13 @@ function updateEq() {
   });
   document.getElementById('err-planta').style.display = 'none';
  
-  // — Tipo: Mototransporte usa selector desplegable, el resto usa botones —
-  const esMoto   = p === 'Mototransporte';
+  // — Mototransporte ahora usa los mismos botones de disciplina que el resto —
   const botones  = document.getElementById('tipo-buttons');
   const selector = document.getElementById('tipo-moto');
   const lbl      = document.getElementById('lbl-disciplina');
-  botones.style.display  = esMoto ? 'none'  : 'flex';
-  selector.style.display = esMoto ? 'block' : 'none';
-  lbl.textContent        = esMoto ? 'Tipo de tarea' : 'Disciplina';
+  botones.style.display  = 'flex';
+  selector.style.display = 'none';
+  lbl.textContent        = 'Disciplina';
   // Resetear tipo al cambiar planta
   tipo = '';
   selector.value = '';
