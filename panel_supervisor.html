@@ -428,6 +428,18 @@ tr:hover td{background:#111827}
         <div class="ot-label">Observaciones</div>
         <textarea id="ot-obs" class="ot-textarea" placeholder="Observaciones adicionales, condiciones del equipo, advertencias..."></textarea>
       </div>
+      <div class="ot-field full">
+        <div class="ot-label">Responsable de la orden</div>
+        <select id="ot-responsable" class="ot-select">
+          <option value="">— Seleccioná responsable —</option>
+          <option>EDUARDO GAMBOA</option>
+          <option>WILSON PIÑEIRO</option>
+          <option>MARIO MANQUIS</option>
+          <option>ALAN MORA</option>
+          <option>MAURICIO PONCE DE LEON</option>
+          <option>DAMIAN HERNANDEZ</option>
+        </select>
+      </div>
     </div>
 
     <div class="ot-footer">
@@ -738,7 +750,7 @@ function abrirModalOTDirecta(){
     <div style="font-size:11px;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">OT sin denuncia asociada</div>
     <div style="font-size:13px;color:#a78bfa">Completá los datos de la orden directamente.</div>`;
   // Limpiar campos
-  ['ot-trabajo','ot-material','ot-obs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['ot-trabajo','ot-material','ot-obs','ot-responsable'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const elEq=document.getElementById('ot-equipo'); if(elEq)elEq.value='';
   const elPl=document.getElementById('ot-planta'); if(elPl)elPl.value='';
   // Mostrar modal
@@ -884,7 +896,9 @@ function confirmarOT(){
     trabajo:trab,
     material:document.getElementById('ot-material').value.trim(),
     observaciones:document.getElementById('ot-obs').value.trim(),
-    responsable: esDirecta ? (document.getElementById('ot-dir-responsable')?document.getElementById('ot-dir-responsable').value:'') : ''
+    responsable: esDirecta
+      ? (document.getElementById('ot-dir-responsable')?document.getElementById('ot-dir-responsable').value:'')
+      : (document.getElementById('ot-responsable')?document.getElementById('ot-responsable').value:'')
   };
 
   // Envío por POST no-cors (más confiable que img.src para payloads largos)
