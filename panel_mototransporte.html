@@ -231,7 +231,7 @@ function cargarDatos(){
     .then(r=>r.json())
     .then(data=>{
       const ots=data.ots||[];
-      const vis=ots.filter(o=>o.taller==='Mototransporte'&&o.estado!=='Finalizado');
+      const vis=ots.filter(o=>o.taller==='Mototransporte'&&o.estado!=='Finalizado'&&o.estado!=='Programada');
       if(!primeraVez){
         vis.forEach(o=>{
           if(!ultimosIds.has(String(o.num_ot))){sonar(o.prioridad==='Máquina parada');mostrarAlerta(o);}

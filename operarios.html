@@ -399,6 +399,7 @@ function mostrarLista() {
 function renderLista() {
   const vis = DENUNCIAS.filter(d => {
     if (d.estado === 'Finalizado') return false;
+    if (d.estado === 'Programada') return false;
     if (sesion.taller === 'Soldadura') return d.taller === 'Soldadura';
     return d.taller === sesion.taller;
   });
