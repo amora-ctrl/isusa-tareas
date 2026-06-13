@@ -92,6 +92,13 @@ tr:hover td{background:#111827}
 .modal-terc select{width:100%;background:#060c16;border:1px solid #2a2f3e;border-radius:8px;color:#fff;padding:9px 12px;font-size:14px;font-family:inherit;outline:none;margin-bottom:14px}
 .btn-active{background:#059669!important;color:#fff!important;border:1px solid #34d399}
 .btn-active-reprog{background:#7c3aed!important;color:#fff!important;border:1px solid #a78bfa}
+/* Programar OT */
+.ot-prog-wrap{display:none;margin-top:12px;padding:12px;background:#0a0f1a;border:1px solid #4c1d95;border-radius:8px}
+.ot-prog-wrap.show{display:block}
+.ot-prog-lbl{font-size:11px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.ot-prog-dt{width:100%;padding:8px 12px;background:#111827;border:1px solid #374151;border-radius:6px;color:#e5e7eb;font-size:13px;font-family:inherit}
+.btn-prog-toggle{background:transparent;border:1px solid #6d28d9;color:#a78bfa;padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit}
+.btn-prog-toggle.active{background:#4c1d95;color:#fff;border-color:#7c3aed}
 /* Botón generar OT */
 .btn-ot{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:none;cursor:pointer;background:#3b0764;color:#c084fc;font-family:inherit;margin-right:4px}
 .btn-ot:hover{background:#4c0a8e}
@@ -362,15 +369,6 @@ tr:hover td{background:#111827}
         <option value="Soldadura">Soldadura</option>
         <option value="Indefinida">Indefinida</option>
       </select>
-      <select id="ot-dir-responsable" class="ot-select" style="width:100%;margin-bottom:4px">
-        <option value="">— Responsable de la orden —</option>
-        <option>EDUARDO GAMBOA</option>
-        <option>WILSON PIÑEIRO</option>
-        <option>MARIO MANQUIS</option>
-        <option>ALAN MORA</option>
-        <option>MAURICIO PONCE DE LEON</option>
-        <option>DAMIAN HERNANDEZ</option>
-      </select>
     </div>
 
     <div class="ot-section">Tipo de trabajo</div>
@@ -442,8 +440,14 @@ tr:hover td{background:#111827}
       </div>
     </div>
 
+    <div class="ot-prog-wrap" id="ot-prog-wrap">
+      <div class="ot-prog-lbl">📅 Programar para</div>
+      <input type="datetime-local" id="ot-prog-fecha" class="ot-prog-dt">
+    </div>
+
     <div class="ot-footer">
       <button class="ot-btn-cancel" onclick="cerrarModalOT()">Cancelar</button>
+      <button class="btn-prog-toggle" id="btn-prog-toggle" onclick="toggleProgOT()">🕐 Programar</button>
       <button class="ot-btn-ok" id="ot-btn-ok" onclick="confirmarOT()">
         <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="2" y="1.5" width="11" height="12" rx="2" stroke="white" stroke-width="1.4" fill="none"/><path d="M5 5h5M5 7.5h5M5 10h3" stroke="white" stroke-width="1.2" stroke-linecap="round"/></svg>
         Generar OT
@@ -685,7 +689,10 @@ function renderOTs(){
       <td>${opCell}</td>
       <td style="vertical-align:middle">${tcOT}</td>
       <td><span class="badge ${bE}">${o.estado}</span></td>
-      <td><button class="btn-ot" onclick="toggleOTExpand('ot-${o.num_ot}')" style="padding:3px 8px;font-size:10px">▼ Detalle</button></td>
+      <td>
+        <button class="btn-ot" onclick="toggleOTExpand('ot-${o.num_ot}')" style="padding:3px 8px;font-size:10px">▼ Detalle</button>
+        ${o.estado!=='Finalizado'?`<button class="btn-ot" onclick="abrirReprogOT('${o.num_ot}')" style="padding:3px 8px;font-size:10px;background:#1e3a5f;color:#60a5fa;margin-top:3px">📅 Prog.</button>`:''}
+      </td>
     </tr>
     <tr class="ot-expand-row" id="ot-${o.num_ot.replace(/[^a-z0-9]/gi,'-')}" style="display:none">
       <td colspan="12">
@@ -830,9 +837,26 @@ function abrirModalOT(id){
   mostrarSugerencias(d.equipo);
 }
 
+function toggleProgOT(){
+  const wrap = document.getElementById('ot-prog-wrap');
+  const btn  = document.getElementById('btn-prog-toggle');
+  const show = !wrap.classList.contains('show');
+  wrap.classList.toggle('show', show);
+  btn.classList.toggle('active', show);
+  if(show){
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('ot-prog-fecha').min = now.toISOString().slice(0,16);
+    document.getElementById('ot-prog-fecha').value = '';
+  }
+}
+
 function cerrarModalOT(){
   document.getElementById('modal-ot-bg').classList.remove('show');
   otDenId=null;otTipo='';otPrio='';otTaller='';
+  document.getElementById('ot-prog-wrap').classList.remove('show');
+  document.getElementById('btn-prog-toggle').classList.remove('active');
+  document.getElementById('ot-prog-fecha').value='';
 }
 
 function setOTTipo(t){
@@ -896,9 +920,9 @@ function confirmarOT(){
     trabajo:trab,
     material:document.getElementById('ot-material').value.trim(),
     observaciones:document.getElementById('ot-obs').value.trim(),
-    responsable: esDirecta
-      ? (document.getElementById('ot-dir-responsable')?document.getElementById('ot-dir-responsable').value:'')
-      : (document.getElementById('ot-responsable')?document.getElementById('ot-responsable').value:'')
+    responsable: document.getElementById('ot-responsable') ? document.getElementById('ot-responsable').value : '',
+    fecha_prog: document.getElementById('ot-prog-wrap').classList.contains('show')
+      ? document.getElementById('ot-prog-fecha').value : ''
   };
 
   // Envío por POST no-cors (más confiable que img.src para payloads largos)
@@ -926,7 +950,7 @@ function confirmarOT(){
     trabajo:trab,
     material:payload.material,
     observaciones:payload.observaciones,
-    estado:'Pendiente'
+    estado: payload.fecha_prog ? 'Programada' : 'Pendiente'
   });
 
   cerrarModalOT();
@@ -1113,6 +1137,60 @@ function agregarMaterial(el, val) {
 
 cargarDatos();
 setInterval(cargarDatos,5000);
+</script>
+
+<!-- Modal reprogramar OT -->
+<div class="modal-bg" id="modal-reprog-ot-bg">
+  <div style="background:#0d1424;border:1px solid #1d3a6e;border-radius:14px;padding:28px;width:360px;max-width:96vw">
+    <div style="font-size:16px;font-weight:700;color:#e5e7eb;margin-bottom:6px">📅 Programar OT</div>
+    <div style="font-size:12px;color:#6b7280;margin-bottom:18px" id="reprog-ot-num">—</div>
+    <div style="font-size:11px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Fecha y hora de activación</div>
+    <input type="datetime-local" id="reprog-ot-fecha" style="width:100%;padding:8px 12px;background:#111827;border:1px solid #374151;border-radius:6px;color:#e5e7eb;font-size:13px;font-family:inherit;box-sizing:border-box">
+    <div style="display:flex;gap:10px;margin-top:18px">
+      <button onclick="cerrarReprogOT()" style="flex:1;padding:10px;background:transparent;border:1px solid #374151;color:#9ca3af;border-radius:8px;cursor:pointer;font-family:inherit">Cancelar</button>
+      <button onclick="confirmarReprogOT()" style="flex:2;padding:10px;background:#7c3aed;border:none;color:#fff;border-radius:8px;cursor:pointer;font-weight:700;font-family:inherit">Programar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var _reprogOTId = null;
+
+function abrirReprogOT(numOt){
+  _reprogOTId = numOt;
+  document.getElementById('reprog-ot-num').textContent = 'OT: ' + numOt;
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  const el = document.getElementById('reprog-ot-fecha');
+  el.min = now.toISOString().slice(0,16);
+  el.value = '';
+  document.getElementById('modal-reprog-ot-bg').classList.add('show');
+}
+
+function cerrarReprogOT(){
+  document.getElementById('modal-reprog-ot-bg').classList.remove('show');
+  _reprogOTId = null;
+}
+
+function confirmarReprogOT(){
+  const fecha = document.getElementById('reprog-ot-fecha').value;
+  if(!fecha){ alert('Seleccioná una fecha y hora.'); return; }
+  // Usar POST igual que las otras acciones
+  fetch(SCRIPT_URL_POST, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: JSON.stringify({
+      accion: 'reprogramar_ot',
+      num_ot: _reprogOTId,
+      fecha_prog: fecha
+    })
+  }).catch(()=>{});
+  // Actualizar localmente
+  const ot = OTS.find(o => String(o.num_ot) === String(_reprogOTId));
+  if(ot){ ot.estado = 'Programada'; ot.fecha_activacion = fecha; }
+  cerrarReprogOT();
+  try{ renderOTs(); } catch(e){}
+}
 </script>
 </body>
 </html>
